@@ -7,7 +7,8 @@
 GitHub에서 프로젝트를 Clone한 후 프로젝트 폴더로 이동합니다.
 
 ```bash
-git clone https://github.com/Jongho-Lee-dev/course-recommendation-timetable.git cd course-recommendation-timetable
+git clone https://github.com/Jongho-Lee-dev/course-recommendation-timetable.
+git cd course-recommendation-timetable
 ```
 
 # 실행 조건
