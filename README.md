@@ -19,7 +19,8 @@
 ## 프로젝트 주소
 
 - **GitHub:** [course-recommendation-timetable](https://github.com/Jongho-Lee-dev/course-recommendation-timetable)
-- **배포:** [서비스 바로가기](https://course-recommendation-timetable.vercel.app/)
+- **서비스:** [서비스 바로가기](https://course-recommendation-timetable.vercel.app/)
+- **Backend API:** [FastAPI 서버](https://course-recommendation-timetable.onrender.com)
 
 ---
 
