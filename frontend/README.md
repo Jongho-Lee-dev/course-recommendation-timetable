@@ -16,3 +16,11 @@
 ### 구조 
 - layout 폴더의 MainLayout에서 Header와 Footer를 상·하단 영역에 배치하며, 필요에 따라 조건부로 표시할 수 있음
 - routes 폴더의 AppRoutes에서 라우팅을 관리
+
+
+## git branch명 통일 
+
+feature/기능명
+fix/버그명
+docs/문서명
+refactor/대상
