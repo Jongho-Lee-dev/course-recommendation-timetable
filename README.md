@@ -77,3 +77,6 @@ Supabase PostgreSQL을 사용했습니다.
 
 <img src="./docs/ERDDiagram.png" width="600">
 
+## 주요 기능
+
+## 기술 스택
