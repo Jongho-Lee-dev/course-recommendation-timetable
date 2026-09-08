@@ -70,3 +70,7 @@ uvicorn app.main:app --reload
 - **Frontend:** `npm run dev` 실행 후 터미널에 표시되는 주소로 접속
 - **Backend:** `http://127.0.0.1:8000`
 - **API 문서:** `http://127.0.0.1:8000/docs`
+
+## Database
+
+<img src="./docs/ERD다이어그램.png" width="600">
