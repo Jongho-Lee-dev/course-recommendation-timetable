@@ -72,5 +72,6 @@ uvicorn app.main:app --reload
 - **API 문서:** `http://127.0.0.1:8000/docs`
 
 ## Database
-
+Supabase PostgreSQL을 사용했습니다.
 <img src="./docs/ERD다이어그램.png" width="600">
+
