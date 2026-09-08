@@ -75,5 +75,5 @@ uvicorn app.main:app --reload
 
 Supabase PostgreSQL을 사용했습니다.
 
-<img src="./docs/ERD다이어그램.png" width="600">
+<img src="./docs/ERDDiagram.png" width="600">
 
