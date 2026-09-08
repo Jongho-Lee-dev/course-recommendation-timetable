@@ -20,7 +20,7 @@
 
 ## git branch명 통일 
 
-feature/기능명
-fix/버그명
-docs/문서명
-refactor/대상
+- feature/기능명
+- fix/버그명
+- docs/문서명
+- refactor/대상
