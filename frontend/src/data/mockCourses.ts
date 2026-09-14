@@ -69,7 +69,7 @@ export const mockCourses: CourseListItem[] = [
     id: 3,
     courseCode: "GE101",
     title: "대학생활과 진로",
-    category: "교필선",
+    category: "교양 필수 선택",
     credit: 2,
 
     sectionNo: "01",
@@ -99,7 +99,7 @@ export const mockCourses: CourseListItem[] = [
     id: 4,
     courseCode: "GE202",
     title: "현대사회와 문화",
-    category: "교선",
+    category: "교양 선택",
     credit: 3,
 
     sectionNo: "01",
