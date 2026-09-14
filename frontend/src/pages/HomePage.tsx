@@ -16,6 +16,7 @@ export default function HomePage() {
     mockCourses.slice(0, 2),
   );
 
+  //임시 데이터
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState(
     "현재 시간표를 분석해 최적의 조합을 추천해드릴게요.",
@@ -69,10 +70,9 @@ export default function HomePage() {
       return false;
     }
 
-    const isGeneral = ["교필", "교필선", "교선"].includes(course.category);
-
     if (filterCategory === "major" && course.category !== "전공") return false;
-    if (filterCategory === "general" && !isGeneral) return false;
+    if (filterCategory === "general" && !["교양 필수", "교양 필수 선택", "교양 선택"].includes(course.category)) return false;
+
 
     if (selectedCollege !== "전체 학부" && course.collegeName !== selectedCollege) return false;
     if (selectedMajor !== "전체 전공" && course.majorName !== selectedMajor) return false;
@@ -301,12 +301,12 @@ export default function HomePage() {
                   }}
                 >
                   <option value="전체 교양">전체 교양</option>
-                  <option value="교필">교양 필수</option>
-                  <option value="교필선">교양 필수 선택</option>
-                  <option value="교선">교양 선택</option>
+                  <option value="교양 필수">교양 필수</option>
+                  <option value="교양 필수 선택">교양 필수 선택</option>
+                  <option value="교양 선택">교양 선택</option>
                 </select>
 
-                {selectedGeneralEducation === "교필선" && (
+                {selectedGeneralEducation === "교양 필수 선택" && (
                   <select
                     value={selectedGeneralEducationArea}
                     onChange={(e) => setSelectedGeneralEducationArea(e.target.value)}
@@ -359,9 +359,8 @@ export default function HomePage() {
 
                 return (
                   <div
-                    className={`course-row ${
-                      isSelected ? "selected" : ""
-                    }`}
+                    className={`course-row ${isSelected ? "selected" : ""
+                      }`}
                     key={course.id}
                   >
                     <div>
@@ -441,16 +440,14 @@ export default function HomePage() {
                               className="schedule-card"
                               key={`${course.id}-${schedule.id}`}
                               style={{
-                                top: `${
-                                  (schedule.startPeriod - 1) * 48 + 1
-                                }px`,
-                                height: `${
-                                  (schedule.endPeriod -
-                                    schedule.startPeriod +
-                                    1) *
-                                    48 -
+                                top: `${(schedule.startPeriod - 1) * 48 + 1
+                                  }px`,
+                                height: `${(schedule.endPeriod -
+                                  schedule.startPeriod +
+                                  1) *
+                                  48 -
                                   2
-                                }px`,
+                                  }px`,
                               }}
                             >
                               <b>{course.courseCode}</b>
