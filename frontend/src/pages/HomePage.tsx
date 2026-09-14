@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./HomePage.css";
 import type { CourseListItem } from "../types/database";
-import { mockCourses } from "../data/courseData";
+import { mockCourses } from "../data/mockCourses";
 import { collegeMajors } from "../data/collegeMajors";
 
 const days = ["월", "화", "수", "목", "금"];
