@@ -29,6 +29,8 @@ export interface Enrollment {
 export interface Department {
   id: number;
   collegeName: string;
+  generalEducationArea?: string;
+  generalEducationElectiveArea?: string;
   facultyName: string;
   majorName: string;
 }
@@ -51,22 +53,21 @@ export interface Student {
   departmentId: number;
 }
 
-
+// HomePage에서 사용하는 과목 목록 데이터
 export interface CourseListItem {
-  id: number;
-
+  id: number; 
   courseCode: string;
   title: string;
   category: string;
   credit: number;
-
   sectionNo: string;
   professorName: string;
   capacity: number;
   targetGrade: number;
-
   departmentId: number;
   majorName: string;
-
+  collegeName: string;
+  generalEducationArea?: string;
+  generalEducationElectiveArea?: string;
   schedules: CourseSchedule[];
 }

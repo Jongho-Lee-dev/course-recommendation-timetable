@@ -15,6 +15,7 @@ export const mockCourses: CourseListItem[] = [
 
     departmentId: 1,
     majorName: "컴퓨터공학과",
+    collegeName: "AI·SW창의융합대학",
 
     schedules: [
       {
@@ -50,6 +51,7 @@ export const mockCourses: CourseListItem[] = [
 
     departmentId: 1,
     majorName: "컴퓨터공학과",
+    collegeName: "AI·SW창의융합대학",
 
     schedules: [
       {
@@ -78,6 +80,9 @@ export const mockCourses: CourseListItem[] = [
     departmentId: 2,
     majorName: "교양학부",
 
+    collegeName: "교양대학",
+    generalEducationArea: "취.창업실무영역(비전설계영역)",
+
     schedules: [
       {
         id: 4,
@@ -104,6 +109,9 @@ export const mockCourses: CourseListItem[] = [
 
     departmentId: 2,
     majorName: "교양학부",
+
+    collegeName: "교양대학",
+    generalEducationArea: "경제와 사회(사회와 문화)",
 
     schedules: [
       {
