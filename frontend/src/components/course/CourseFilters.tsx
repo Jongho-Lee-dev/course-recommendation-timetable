@@ -1,6 +1,6 @@
 
 import type { Dispatch, SetStateAction } from "react";
-import { collegeMajors } from "../data/collegeMajors";
+import { collegeMajors } from "../../data/collegeMajors";
 
 type FilterCategory = "all" | "major" | "general";
 

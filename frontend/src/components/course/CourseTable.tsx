@@ -1,4 +1,4 @@
-import type { CourseListItem } from "../types/database";
+import type { CourseListItem } from "../../types/database";
 
 interface CourseTableProps {
   courses: CourseListItem[];

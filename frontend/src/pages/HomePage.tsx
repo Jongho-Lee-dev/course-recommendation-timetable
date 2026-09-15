@@ -1,15 +1,14 @@
 import { useState } from "react";
 import type { CourseListItem } from "../types/database";
 import { mockCourses } from "../data/mockCourses";
-import CourseFilters from "../components/CourseFilters";
-import CourseTable from "../components/CourseTable";
-
-const days = ["월", "화", "수", "목", "금"];
-const periods = Array.from({ length: 10 }, (_, i) => i + 1);
+import WeeklyTimetable from "../components/course/WeeklyTimetable";
+import CourseRegistrationList from "../components/course/CourseRegistrationList";
+import CourseSearch from "../components/course/CourseSearch";
 
 type FilterCategory = "all" | "major" | "general";
 
 export default function HomePage() {
+  const [activeMenu, setActiveMenu] = useState("대시보드");
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
@@ -153,10 +152,11 @@ export default function HomePage() {
             ["♡", "관심 강좌"],
             ["✓", "신청 내역"],
             ["i", "공지사항"],
-          ].map(([icon, label], index) => (
+          ].map(([icon, label]) => (
             <button
               key={label}
-              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${index === 0
+              onClick={() => setActiveMenu(label)}
+              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${activeMenu === label
                 ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
                 : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
                 }`}
@@ -228,173 +228,51 @@ export default function HomePage() {
 
         <div className="grid min-w-0 gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
           <section className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
-            <div className="border-b border-[#ececf0] px-5 py-4">
-              <h2 className="text-sm font-bold">
-                강의 검색
-              </h2>
-
-              <p className="mt-1 text-[9px] text-[#9699a7]">
-                원하는 조건으로 강좌를 검색하세요.
-              </p>
-            </div>
-
-            <CourseFilters
-              keyword={keyword}
-              setKeyword={setKeyword}
-              professorKeyword={professorKeyword}
-              setProfessorKeyword={setProfessorKeyword}
-              filterCategory={filterCategory}
-              setFilterCategory={setFilterCategory}
-              selectedDay={selectedDay}
-              setSelectedDay={setSelectedDay}
-              selectedGrade={selectedGrade}
-              setSelectedGrade={setSelectedGrade}
-              selectedCollege={selectedCollege}
-              setSelectedCollege={setSelectedCollege}
-              selectedMajor={selectedMajor}
-              setSelectedMajor={setSelectedMajor}
-              selectedGeneralEducation={selectedGeneralEducation}
-              setSelectedGeneralEducation={setSelectedGeneralEducation}
-              selectedGeneralEducationArea={selectedGeneralEducationArea}
-              setSelectedGeneralEducationArea={setSelectedGeneralEducationArea}
-              selectedGeneralEducationElectiveArea={
-                selectedGeneralEducationElectiveArea
-              }
-              setSelectedGeneralEducationElectiveArea={
-                setSelectedGeneralEducationElectiveArea
-              }
-              onReset={handleResetFilters}
-            />
-
-            <CourseTable
-              courses={filteredCourses}
-              selected={selected}
-              toggleCourse={toggleCourse}
-            />
+            {activeMenu === "대시보드" && (
+              <CourseSearch
+                keyword={keyword}
+                setKeyword={setKeyword}
+                professorKeyword={professorKeyword}
+                setProfessorKeyword={setProfessorKeyword}
+                filterCategory={filterCategory}
+                setFilterCategory={setFilterCategory}
+                selectedDay={selectedDay}
+                setSelectedDay={setSelectedDay}
+                selectedGrade={selectedGrade}
+                setSelectedGrade={setSelectedGrade}
+                selectedCollege={selectedCollege}
+                setSelectedCollege={setSelectedCollege}
+                selectedMajor={selectedMajor}
+                setSelectedMajor={setSelectedMajor}
+                selectedGeneralEducation={selectedGeneralEducation}
+                setSelectedGeneralEducation={setSelectedGeneralEducation}
+                selectedGeneralEducationArea={selectedGeneralEducationArea}
+                setSelectedGeneralEducationArea={setSelectedGeneralEducationArea}
+                selectedGeneralEducationElectiveArea={
+                  selectedGeneralEducationElectiveArea
+                }
+                setSelectedGeneralEducationElectiveArea={
+                  setSelectedGeneralEducationElectiveArea
+                }
+                onReset={handleResetFilters}
+                courses={filteredCourses}
+                selected={selected}
+                toggleCourse={toggleCourse}
+              />
+            )}
           </section>
 
-          {/* 주간 시간표 */}
-          <section className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)] min-[1101px]:order-none">
-            <div className="flex items-center justify-between border-b border-[#ececf0] px-5 py-4">
-              <div>
-                <h2 className="text-sm font-bold">
-                  주간 시간표
-                </h2>
+          <WeeklyTimetable
+            selected={selected}
+          />
 
-                <p className="mt-1 text-[9px] text-[#9699a7]">
-                  현재 신청한 강좌를 기준으로 표시됩니다.
-                </p>
-              </div>
-
-              <button className="rounded-md border border-[#dedfe5] bg-white px-2 py-1.5 text-[9px] text-[#777a89]">
-                주간 새로고침
-              </button>
-            </div>
-
-            <div className="flex h-[508px] min-w-[540px]">
-              <div className="w-[49px] shrink-0 text-right text-[8px] text-[#a0a3b0]">
-                <div className="h-[37px] border-b border-[#e8e9ee]" />
-
-                {periods.map((period) => (
-                  <div
-                    className="box-border h-[47px] border-b border-[#f1f1f4] pr-1.5 pt-1.5"
-                    key={period}
-                  >
-                    {period}교시
-                  </div>
-                ))}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="grid h-[37px] grid-cols-5 border-b border-[#e8e9ee]">
-                  {days.map((day) => (
-                    <div
-                      className="grid place-items-center border-l border-[#ececf0] text-[9px] font-bold text-[#777a89]"
-                      key={day}
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid h-[470px] grid-cols-5">
-                  {days.map((day) => (
-                    <div
-                      className="relative border-l border-[#ececf0] bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_46px,#eff0f3_46px,#eff0f3_47px)]"
-                      key={day}
-                    >
-                      {periods.map((period) => (
-                        <div className="h-[47px]" key={period} />
-                      ))}
-
-                      {selected.flatMap((course) =>
-                        course.schedules
-                          .filter((schedule) => schedule.dayOfWeek === day)
-                          .map((schedule) => (
-                            <div
-                              className="absolute left-[3px] right-[3px] overflow-hidden rounded-md border-l-[3px] border-[#7658e9] bg-[#eee9ff] p-1.5"
-                              key={`${course.id}-${schedule.id}`}
-                              style={{
-                                top: `${(schedule.startPeriod - 1) * 48 + 1}px`,
-                                height: `${(schedule.endPeriod - schedule.startPeriod + 1) * 48 - 2}px`,
-                              }}
-                            >
-                              <b className="block text-[7px] text-[#7658e9]">
-                                {course.courseCode}
-                              </b>
-
-                              <strong className="mt-0.5 block text-[9px]">
-                                {course.title}
-                              </strong>
-
-                              <small className="mt-1 block text-[7px] text-[#858895]">
-                                {course.professorName}
-                              </small>
-                            </div>
-                          )),
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
 
-        <section className="mt-4 grid gap-4 min-[1101px]:grid-cols-[1.25fr_0.75fr]">
-          <div className="overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
-            <div className="flex items-center justify-between border-b border-[#ececf0] px-5 py-3.5">
-              <div>
-                <h2 className="text-sm font-bold">
-                  수강 신청 목록
-                </h2>
-                <p className="mt-1 text-[9px] text-[#9699a7]">
-                  현재 선택한 강좌입니다.
-                </p>
-              </div>
-
-              <strong className="text-[9px] text-[#7658e9]">
-                신청 총 학점: {totalCredits}학점
-              </strong>
-            </div>
-
-            <div className="grid grid-cols-1 gap-1.5 px-5 py-2 min-[701px]:grid-cols-2">
-              {selected.map((course) => (
-                <div
-                  className="relative rounded-md border border-[#ececf1] px-2.5 py-2"
-                  key={course.id}
-                >
-                  <span className="block text-[10px] font-bold">{course.title}</span>
-                  <small className="mt-0.5 block text-[8px] text-[#9699a7]">
-                    {course.courseCode} · {course.professorName}
-                  </small>
-                  <b className="absolute right-2 top-2.5 text-[8px] text-[#7658e9]">
-                    {course.credit}학점
-                  </b>
-                </div>
-              ))}
-            </div>
-          </div>
+        <section className="mt-4 grid gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
+          <CourseRegistrationList
+            selected={selected}
+            totalCredits={totalCredits}
+          />
 
           <div className="rounded-xl border border-[#282633] bg-[#282633] p-[18px] text-white">
             <div className="text-[8px] font-extrabold tracking-[0.8px] text-[#aa9cf3]">

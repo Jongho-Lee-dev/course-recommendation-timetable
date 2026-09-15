@@ -16,7 +16,7 @@ export const collegeMajors: Record<string, string[]> = {
     "생명공학과",
   ],
   "AI·SW창의융합대학": [
-    "컴퓨터공학",
+    "컴퓨터공학과",
     "소프트웨어학",
     "정보보안학",
     "인공지능",
