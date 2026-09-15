@@ -135,8 +135,8 @@ export default function HomePage() {
   return (
     <div className="grid min-h-[calc(100vh-72px)] grid-cols-1 bg-[#f5f6f9] font-['Pretendard',sans-serif] text-[#20212b] min-[701px]:grid-cols-[210px_minmax(0,1fr)]">
       <aside className="flex min-h-auto flex-col bg-[#20212a] px-3.5 py-6 text-[#d7d8df] min-[701px]:min-h-[calc(100vh-72px)]">
-        <div className="px-3 text-lg font-extrabold text-white">
-          수강신청
+        <div className="whitespace-nowrap px-3 text-[15px] font-extrabold leading-tight tracking-[-0.5px] text-white">
+          수강 신청
         </div>
 
         <div className="px-3 pb-6 pt-1 text-[10px] text-[#858796]">
@@ -186,12 +186,12 @@ export default function HomePage() {
       </aside>
 
       <main className="mx-auto w-full max-w-[1500px] min-w-0 px-4 py-6 min-[1101px]:px-7">
-        <section className="mb-5 flex flex-col items-start justify-between gap-3 min-[701px]:flex-row min-[701px]:items-end">
+        <section className="flex items-center justify-between">
           <div>
-            <div className="mb-1 text-[11px] text-[#8a8d9b]">
+            <div className="text-[11px] text-[#8a8d9b]">
               2026학년도 2학기 수강 신청
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="!text-[28px] font-extrabold leading-tight tracking-[-1px] text-[#20212b]">
               수강 신청
             </h1>
           </div>
