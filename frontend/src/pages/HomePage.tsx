@@ -186,7 +186,7 @@ export default function HomePage() {
       </aside>
 
       <main className="mx-auto w-full max-w-[1500px] min-w-0 px-4 py-6 min-[1101px]:px-7">
-        <section className="flex items-center justify-between">
+        <section className="flex flex-col gap-3 min-[701px]:flex-row min-[701px]:items-center min-[701px]:justify-between">
           <div>
             <div className="text-[11px] text-[#8a8d9b]">
               2026학년도 2학기 수강 신청
@@ -196,7 +196,7 @@ export default function HomePage() {
             </h1>
           </div>
 
-          <div className="grid w-full grid-cols-3 gap-2 min-[701px]:w-auto">
+          <div className="mt-3 mb-3 grid w-full grid-cols-3 gap-2 min-[701px]:my-0 min-[701px]:w-auto">
             <div className="min-w-0 rounded-lg border border-[#e4e5eb] bg-white px-3 py-2.5">
               <span className="block text-[9px] text-[#9699a6]">
                 수강 신청 현황
