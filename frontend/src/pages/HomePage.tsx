@@ -146,11 +146,8 @@ export default function HomePage() {
         <nav className="hidden flex-col gap-1 min-[701px]:flex">
           {[
             ["▦", "대시보드"],
-            ["⌕", "강의 검색"],
-            ["▣", "나의 시간표"],
+            ["⌕", "수강신청"],
             ["✦", "AI 시간표 추천"],
-            ["♡", "관심 강좌"],
-            ["✓", "신청 내역"],
             ["i", "공지사항"],
           ].map(([icon, label]) => (
             <button
