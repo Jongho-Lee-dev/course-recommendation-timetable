@@ -100,6 +100,34 @@ export default function WeeklyTimetable({ selected }: WeeklyTimetableProps) {
           </div>
         </div>
       </div>
+      {selected.some((course) => course.isOnline) && (
+        <div className="border-t border-[#ececf0] px-5 py-4">
+          <h3 className="text-xs font-bold">온라인 강의</h3>
+
+          <div className="mt-3 space-y-2">
+            {selected
+              .filter((course) => course.isOnline)
+              .map((course) => (
+                <div
+                  className="flex items-center justify-between rounded-lg border border-[#ececf0] bg-[#fafafd] px-3 py-2.5"
+                  key={course.id}
+                >
+                  <div>
+                    <b className="block text-[9px]">{course.title}</b>
+
+                    <small className="mt-1 block text-[8px] text-[#9699a7]">
+                      {course.courseCode} · {course.professorName}
+                    </small>
+                  </div>
+
+                  <span className="rounded-md bg-[#eee9ff] px-2 py-1 text-[8px] font-medium text-[#7658e9]">
+                    온라인
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
