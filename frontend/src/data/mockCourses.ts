@@ -176,6 +176,5 @@ export const mockCourses: CourseListItem[] = [
     generalEducationElectiveArea: "경제와 사회(사회와 문화)",
 
     isOnline: true,
-    schedules: [],
   },
 ];

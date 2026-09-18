@@ -85,5 +85,5 @@ export interface CourseListItem {
   generalEducationArea?: string;
   generalEducationElectiveArea?: string;
   isOnline: boolean;
-  schedules: CourseSchedule[];
+  schedules?: CourseSchedule[];
 }
