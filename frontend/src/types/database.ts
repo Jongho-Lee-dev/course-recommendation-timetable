@@ -17,6 +17,7 @@ export interface OpenCourse {
   targetGrade: number;
   courseCode: string;
   departmentId: number;
+  isOnline: boolean;
 }
 
 // 학생의 수강신청 정보
@@ -83,5 +84,6 @@ export interface CourseListItem {
   collegeName: string;
   generalEducationArea?: string;
   generalEducationElectiveArea?: string;
+  isOnline: boolean;
   schedules: CourseSchedule[];
 }
