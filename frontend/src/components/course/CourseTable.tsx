@@ -1,4 +1,5 @@
 import type { CourseListItem } from "../../types/database";
+import { toast } from "sonner";
 
 interface CourseTableProps {
   courses: CourseListItem[];
@@ -11,6 +12,33 @@ export default function CourseTable({
   selected,
   toggleCourse,
 }: CourseTableProps) {
+  const handleToggleCourse = (course: CourseListItem) => {
+    const isSelected = selected.some((item) => item.id === course.id);
+
+    if (isSelected) {
+      toggleCourse(course);
+      return;
+    }
+
+    const conflictCourse = selected.find((selectedCourse) =>
+      selectedCourse.schedules.some((selectedSchedule) =>
+        course.schedules.some(
+          (schedule) =>
+            selectedSchedule.dayOfWeek === schedule.dayOfWeek &&
+            selectedSchedule.startPeriod <= schedule.endPeriod &&
+            selectedSchedule.endPeriod >= schedule.startPeriod,
+        ),
+      ),
+    );
+
+    if (conflictCourse) {
+      toast.error(`'${conflictCourse.title}' 강의와 시간이 겹칩니다.`);
+      return;
+    }
+
+    toggleCourse(course);
+  }
+
   return (
     <div className="overflow-x-auto border-t border-[#ececf0]">
       <div className="grid min-w-[600px] grid-cols-[1.45fr_0.8fr_1.15fr_0.42fr_0.65fr_44px] items-center gap-2 bg-[#fafafd] px-5 py-2.5 text-[8px] text-[#9a9daa]">
@@ -25,12 +53,14 @@ export default function CourseTable({
       {courses.map((course) => {
         const isSelected = selected.some((item) => item.id === course.id);
 
-        const scheduleText = course.schedules
-          .map(
-            (schedule) =>
-              `${schedule.dayOfWeek} ${schedule.startPeriod}~${schedule.endPeriod}교시 (${schedule.classroom})`,
-          )
-          .join(", ");
+        const scheduleText = course.isOnline
+          ? "온라인 강의"
+          : course.schedules
+            .map(
+              (schedule) =>
+                `${schedule.dayOfWeek} ${schedule.startPeriod}~${schedule.endPeriod}교시 (${schedule.classroom})`,
+            )
+            .join(", ");
 
         return (
           <div
@@ -58,7 +88,7 @@ export default function CourseTable({
                 ? "bg-[#f0eff6] text-[#777a88]"
                 : "bg-[#7658e9] text-white"
                 }`}
-              onClick={() => toggleCourse(course)}
+              onClick={() => handleToggleCourse(course)}
             >
               {isSelected ? "취소" : "신청"}
             </button>
