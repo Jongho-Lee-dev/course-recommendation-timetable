@@ -16,7 +16,7 @@ export const mockCourses: CourseListItem[] = [
     departmentId: 1,
     majorName: "컴퓨터공학과",
     collegeName: "AI·SW창의융합대학",
-
+    isOnline: false,
     schedules: [
       {
         id: 1,
@@ -25,6 +25,7 @@ export const mockCourses: CourseListItem[] = [
         endPeriod: 3,
         classroom: "IT Hall 301",
         openCourseId: 1,
+
       },
       {
         id: 2,
@@ -33,6 +34,7 @@ export const mockCourses: CourseListItem[] = [
         endPeriod: 3,
         classroom: "IT Hall 301",
         openCourseId: 1,
+
       },
     ],
   },
@@ -52,7 +54,7 @@ export const mockCourses: CourseListItem[] = [
     departmentId: 1,
     majorName: "컴퓨터공학과",
     collegeName: "AI·SW창의융합대학",
-
+    isOnline: false,
     schedules: [
       {
         id: 3,
@@ -61,6 +63,7 @@ export const mockCourses: CourseListItem[] = [
         endPeriod: 5,
         classroom: "IT Hall 202",
         openCourseId: 2,
+
       },
     ],
   },
@@ -82,7 +85,7 @@ export const mockCourses: CourseListItem[] = [
 
     collegeName: "교양대학",
     generalEducationArea: "취.창업실무영역(비전설계영역)",
-
+    isOnline: false,
     schedules: [
       {
         id: 4,
@@ -91,6 +94,7 @@ export const mockCourses: CourseListItem[] = [
         endPeriod: 5,
         classroom: "인문관 203",
         openCourseId: 3,
+
       },
     ],
   },
@@ -112,7 +116,7 @@ export const mockCourses: CourseListItem[] = [
 
     collegeName: "교양대학",
     generalEducationArea: "경제와 사회(사회와 문화)",
-
+    isOnline: false,
     schedules: [
       {
         id: 5,
@@ -123,5 +127,55 @@ export const mockCourses: CourseListItem[] = [
         openCourseId: 4,
       },
     ],
+  },
+  {
+    id: 5,
+    courseCode: "GE303",
+    title: "인간과 사회",
+    category: "교양 필수 선택",
+    credit: 3,
+
+    sectionNo: "01",
+    professorName: "정교수",
+    capacity: 40,
+    targetGrade: 2,
+
+    departmentId: 2,
+    majorName: "교양학부",
+    collegeName: "교양대학",
+    generalEducationArea: "균형기초학문영역(균형학문영역)",
+    generalEducationElectiveArea: "인문과 철학(인문과 예술)",
+    isOnline: false,
+    schedules: [
+      {
+        id: 6,
+        dayOfWeek: "수",
+        startPeriod: 3,
+        endPeriod: 4,
+        classroom: "인문관 201",
+        openCourseId: 5,
+      },
+    ],
+  },
+  {
+    id: 6,
+    courseCode: "GE304",
+    title: "디지털 시대의 이해",
+    category: "교양 필수 선택",
+    credit: 3,
+
+    sectionNo: "01",
+    professorName: "김교수",
+    capacity: 50,
+    targetGrade: 1,
+
+    departmentId: 2,
+    majorName: "교양학부",
+    collegeName: "교양대학",
+    generalEducationArea: "균형기초학문영역(균형학문영역)",
+    generalEducationElectiveArea: "경제와 사회(사회와 문화)",
+
+    isOnline: true,
+    schedules: [],
   },
 ];
