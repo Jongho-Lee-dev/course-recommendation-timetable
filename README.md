@@ -24,81 +24,131 @@
 
 ---
 
-## 프로젝트 내려받기
+## 주요 기능
 
-GitHub 저장소를 Clone하여 프로젝트를 로컬 환경에 내려받습니다.
+### 1. 학생 정보 입력
 
-```bash
-git clone https://github.com/Jongho-Lee-dev/course-recommendation-timetable.git
-cd course-recommendation-timetable
+학생의 개인 조건을 입력하여 맞춤형 과목 추천과 시간표 설계에 활용합니다.
+
+- 학년
+- 학과 및 전공
+- 이수 학점
+- 최대 신청 가능 학점
+- 이수 과목 정보
+
+### 2. 수강신청 대시보드
+
+수강신청에 필요한 정보를 한 화면에서 확인할 수 있습니다.
+
+- 강의 검색
+- 강의 필터링
+- 주간 시간표 확인
+- 현재 신청 강좌 확인
+- 신청 학점 확인
+- AI 시간표 추천
+
+### 3. 수강신청
+
+개설된 과목을 조회하고 실제 수강신청을 진행할 수 있습니다.
+
+- 과목 검색
+- 전공 및 교양 과목 필터링
+- 학년 및 요일별 필터링
+- 교수 검색
+- 수강신청 및 취소
+- 수강 정원 확인
+- 신청 학점 확인
+
+### 4. AI 시간표 추천
+
+학생의 개인 조건과 수강 가능한 과목을 기반으로 AI를 활용하여 시간표를 추천합니다.
+
+- 개인 조건 기반 과목 추천
+- 수강 가능 과목 분석
+- 시간표 구성
+- 추천 시간표 확인
+
+### 5. 관리자 과목 관리
+
+관리자 페이지에서 수강신청에 필요한 과목 정보를 관리합니다.
+
+- 과목 등록
+- 과목 수정
+- 과목 삭제
+- 교수 정보 관리
+- 강의 시간 및 강의실 관리
+- 수강 정원 관리
+- 대상 학년 및 전공 관리
+
+---
+
+## 페이지 구성
+
+### 학생
+
+```text
+학생 정보 입력
+      │
+      ▼
+수강신청 대시보드
+      │
+      ├── 강의 검색
+      ├── 주간 시간표
+      ├── 수강 신청 목록
+      └── AI 시간표 추천
+      │
+      ▼
+수강신청
+```
+
+### 관리자
+
+```text
+관리자
+  │
+  ▼
+과목 관리
+  ├── 과목 등록
+  ├── 과목 수정
+  ├── 과목 삭제
+  └── 과목 정보 관리
 ```
 
 ---
 
-## 프로젝트 실행
+## 기술 스택
 
 ### Frontend
 
-`frontend` 폴더로 이동한 후 필요한 패키지를 설치하고 개발 서버를 실행합니다.
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- React
+- TypeScript
+- Zustand
 
 ### Backend
 
-`backend` 폴더로 이동한 후 Python 가상환경을 생성하고 필요한 패키지를 설치한 뒤 서버를 실행합니다.
+- Python
+- FastAPI
 
-```powershell
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+### AI
 
-### Redis
+- Gemini Flash API
 
-로컬 개발 환경에서는 Docker를 사용하여 Redis를 실행합니다.
+### Database / In-Memory
 
-```bash
-docker run -d --name my-redis -p 6379:6379 redis
-```
+- PostgreSQL
+- Supabase
+- Redis
 
-Redis 컨테이너가 생성된 이후에는 다음 명령어로 실행할 수 있습니다.
+### Test / Infrastructure
 
-```bash
-docker start my-redis
-```
+- k6
+- Docker
 
-실행 여부는 다음 명령어로 확인합니다.
+### Development Tools
 
-```bash
-docker ps
-```
-
-### 환경변수
-
-Backend 실행에 필요한 환경변수는 `backend/.env` 파일에서 관리합니다.
-
-```env
-UPSTASH_REDIS_REST_URL=https://arriving-llama-132373.upstash.io
-UPSTASH_REDIS_REST_TOKEN=발급받은_토큰
-```
-
-> `UPSTASH_REDIS_REST_TOKEN`은 Redis 인증 정보이므로 GitHub에 업로드하지 않습니다.
-
----
-
-## 실행 확인
-
-프론트엔드와 백엔드 서버가 정상적으로 실행되면 개발 환경이 구성됩니다.
-
-- **Frontend:** `npm run dev` 실행 후 터미널에 표시되는 주소로 접속
-- **Backend:** http://127.0.0.1:8000
-- **API 문서:** http://127.0.0.1:8000/docs
+- VS Code
+- Git
+- GitHub
 
 ---
 
@@ -141,26 +191,6 @@ Redis 접속 정보는 환경변수로 관리하여 GitHub에 인증 정보가 �
 
 k6를 활용하여 다수 사용자의 동시 접속 상황을 가정한 부하 테스트를 진행합니다.
 
-### k6 설치
-
-Windows PowerShell에서 다음 명령어를 실행합니다.
-
-```powershell
-winget install k6 --source winget
-```
-
-### 버전 확인
-
-k6가 정상적으로 설치되었는지 확인합니다.
-
-```bash
-k6 version
-```
-
-### k6 실행
-
-k6 테스트 스크립트를 실행할 때 다음 명령어를 사용합니다.
-
 ```bash
 k6 run 파일이름
 ```
@@ -179,40 +209,83 @@ k6 run 파일이름
 
 ---
 
-## 주요 기능
+## 프로젝트 실행
 
----
+### 프로젝트 내려받기
 
-## 기술 스택
+GitHub 저장소를 Clone하여 프로젝트를 로컬 환경에 내려받습니다.
+
+```bash
+git clone https://github.com/Jongho-Lee-dev/course-recommendation-timetable.git
+
+cd course-recommendation-timetable
+```
 
 ### Frontend
 
-- React
-- TypeScript
-- Zustand
+`frontend` 폴더로 이동한 후 필요한 패키지를 설치하고 개발 서버를 실행합니다.
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
 
 ### Backend
 
-- Python
-- FastAPI
+`backend` 폴더로 이동한 후 Python 가상환경을 생성하고 필요한 패키지를 설치한 뒤 서버를 실행합니다.
 
-### AI
+```powershell
+cd backend
 
-- Gemini Flash API
+python -m venv venv
 
-### Database / In-Memory
+venv\Scripts\activate
 
-- PostgreSQL
-- Supabase
-- Redis
+pip install -r requirements.txt
 
-### Test / Infrastructure
+uvicorn app.main:app --reload
+```
 
-- k6
-- Docker
+### Redis
 
-### Development Tools
+로컬 개발 환경에서는 Docker를 사용하여 Redis를 실행합니다.
 
-- VS Code
-- Git
-- GitHub
+```bash
+docker run -d --name my-redis -p 6379:6379 redis
+```
+
+Redis 컨테이너가 생성된 이후에는 다음 명령어로 실행할 수 있습니다.
+
+```bash
+docker start my-redis
+```
+
+실행 여부는 다음 명령어로 확인합니다.
+
+```bash
+docker ps
+```
+
+### 환경변수
+
+Backend 실행에 필요한 환경변수는 `backend/.env` 파일에서 관리합니다.
+
+```env
+UPSTASH_REDIS_REST_URL=발급받은_URL
+UPSTASH_REDIS_REST_TOKEN=발급받은_토큰
+```
+
+> `UPSTASH_REDIS_REST_TOKEN`은 Redis 인증 정보이므로 GitHub에 업로드하지 않습니다.
+
+---
+
+## 실행 확인
+
+프론트엔드와 백엔드 서버가 정상적으로 실행되면 개발 환경이 구성됩니다.
+
+- **Frontend:** `npm run dev` 실행 후 터미널에 표시되는 주소로 접속
+- **Backend:** `http://127.0.0.1:8000`
+- **API 문서:** `http://127.0.0.1:8000/docs`
