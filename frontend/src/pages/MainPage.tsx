@@ -4,10 +4,14 @@ import { mockCourses } from "../data/mockCourses";
 import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
 import CourseSearch from "../components/course/CourseSearch";
+import { useUserStore } from "../store/userStore";
+import { useNavigate } from "react-router-dom";
 
 type FilterCategory = "all" | "major" | "general";
 
-export default function HomePage() {
+export default function MainPage() {
+  const navigate = useNavigate()
+
   const [activeMenu, setActiveMenu] = useState("대시보드");
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
@@ -24,6 +28,9 @@ export default function HomePage() {
   const [selectedGeneralEducationElectiveArea, setSelectedGeneralEducationElectiveArea] = useState("전체 영역");
 
   const totalCredits = selected.reduce((sum, item) => sum + item.credit, 0);
+
+  const user = useUserStore((state) => state.user);
+  const resetUser = useUserStore((state) => state.reset);
 
   const activeDaysCount = new Set(
     selected.flatMap((course) =>
@@ -166,18 +173,75 @@ export default function HomePage() {
           ))}
         </nav>
 
-        <div className="mt-auto hidden items-center gap-2 border-t border-[#373843] px-2 pt-4 min-[701px]:flex">
-          <div className="grid h-8 w-8 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">
-            김
-          </div>
+        <div className="mt-auto hidden border-t border-[#373843] pt-4 min-[701px]:block">
+          <div className="rounded-lg bg-[#2d2e38] px-3 py-3">
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">
+                {user.name.slice(0, 1)}
+              </div>
 
-          <div>
-            <strong className="block text-[11px] text-white">
-              김도현
-            </strong>
-            <small className="mt-1 block text-[9px] text-[#858796]">
-              컴퓨터공학과 · 3학년
-            </small>
+              <div className="min-w-0">
+                <strong className="block truncate text-[11px] font-bold text-white">
+                  {user.name}
+                </strong>
+
+                <small className="mt-1 block truncate text-[9px] text-[#858796]">
+                  {user.major} · {user.grade}학년
+                </small>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#3b3c46] pt-3">
+              <div>
+                <span className="block text-[8px] text-[#858796]">
+                  학번
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.studentId}
+                </strong>
+              </div>
+
+              <div>
+                <span className="block text-[8px] text-[#858796]">
+                  이수 학점
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.completedCredits}학점
+                </strong>
+              </div>
+
+              <div>
+                <span className="block text-[8px] text-[#858796]">
+                  최대 신청
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.maxCredits}학점
+                </strong>
+              </div>
+
+              <div>
+                <span className="block text-[8px] text-[#858796]">
+                  졸업 필요
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.graduationCredits}학점
+                </strong>
+              </div>
+              <div className="mt-3 border-t border-[#3b3c46] pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm("학생 정보를 초기화하시겠습니까?")) {
+                      resetUser();
+                      navigate("/");
+                    }
+                  }}
+                  className="w-full rounded-md bg-[#383944] py-1.5 text-[9px] font-medium text-[#a8a9b4] transition hover:bg-[#444550] hover:text-white"
+                >
+                  학생 정보 초기화
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
@@ -208,7 +272,7 @@ export default function HomePage() {
                 신청 학점
               </span>
               <strong className="mt-1 block text-xs">
-                {totalCredits}/18
+                {totalCredits}/{user.maxCredits}
               </strong>
             </div>
           </div>
