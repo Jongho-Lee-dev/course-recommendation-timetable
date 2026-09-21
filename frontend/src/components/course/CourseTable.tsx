@@ -51,7 +51,7 @@ export default function CourseTable({
         totalCredits + course.credit - user.maxCredits;
 
       toast.error(
-        `신청 학점을 ${exceededCredits}학점 초과합니다. (최대 ${user.maxCredits}학점)`,
+        `'${course.title}' 신청 시 학점을 ${exceededCredits}학점 초과합니다. (최대 ${user.maxCredits}학점)`,
       );
       return;
     }
@@ -105,8 +105,8 @@ export default function CourseTable({
 
             <button
               className={`rounded-md px-1.5 py-1.5 text-[8px] ${isSelected
-                  ? "bg-[#f0eff6] text-[#777a88]"
-                  : "bg-[#7658e9] text-white"
+                ? "bg-[#f0eff6] text-[#777a88]"
+                : "bg-[#7658e9] text-white"
                 }`}
               onClick={() => handleToggleCourse(course)}
             >
