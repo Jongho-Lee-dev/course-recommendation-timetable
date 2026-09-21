@@ -5,9 +5,10 @@ interface User {
   studentId: string;
   name: string;
   grade: number;
-  completedSemesters: number;
+  major: string;
+  completedCredits: number;
+  graduationCredits: number;
   maxCredits: number;
-  departmentId: number;
 }
 
 interface UserStore {
