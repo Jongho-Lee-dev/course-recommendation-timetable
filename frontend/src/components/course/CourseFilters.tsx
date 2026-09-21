@@ -166,7 +166,7 @@ export default function CourseFilters({
         )}
 
         {/* 전공 필터 */}
-        {(filterCategory === "all" || filterCategory === "major") && (
+        {filterCategory === "major" && (
           <div className="flex flex-wrap gap-[6px]">
             <select
               className={selectClassName}
@@ -205,7 +205,7 @@ export default function CourseFilters({
         )}
 
         {/* 교양 필터 */}
-        {(filterCategory === "all" || filterCategory === "general") && (
+        {filterCategory === "general" && (
           <div className="flex flex-wrap gap-[6px]">
             <select
               className={selectClassName}
