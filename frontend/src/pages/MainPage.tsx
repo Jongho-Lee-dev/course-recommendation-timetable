@@ -173,77 +173,79 @@ export default function MainPage() {
           ))}
         </nav>
 
-        <div className="mt-auto hidden border-t border-[#373843] pt-4 min-[701px]:block">
-          <div className="rounded-lg bg-[#2d2e38] px-3 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">
-                {user.name.slice(0, 1)}
+        {user && (
+          <div className="mt-auto hidden border-t border-[#373843] pt-4 min-[701px]:block">
+            <div className="rounded-lg bg-[#2d2e38] px-3 py-3">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">
+                  {user.name.slice(0, 1)}
+                </div>
+
+                <div className="min-w-0">
+                  <strong className="block truncate text-[11px] font-bold text-white">
+                    {user.name}
+                  </strong>
+
+                  <small className="mt-1 block truncate text-[9px] text-[#858796]">
+                    {user.major} · {user.grade}학년
+                  </small>
+                </div>
               </div>
 
-              <div className="min-w-0">
-                <strong className="block truncate text-[11px] font-bold text-white">
-                  {user.name}
-                </strong>
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#3b3c46] pt-3">
+                <div>
+                  <span className="block text-[8px] text-[#858796]">
+                    학번
+                  </span>
+                  <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                    {user.studentId}
+                  </strong>
+                </div>
 
-                <small className="mt-1 block truncate text-[9px] text-[#858796]">
-                  {user.major} · {user.grade}학년
-                </small>
-              </div>
-            </div>
+                <div>
+                  <span className="block text-[8px] text-[#858796]">
+                    이수 학점
+                  </span>
+                  <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                    {user.completedCredits}학점
+                  </strong>
+                </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#3b3c46] pt-3">
-              <div>
-                <span className="block text-[8px] text-[#858796]">
-                  학번
-                </span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
-                  {user.studentId}
-                </strong>
-              </div>
+                <div>
+                  <span className="block text-[8px] text-[#858796]">
+                    최대 신청
+                  </span>
+                  <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                    {user.maxCredits}학점
+                  </strong>
+                </div>
 
-              <div>
-                <span className="block text-[8px] text-[#858796]">
-                  이수 학점
-                </span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
-                  {user.completedCredits}학점
-                </strong>
-              </div>
-
-              <div>
-                <span className="block text-[8px] text-[#858796]">
-                  최대 신청
-                </span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
-                  {user.maxCredits}학점
-                </strong>
-              </div>
-
-              <div>
-                <span className="block text-[8px] text-[#858796]">
-                  졸업 필요
-                </span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
-                  {user.graduationCredits}학점
-                </strong>
-              </div>
-              <div className="mt-3 col-span-2 border-t border-[#3b3c46] pt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm("학생 정보를 초기화하시겠습니까?")) {
-                      resetUser();
-                      navigate("/");
-                    }
-                  }}
-                  className="w-full rounded-md bg-[#383944] py-1.5 text-[9px] font-medium text-[#a8a9b4] transition hover:bg-[#444550] hover:text-white"
-                >
-                  학생 정보 초기화
-                </button>
+                <div>
+                  <span className="block text-[8px] text-[#858796]">
+                    졸업 필요
+                  </span>
+                  <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                    {user.graduationCredits}학점
+                  </strong>
+                </div>
+                <div className="mt-3 col-span-2 border-t border-[#3b3c46] pt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("학생 정보를 초기화하시겠습니까?")) {
+                        resetUser();
+                        navigate("/");
+                      }
+                    }}
+                    className="w-full rounded-md bg-[#383944] py-1.5 text-[9px] font-medium text-[#a8a9b4] transition hover:bg-[#444550] hover:text-white"
+                  >
+                    학생 정보 초기화
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </aside>
 
       <main className="mx-auto w-full max-w-[1500px] min-w-0 px-4 py-6 min-[1101px]:px-7">
@@ -272,7 +274,7 @@ export default function MainPage() {
                 신청 학점
               </span>
               <strong className="mt-1 block text-xs">
-                {totalCredits}/{user.maxCredits}
+                {totalCredits}/{user?.maxCredits}
               </strong>
             </div>
           </div>
