@@ -227,7 +227,7 @@ export default function MainPage() {
                   {user.graduationCredits}학점
                 </strong>
               </div>
-              <div className="mt-3 border-t border-[#3b3c46] pt-3">
+              <div className="mt-3 col-span-2 border-t border-[#3b3c46] pt-3">
                 <button
                   type="button"
                   onClick={() => {
