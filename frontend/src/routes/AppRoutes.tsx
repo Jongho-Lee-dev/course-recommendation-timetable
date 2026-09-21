@@ -1,15 +1,27 @@
 import MainLayout from "../layout/MainLayout";
-import HomePage from "../pages/HomePage";
-import UserPage from "../pages/userPage";
-import { Routes, Route } from "react-router-dom";
-
+import MainPage from "../pages/MainPage";
+import UserPage from "../pages/UserPage";
+import { useUserStore } from "../store/userStore";
+import { Navigate, Routes, Route } from "react-router-dom";
 
 export default function AppRoutes() {
+  const user = useUserStore((state) => state.user);
+
   return (
     <Routes>
-      <Route path="/user" element={<UserPage />} />
+      <Route
+        path="/"
+        element={
+          user ? (
+            <Navigate to="/mainPage" replace />
+          ) : (
+            <UserPage />
+          )
+        }
+      />
+      
       <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/mainPage" element={<MainPage />} />
       </Route>
     </Routes>
   );
