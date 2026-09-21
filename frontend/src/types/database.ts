@@ -63,7 +63,8 @@ export interface Student {
   studentId: string;
   name: string;
   grade: number;
-  completedSemesters: number;
+  completedCredits: number;
+  graduationCredits: number;
   maxCredits: number;
   departmentId: number;
 }
@@ -85,5 +86,5 @@ export interface CourseListItem {
   generalEducationArea?: string;
   generalEducationElectiveArea?: string;
   isOnline: boolean;
-  schedules?: CourseSchedule[];
+  schedules: CourseSchedule[];
 }
