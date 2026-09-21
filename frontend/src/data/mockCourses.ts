@@ -158,6 +158,33 @@ export const mockCourses: CourseListItem[] = [
     ],
   },
   {
+    id: 9,
+    courseCode: "CS305",
+    title: "웹프로그래밍",
+    category: "전공",
+    credit: 3,
+
+    sectionNo: "01",
+    professorName: "박교수",
+    capacity: 40,
+    targetGrade: 3,
+    
+    departmentId: 1,
+    majorName: "컴퓨터공학과",
+    collegeName: "AI·SW창의융합대학",
+    isOnline: false,
+    schedules: [
+      {
+        id: 9,
+        dayOfWeek: "금",
+        startPeriod: 4,
+        endPeriod: 5,
+        classroom: "IT Hall 302",
+        openCourseId: 9,
+      },
+    ],
+  },
+  {
     id: 6,
     courseCode: "GE304",
     title: "디지털 시대의 이해",
@@ -176,5 +203,6 @@ export const mockCourses: CourseListItem[] = [
     generalEducationElectiveArea: "경제와 사회(사회와 문화)",
 
     isOnline: true,
+    schedules: [],
   },
 ];
