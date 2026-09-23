@@ -1,6 +1,10 @@
+
 import type { CourseListItem } from "../types/database";
 
 export const mockCourses: CourseListItem[] = [
+  // =========================
+  // 전공
+  // =========================
   {
     id: 1,
     courseCode: "CS201",
@@ -240,11 +244,15 @@ export const mockCourses: CourseListItem[] = [
       },
     ],
   },
+
+  // =========================
+  // 교양
+  // =========================
   {
     id: 10,
     courseCode: "GE101",
     title: "대학생활과 진로",
-    category: "교양 필수 선택",
+    category: "교양",
     credit: 2,
     sectionNo: "01",
     professorName: "이강사",
@@ -253,7 +261,8 @@ export const mockCourses: CourseListItem[] = [
     departmentId: 10,
     majorName: "교양학부",
     collegeName: "교양대학",
-    generalEducationArea: "취.창업실무영역(비전설계영역)",
+    generalEducationArea: "취·창업실무영역(비전설계영역)",
+    generalEducationElectiveArea: "교양 필수 선택",
     isOnline: false,
     schedules: [
       {
@@ -270,7 +279,7 @@ export const mockCourses: CourseListItem[] = [
     id: 11,
     courseCode: "GE202",
     title: "현대사회와 문화",
-    category: "교양 선택",
+    category: "교양",
     credit: 3,
     sectionNo: "01",
     professorName: "최교수",
@@ -280,6 +289,7 @@ export const mockCourses: CourseListItem[] = [
     majorName: "교양학부",
     collegeName: "교양대학",
     generalEducationArea: "경제와 사회(사회와 문화)",
+    generalEducationElectiveArea: "교양 선택",
     isOnline: false,
     schedules: [
       {
@@ -296,7 +306,7 @@ export const mockCourses: CourseListItem[] = [
     id: 12,
     courseCode: "GE303",
     title: "인간과 사회",
-    category: "교양 필수 선택",
+    category: "교양",
     credit: 3,
     sectionNo: "01",
     professorName: "정교수",
@@ -323,7 +333,7 @@ export const mockCourses: CourseListItem[] = [
     id: 13,
     courseCode: "GE304",
     title: "디지털 시대의 이해",
-    category: "교양 필수 선택",
+    category: "교양",
     credit: 3,
     sectionNo: "01",
     professorName: "김교수",
@@ -337,4 +347,78 @@ export const mockCourses: CourseListItem[] = [
     isOnline: true,
     schedules: [],
   },
+
+  // =========================
+  // 마이크로디그리
+  // =========================
+  {
+    id: 14,
+    courseCode: "MD201",
+    title: "인공지능 기초",
+    category: "마이크로디그리",
+    credit: 3,
+    sectionNo: "01",
+    professorName: "강교수",
+    capacity: 30,
+    targetGrade: 2,
+    departmentId: 11,
+    collegeName: "AI·SW창의융합대학",
+    facultyName: "AI융합학부",
+    majorName: "인공지능학과",
+    isOnline: false,
+    schedules: [
+      {
+        id: 14,
+        dayOfWeek: "월",
+        startPeriod: 6,
+        endPeriod: 7,
+        classroom: "AI관 201",
+        openCourseId: 14,
+      },
+    ],
+  },
+  {
+    id: 15,
+    courseCode: "MD301",
+    title: "머신러닝 실습",
+    category: "마이크로디그리",
+    credit: 3,
+    sectionNo: "01",
+    professorName: "이교수",
+    capacity: 30,
+    targetGrade: 3,
+    departmentId: 11,
+    collegeName: "AI·SW창의융합대학",
+    facultyName: "AI융합학부",
+    majorName: "인공지능학과",
+    isOnline: false,
+    schedules: [
+      {
+        id: 15,
+        dayOfWeek: "수",
+        startPeriod: 6,
+        endPeriod: 8,
+        classroom: "AI관 302",
+        openCourseId: 15,
+      },
+    ],
+  },
+  {
+    id: 16,
+    courseCode: "MD401",
+    title: "데이터 분석",
+    category: "마이크로디그리",
+    credit: 3,
+    sectionNo: "01",
+    professorName: "박교수",
+    capacity: 35,
+    targetGrade: 3,
+    departmentId: 12,
+    collegeName: "AI·SW창의융합대학",
+    facultyName: "데이터사이언스학부",
+    majorName: "데이터사이언스학과",
+    isOnline: true,
+    schedules: [],
+  },
 ];
+

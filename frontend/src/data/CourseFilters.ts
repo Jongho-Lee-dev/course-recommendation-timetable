@@ -1,3 +1,4 @@
+
 import type {
   CourseFilter,
   CourseFilterOption,
@@ -167,24 +168,46 @@ const createGeneralEducationFilters =
     );
   };
 
+// 최상위 카테고리를 목업 데이터에서 동적으로 생성
+const createCategoryFilters = (): CourseFilter[] => {
+  const categories = Array.from(
+    new Set(
+      mockCourses.map(
+        (course) => course.category,
+      ),
+    ),
+  );
+
+  return categories.map(
+    (category, index) => {
+      let options: CourseFilterOption[] = [];
+
+      if (category === "전공") {
+        options = createMajorFilters();
+      } else if (
+        category.startsWith("교양")
+      ) {
+        options =
+          createGeneralEducationFilters();
+      }
+
+      return {
+        id: index + 1,
+        name: category,
+        isFixed: false,
+        options,
+      };
+    },
+  );
+};
+
 export const createCourseFilters =
   (): CourseFilter[] => {
     return [
-      {
-        id: 1,
-        name: "전공",
-        isFixed: false,
-        options: createMajorFilters(),
-      },
+      // 최상위 카테고리
+      ...createCategoryFilters(),
 
-      {
-        id: 2,
-        name: "교양",
-        isFixed: false,
-        options:
-          createGeneralEducationFilters(),
-      },
-
+      // 고정 필터
       {
         id: 1001,
         name: "학년",
@@ -276,3 +299,4 @@ export const createCourseFilters =
       },
     ];
   };
+
