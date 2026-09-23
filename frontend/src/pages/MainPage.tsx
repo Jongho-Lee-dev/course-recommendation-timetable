@@ -131,6 +131,7 @@ export default function MainPage() {
       return false;
     }
 
+
     return Object.entries(selectedFilters).every(
       ([filterId, selectedPath]) => {
         if (selectedPath.length === 0) {
@@ -142,6 +143,17 @@ export default function MainPage() {
         );
 
         if (!filter) {
+          return true;
+        }
+
+        // Dynamic filters represent categories (major, general education,
+        // microdegree, etc.). Keep every selection, including "All" and
+        // parent options without a field, scoped to that category.
+        if (!filter.isFixed && course.category !== filter.name) {
+          return false;
+        }
+
+        if (!filter.isFixed && selectedPath.length === 1 && selectedPath[0] === 0) {
           return true;
         }
 
@@ -170,6 +182,7 @@ export default function MainPage() {
         );
       },
     );
+
   });
 
   const handleResetFilters = () => {
@@ -236,8 +249,8 @@ export default function MainPage() {
               key={label}
               onClick={() => setActiveMenu(label)}
               className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${activeMenu === label
-                  ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
-                  : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
+                ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
+                : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
                 }`}
             >
               <span className="mr-2 inline-block w-5 text-[#7d7f8c]">

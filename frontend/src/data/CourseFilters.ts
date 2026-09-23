@@ -168,7 +168,6 @@ const createGeneralEducationFilters =
     );
   };
 
-// 최상위 카테고리를 목업 데이터에서 동적으로 생성
 const createCategoryFilters = (): CourseFilter[] => {
   const categories = Array.from(
     new Set(
@@ -204,10 +203,8 @@ const createCategoryFilters = (): CourseFilter[] => {
 export const createCourseFilters =
   (): CourseFilter[] => {
     return [
-      // 최상위 카테고리
       ...createCategoryFilters(),
 
-      // 고정 필터
       {
         id: 1001,
         name: "학년",

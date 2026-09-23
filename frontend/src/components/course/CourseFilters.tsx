@@ -43,12 +43,11 @@ function FilterSelect({
     <div className="flex flex-wrap gap-[6px]">
       <button
         type="button"
-        className={`rounded-md border px-3 py-2 text-[10px] transition ${
-          selectedId === null
+        className={`rounded-md border px-3 py-2 text-[10px] transition ${selectedId === null || selectedId === 0
             ? "border-[#7658e9] bg-[#7658e9] text-white"
             : "border-[#dddfe6] bg-white text-[#777a89]"
-        }`}
-        onClick={() => onChange([])}
+          }`}
+        onClick={() => onChange([0])}
       >
         전체
       </button>
@@ -57,11 +56,10 @@ function FilterSelect({
         <button
           key={option.id}
           type="button"
-          className={`rounded-md border px-3 py-2 text-[10px] transition ${
-            selectedId === option.id
+          className={`rounded-md border px-3 py-2 text-[10px] transition ${selectedId === option.id
               ? "border-[#7658e9] bg-[#7658e9] text-white"
               : "border-[#dddfe6] bg-white text-[#777a89]"
-          }`}
+            }`}
           onClick={() => onChange([option.id])}
         >
           {option.name}
@@ -165,11 +163,10 @@ export default function CourseFilters({
             <button
               key={filter.id}
               type="button"
-              className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${
-                activeFilterId === filter.id
+              className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${activeFilterId === filter.id
                   ? "border-[#7658e9] bg-[#7658e9] text-white"
                   : "border-[#dddfe6] bg-white text-[#777a89] hover:bg-[#fafafd]"
-              }`}
+                }`}
               onClick={() => handleFilterToggle(filter.id)}
             >
               {filter.name}
