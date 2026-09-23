@@ -1,299 +1,192 @@
-
 import type {
   CourseFilter,
   CourseFilterOption,
+  CourseListItem,
+  FilterCategory,
 } from "../types/database";
+import { mockFilterCategories } from "./mockFilterCategories";
 import { mockCourses } from "./mockCourses";
 
-const createMajorFilters = (): CourseFilterOption[] => {
-  const collegeMap = new Map<
-    string,
-    Map<string, Set<string>>
-  >();
+type FilterValue = NonNullable<CourseFilterOption["value"]>;
 
-  const directMajorSet = new Set<string>();
+const isFilterValue = (value: unknown): value is FilterValue =>
+  typeof value === "string" ||
+  typeof value === "number" ||
+  typeof value === "boolean";
 
-  mockCourses
-    .filter((course) => course.category === "전공")
-    .forEach((course) => {
-      const {
-        collegeName,
-        facultyName,
-        majorName,
-      } = course;
+export const getCourseFieldValues = (
+  course: CourseListItem,
+  field: string,
+): unknown[] => {
+  const parts = field.split(".");
 
-      if (!collegeName) {
-        directMajorSet.add(majorName);
-        return;
-      }
+  const getValues = (
+    current: unknown,
+    index: number,
+  ): unknown[] => {
+    if (current === null || current === undefined) {
+      return [];
+    }
 
-      if (!collegeMap.has(collegeName)) {
-        collegeMap.set(
-          collegeName,
-          new Map<string, Set<string>>(),
-        );
-      }
+    if (index >= parts.length) {
+      return [current];
+    }
 
-      const facultyMap = collegeMap.get(collegeName)!;
+    if (Array.isArray(current)) {
+      return current.flatMap((item) => getValues(item, index));
+    }
 
-      if (!facultyName) {
-        if (!facultyMap.has("")) {
-          facultyMap.set("", new Set<string>());
-        }
+    if (typeof current === "object" && parts[index] in current) {
+      return getValues(
+        (current as Record<string, unknown>)[parts[index]],
+        index + 1,
+      );
+    }
 
-        facultyMap.get("")!.add(majorName);
-        return;
-      }
+    return [];
+  };
 
-      if (!facultyMap.has(facultyName)) {
-        facultyMap.set(
-          facultyName,
-          new Set<string>(),
-        );
-      }
+  return getValues(course, 0);
+};
 
-      facultyMap.get(facultyName)!.add(majorName);
-    });
+export const matchesCourseFilter = (
+  course: CourseListItem,
+  filter: Pick<CourseFilterOption, "field" | "value">,
+): boolean => {
+  if (!filter.field || filter.value === undefined) {
+    return true;
+  }
 
-  let id = 100;
+  return getCourseFieldValues(course, filter.field).some(
+    (value) => value === filter.value,
+  );
+};
 
-  const createMajorOption = (
-    majorName: string,
-  ): CourseFilterOption => ({
-    id: id++,
-    name: majorName,
-    field: "majorName",
-    value: majorName,
-  });
+const createDynamicOptions = (
+  courses: CourseListItem[],
+  fields: string[],
+  nextId: () => number,
+): CourseFilterOption[] => {
+  if (fields.length === 0) {
+    return [];
+  }
 
-  const options: CourseFilterOption[] = [];
+  const [field, ...remainingFields] = fields;
+  const valueGroups = new Map<FilterValue, CourseListItem[]>();
+  const coursesWithoutValue: CourseListItem[] = [];
 
-  collegeMap.forEach((facultyMap, collegeName) => {
-    const collegeChildren: CourseFilterOption[] = [];
-
-    facultyMap.forEach(
-      (majorSet, facultyName) => {
-        if (!facultyName) {
-          majorSet.forEach((majorName) => {
-            collegeChildren.push(
-              createMajorOption(majorName),
-            );
-          });
-
-          return;
-        }
-
-        collegeChildren.push({
-          id: id++,
-          name: facultyName,
-          children: Array.from(majorSet).map(
-            createMajorOption,
-          ),
-        });
-      },
+  courses.forEach((course) => {
+    const values = Array.from(
+      new Set(
+        getCourseFieldValues(course, field).filter(isFilterValue),
+      ),
     );
 
-    options.push({
-      id: id++,
-      name: collegeName,
-      children: collegeChildren,
+    if (values.length === 0) {
+      coursesWithoutValue.push(course);
+      return;
+    }
+
+    values.forEach((value) => {
+      const group = valueGroups.get(value) ?? [];
+      group.push(course);
+      valueGroups.set(value, group);
     });
   });
 
-  directMajorSet.forEach((majorName) => {
-    options.push(createMajorOption(majorName));
-  });
+  const options: CourseFilterOption[] = Array.from(
+    valueGroups,
+    ([value, matchingCourses]) => {
+      const children = createDynamicOptions(
+        matchingCourses,
+        remainingFields,
+        nextId,
+      );
+
+      return {
+        id: nextId(),
+        name: String(value),
+        field,
+        value,
+        children: children.length > 0 ? children : undefined,
+      };
+    },
+  );
+
+  if (remainingFields.length > 0 && coursesWithoutValue.length > 0) {
+    options.push(
+      ...createDynamicOptions(
+        coursesWithoutValue,
+        remainingFields,
+        nextId,
+      ),
+    );
+  }
 
   return options;
 };
 
-const createGeneralEducationFilters =
-  (): CourseFilterOption[] => {
-    const areaMap = new Map<
-      string,
-      Set<string>
-    >();
+export const createCourseFilters = (): CourseFilter[] => {
+  const categories = mockFilterCategories;
+  const childrenByParent = new Map<number, FilterCategory[]>();
 
-    mockCourses
-      .filter((course) =>
-        course.category.startsWith("교양"),
-      )
-      .forEach((course) => {
-        const area =
-          course.generalEducationArea;
+  categories.forEach((category) => {
+    if (category.parentId === undefined) {
+      return;
+    }
 
-        if (!area) {
-          return;
-        }
+    const children = childrenByParent.get(category.parentId) ?? [];
+    children.push(category);
+    childrenByParent.set(category.parentId, children);
+  });
 
-        if (!areaMap.has(area)) {
-          areaMap.set(area, new Set<string>());
-        }
+  let optionId =
+    Math.max(...categories.map((category) => category.id), 0) + 1;
+  const nextId = () => optionId++;
 
-        const electiveArea =
-          course.generalEducationElectiveArea;
-
-        if (electiveArea) {
-          areaMap.get(area)!.add(electiveArea);
-        }
-      });
-
-    let id = 200;
-
-    return Array.from(areaMap).map(
-      ([area, electiveAreas]) => ({
-        id: id++,
-        name: area,
-        children:
-          electiveAreas.size > 0
-            ? Array.from(electiveAreas).map(
-                (name) => ({
-                  id: id++,
-                  name,
-                  field:
-                    "generalEducationElectiveArea",
-                  value: name,
-                }),
-              )
-            : undefined,
-        field:
-          electiveAreas.size === 0
-            ? "generalEducationArea"
-            : undefined,
-        value:
-          electiveAreas.size === 0
-            ? area
-            : undefined,
-      }),
+  const buildOption = (
+    category: FilterCategory,
+    availableCourses: CourseListItem[],
+  ): CourseFilterOption => {
+    const matchingCourses = availableCourses.filter((course) =>
+      matchesCourseFilter(course, category),
     );
+    const configuredChildren = (
+      childrenByParent.get(category.id) ?? []
+    ).map((child) => buildOption(child, matchingCourses));
+    const dynamicChildren = createDynamicOptions(
+      matchingCourses,
+      category.childFields ?? [],
+      nextId,
+    );
+    const children = [...configuredChildren, ...dynamicChildren];
+
+    return {
+      id: category.id,
+      name: category.name,
+      field: category.field,
+      value: category.value,
+      children: children.length > 0 ? children : undefined,
+    };
   };
 
-const createCategoryFilters = (): CourseFilter[] => {
-  const categories = Array.from(
-    new Set(
-      mockCourses.map(
-        (course) => course.category,
-      ),
-    ),
-  );
-
-  return categories.map(
-    (category, index) => {
-      let options: CourseFilterOption[] = [];
-
-      if (category === "전공") {
-        options = createMajorFilters();
-      } else if (
-        category.startsWith("교양")
-      ) {
-        options =
-          createGeneralEducationFilters();
-      }
+  return categories
+    .filter((category) => category.parentId === undefined)
+    .map((category) => {
+      const matchingCourses = mockCourses.filter((course) =>
+        matchesCourseFilter(course, category),
+      );
+      const options = (childrenByParent.get(category.id) ?? []).map(
+        (child) => buildOption(child, matchingCourses),
+      );
 
       return {
-        id: index + 1,
-        name: category,
-        isFixed: false,
+        id: category.id,
+        name: category.name,
+        isFixed: category.isFixed ?? false,
+        field: category.field,
+        value: category.value,
         options,
       };
-    },
-  );
+    });
 };
-
-export const createCourseFilters =
-  (): CourseFilter[] => {
-    return [
-      ...createCategoryFilters(),
-
-      {
-        id: 1001,
-        name: "학년",
-        isFixed: true,
-        options: [
-          {
-            id: 100101,
-            name: "1학년",
-            field: "targetGrade",
-            value: 1,
-          },
-          {
-            id: 100102,
-            name: "2학년",
-            field: "targetGrade",
-            value: 2,
-          },
-          {
-            id: 100103,
-            name: "3학년",
-            field: "targetGrade",
-            value: 3,
-          },
-          {
-            id: 100104,
-            name: "4학년",
-            field: "targetGrade",
-            value: 4,
-          },
-        ],
-      },
-
-      {
-        id: 1002,
-        name: "요일",
-        isFixed: true,
-        options: [
-          {
-            id: 100201,
-            name: "월",
-            field: "schedules.dayOfWeek",
-            value: "월",
-          },
-          {
-            id: 100202,
-            name: "화",
-            field: "schedules.dayOfWeek",
-            value: "화",
-          },
-          {
-            id: 100203,
-            name: "수",
-            field: "schedules.dayOfWeek",
-            value: "수",
-          },
-          {
-            id: 100204,
-            name: "목",
-            field: "schedules.dayOfWeek",
-            value: "목",
-          },
-          {
-            id: 100205,
-            name: "금",
-            field: "schedules.dayOfWeek",
-            value: "금",
-          },
-        ],
-      },
-
-      {
-        id: 1003,
-        name: "수업 형태",
-        isFixed: true,
-        options: [
-          {
-            id: 100301,
-            name: "대면",
-            field: "isOnline",
-            value: false,
-          },
-          {
-            id: 100302,
-            name: "온라인",
-            field: "isOnline",
-            value: true,
-          },
-        ],
-      },
-    ];
-  };
-

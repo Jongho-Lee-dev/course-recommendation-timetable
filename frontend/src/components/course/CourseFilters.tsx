@@ -113,14 +113,13 @@ export default function CourseFilters({
   };
 
   const handleFilterToggle = (filterId: number) => {
-    setActiveFilterId((prev) => {
-      if (prev === filterId) {
-        return null;
-      }
+    if (activeFilterId === filterId) {
+      setActiveFilterId(null);
+      return;
+    }
 
-      setSelectedFilters({});
-      return filterId;
-    });
+    setSelectedFilters({ [filterId]: [0] });
+    setActiveFilterId(filterId);
   };
 
   const dynamicFilters = courseFilters.filter(
@@ -193,29 +192,55 @@ export default function CourseFilters({
       </div>
 
       <div className="flex flex-wrap gap-[6px]">
-        {fixedFilters.map((filter) => (
-          <select
-            key={filter.id}
-            className={selectClassName}
-            value={selectedFilters[filter.id]?.[0] ?? ""}
-            onChange={(e) => {
-              const value = e.target.value;
+        {fixedFilters.map((filter) => {
+          const hasNestedOptions = filter.options.some(
+            (option) => option.children?.length,
+          );
 
-              setSelectedFilters((prev) => ({
-                ...prev,
-                [filter.id]: value ? [Number(value)] : [],
-              }));
-            }}
-          >
-            <option value="">{filter.name}</option>
+          if (hasNestedOptions) {
+            return (
+              <div key={filter.id} className="w-full space-y-2">
+                <span className="text-[10px] text-[#777a89]">
+                  {filter.name}
+                </span>
+                <FilterSelect
+                  options={filter.options}
+                  selectedPath={selectedFilters[filter.id] ?? []}
+                  onChange={(path) =>
+                    setSelectedFilters((prev) => ({
+                      ...prev,
+                      [filter.id]: path,
+                    }))
+                  }
+                />
+              </div>
+            );
+          }
 
-            {filter.options.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        ))}
+          return (
+            <select
+              key={filter.id}
+              className={selectClassName}
+              value={selectedFilters[filter.id]?.[0] ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setSelectedFilters((prev) => ({
+                  ...prev,
+                  [filter.id]: value ? [Number(value)] : [],
+                }));
+              }}
+            >
+              <option value="">{filter.name}</option>
+
+              {filter.options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          );
+        })}
       </div>
     </div>
   );

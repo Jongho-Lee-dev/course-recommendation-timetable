@@ -102,7 +102,7 @@ export default function CourseTable({
                   {course.title}
                 </b>
                 <small className="mt-1 block text-[8px] text-[#9b9eab]">
-                  {course.courseCode} · {course.category}
+                  {course.courseCode} · {course.courseType ?? course.category}
                 </small>
               </div>
               <span>{course.professorName}</span>

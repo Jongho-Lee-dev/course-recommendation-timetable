@@ -4,7 +4,10 @@ import type {
   CourseListItem,
 } from "../types/database";
 import { mockCourses } from "../data/mockCourses";
-import { createCourseFilters } from "../data/CourseFilters";
+import {
+  createCourseFilters,
+  matchesCourseFilter,
+} from "../data/CourseFilters";
 import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
 import CourseSearch from "../components/course/CourseSearch";
@@ -33,7 +36,7 @@ export default function MainPage() {
     "현재 시간표를 분석해 최적의 조합을 추천해드릴게요.",
   );
 
-  // 목업 필터 데이터 사용
+  // 관리자 필터 설정 목업 사용
   const courseFilters = useMemo(
     () => createCourseFilters(),
     [],
@@ -54,65 +57,6 @@ export default function MainPage() {
       ),
     ),
   ).size;
-
-  // "schedules.dayOfWeek"처럼 중첩된 값을 가져오기 위한 함수
-  const getFieldValues = (
-    course: CourseListItem,
-    field: string,
-  ): unknown[] => {
-    const parts = field.split(".");
-
-    const getValues = (
-      current: unknown,
-      index: number,
-    ): unknown[] => {
-      if (current === null || current === undefined) {
-        return [];
-      }
-
-      if (index >= parts.length) {
-        return [current];
-      }
-
-      if (Array.isArray(current)) {
-        return current.flatMap((item) =>
-          getValues(item, index),
-        );
-      }
-
-      if (
-        typeof current === "object" &&
-        parts[index] in current
-      ) {
-        return getValues(
-          (current as Record<string, unknown>)[parts[index]],
-          index + 1,
-        );
-      }
-
-      return [];
-    };
-
-    return getValues(course, 0);
-  };
-
-  const matchesOption = (
-    course: CourseListItem,
-    option: CourseFilterOption,
-  ) => {
-    if (!option.field || option.value === undefined) {
-      return true;
-    }
-
-    const values = getFieldValues(
-      course,
-      option.field,
-    );
-
-    return values.some(
-      (value) => value === option.value,
-    );
-  };
 
   const filteredCourses = mockCourses.filter((course) => {
     const matchesKeyword =
@@ -146,14 +90,12 @@ export default function MainPage() {
           return true;
         }
 
-        // Dynamic filters represent categories (major, general education,
-        // microdegree, etc.). Keep every selection, including "All" and
-        // parent options without a field, scoped to that category.
-        if (!filter.isFixed && course.category !== filter.name) {
+        // Apply a configured root condition (for example, category=전공).
+        if (!matchesCourseFilter(course, filter)) {
           return false;
         }
 
-        if (!filter.isFixed && selectedPath.length === 1 && selectedPath[0] === 0) {
+        if (!filter.isFixed && selectedPath[0] === 0) {
           return true;
         }
 
@@ -161,6 +103,11 @@ export default function MainPage() {
         const selectedOptions: CourseFilterOption[] = [];
 
         for (const selectedId of selectedPath) {
+          // "전체" at a nested level keeps the filters selected above it.
+          if (selectedId === 0) {
+            break;
+          }
+
           const option = options.find(
             (item) => item.id === selectedId,
           );
@@ -173,12 +120,8 @@ export default function MainPage() {
           options = option.children ?? [];
         }
 
-        const selectedOption =
-          selectedOptions[selectedOptions.length - 1];
-
-        return matchesOption(
-          course,
-          selectedOption,
+        return selectedOptions.every((option) =>
+          matchesCourseFilter(course, option),
         );
       },
     );

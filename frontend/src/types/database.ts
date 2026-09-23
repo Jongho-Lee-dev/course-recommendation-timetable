@@ -1,8 +1,12 @@
 // 과목 자체의 기본 정보
+// 관리자 설정으로 분류명을 추가할 수 있도록 자유 문자열로 둔다.
+export type CourseType = string;
+
 export interface Course {
   courseCode: string;
   title: string;
   category: string;
+  courseType?: CourseType;
   credit: number;
   theoryHours: number;
   labHours: number;
@@ -54,6 +58,10 @@ export interface FilterCategory {
   id: number;
   name: string;
   parentId?: number;
+  isFixed?: boolean;
+  field?: string;
+  value?: string | number | boolean;
+  childFields?: string[];
 }
 
 // 개설 과목의 수업 시간 및 강의실 정보
@@ -82,6 +90,8 @@ export interface CourseFilter {
   id: number;
   name: string;
   isFixed: boolean;
+  field?: string;
+  value?: string | number | boolean;
   options: CourseFilterOption[];
 }
 
@@ -100,6 +110,7 @@ export interface CourseListItem {
   courseCode: string;
   title: string;
   category: string;
+  courseType?: CourseType;
   credit: number;
   sectionNo: string;
   professorName: string;

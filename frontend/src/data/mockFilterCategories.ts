@@ -1,0 +1,77 @@
+import type { FilterCategory } from "../types/database";
+
+export const mockFilterCategories: FilterCategory[] = [
+  { id: 1, name: "전공", field: "category", value: "전공" },
+  {
+    id: 2,
+    name: "전공 필수",
+    parentId: 1,
+    field: "courseType",
+    value: "전공 필수",
+    childFields: ["collegeName", "facultyName", "majorName"],
+  },
+  {
+    id: 3,
+    name: "전공 선택",
+    parentId: 1,
+    field: "courseType",
+    value: "전공 선택",
+    childFields: ["collegeName", "facultyName", "majorName"],
+  },
+  { id: 4, name: "교양", field: "category", value: "교양" },
+  {
+    id: 5,
+    name: "교양 필수",
+    parentId: 4,
+    field: "courseType",
+    value: "교양 필수",
+    childFields: ["generalEducationArea", "generalEducationElectiveArea"],
+  },
+  {
+    id: 6,
+    name: "교양 선택",
+    parentId: 4,
+    field: "courseType",
+    value: "교양 선택",
+    childFields: ["generalEducationArea", "generalEducationElectiveArea"],
+  },
+  {
+    id: 7,
+    name: "교양 필수 선택",
+    parentId: 4,
+    field: "courseType",
+    value: "교양 필수 선택",
+    childFields: ["generalEducationArea", "generalEducationElectiveArea"],
+  },
+  {
+    id: 8,
+    name: "마이크로디그리",
+    field: "category",
+    value: "마이크로디그리",
+  },
+  {
+    id: 9,
+    name: "마이크로",
+    parentId: 8,
+    field: "courseType",
+    value: "마이크로",
+    childFields: ["majorName"],
+  },
+
+  { id: 1001, name: "학년", isFixed: true },
+  { id: 100101, name: "1학년", parentId: 1001, field: "targetGrade", value: 1 },
+  { id: 100102, name: "2학년", parentId: 1001, field: "targetGrade", value: 2 },
+  { id: 100103, name: "3학년", parentId: 1001, field: "targetGrade", value: 3 },
+  { id: 100104, name: "4학년", parentId: 1001, field: "targetGrade", value: 4 },
+
+  { id: 1002, name: "요일", isFixed: true },
+  { id: 100201, name: "월", parentId: 1002, field: "schedules.dayOfWeek", value: "월" },
+  { id: 100202, name: "화", parentId: 1002, field: "schedules.dayOfWeek", value: "화" },
+  { id: 100203, name: "수", parentId: 1002, field: "schedules.dayOfWeek", value: "수" },
+  { id: 100204, name: "목", parentId: 1002, field: "schedules.dayOfWeek", value: "목" },
+  { id: 100205, name: "금", parentId: 1002, field: "schedules.dayOfWeek", value: "금" },
+
+  { id: 1003, name: "수업 형태", isFixed: true },
+  { id: 100301, name: "대면", parentId: 1003, field: "isOnline", value: false },
+  { id: 100302, name: "온라인", parentId: 1003, field: "isOnline", value: true },
+];
