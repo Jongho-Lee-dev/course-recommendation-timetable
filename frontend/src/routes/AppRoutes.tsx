@@ -19,9 +19,18 @@ export default function AppRoutes() {
           )
         }
       />
-      
+
       <Route element={<MainLayout />}>
-        <Route path="/mainPage" element={<MainPage />} />
+        <Route
+          path="/mainPage"
+          element={
+            user ? (
+              <MainPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
       </Route>
     </Routes>
   );
