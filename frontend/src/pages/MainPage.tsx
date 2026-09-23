@@ -45,15 +45,6 @@ export default function MainPage() {
     ),
   ).size;
 
-  /*
-   * 점(.)으로 연결된 field를 따라가면서 값을 가져온다.
-   *
-   * 예:
-   * "targetGrade"
-   * "majorName"
-   * "isOnline"
-   * "schedules.dayOfWeek"
-   */
   const getFieldValues = (
     course: CourseListItem,
     field: string,
@@ -92,34 +83,6 @@ export default function MainPage() {
     };
 
     return getValues(course, 0);
-  };
-
-  /*
-   * 선택된 option의 실제 데이터를 가져온다.
-   */
-  const findSelectedOptions = (
-    options: CourseFilterOption[],
-    selectedIds: number[],
-  ): CourseFilterOption[] => {
-    const result: CourseFilterOption[] = [];
-
-    const findOptions = (
-      currentOptions: CourseFilterOption[],
-    ) => {
-      for (const option of currentOptions) {
-        if (selectedIds.includes(option.id)) {
-          result.push(option);
-        }
-
-        if (option.children) {
-          findOptions(option.children);
-        }
-      }
-    };
-
-    findOptions(options);
-
-    return result;
   };
 
   const matchesOption = (
@@ -250,10 +213,11 @@ export default function MainPage() {
             <button
               key={label}
               onClick={() => setActiveMenu(label)}
-              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${activeMenu === label
-                ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
-                : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
-                }`}
+              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${
+                activeMenu === label
+                  ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
+                  : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
+              }`}
             >
               <span className="mr-2 inline-block w-5 text-[#7d7f8c]">
                 {icon}
