@@ -1,46 +1,18 @@
-
 import type { Dispatch, SetStateAction } from "react";
 import type { CourseListItem } from "../../types/database";
 import CourseFilters from "./CourseFilters";
 import CourseTable from "./CourseTable";
 
-type FilterCategory = "all" | "major" | "general";
-
 type CourseSearchProps = {
   keyword: string;
   setKeyword: Dispatch<SetStateAction<string>>;
-
   professorKeyword: string;
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
-
-  filterCategory: FilterCategory;
-  setFilterCategory: Dispatch<SetStateAction<FilterCategory>>;
-
-  selectedDay: string;
-  setSelectedDay: Dispatch<SetStateAction<string>>;
-
-  selectedGrade: string;
-  setSelectedGrade: Dispatch<SetStateAction<string>>;
-
-  selectedCollege: string;
-  setSelectedCollege: Dispatch<SetStateAction<string>>;
-
-  selectedMajor: string;
-  setSelectedMajor: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducation: string;
-  setSelectedGeneralEducation: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducationArea: string;
-  setSelectedGeneralEducationArea: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducationElectiveArea: string;
-  setSelectedGeneralEducationElectiveArea: Dispatch<
-    SetStateAction<string>
+  selectedFilters: Record<number, number[]>;
+  setSelectedFilters: Dispatch<
+    SetStateAction<Record<number, number[]>>
   >;
-
   onReset: () => void;
-
   courses: CourseListItem[];
   selected: CourseListItem[];
   toggleCourse: (course: CourseListItem) => void;
@@ -51,22 +23,8 @@ export default function CourseSearch({
   setKeyword,
   professorKeyword,
   setProfessorKeyword,
-  filterCategory,
-  setFilterCategory,
-  selectedDay,
-  setSelectedDay,
-  selectedGrade,
-  setSelectedGrade,
-  selectedCollege,
-  setSelectedCollege,
-  selectedMajor,
-  setSelectedMajor,
-  selectedGeneralEducation,
-  setSelectedGeneralEducation,
-  selectedGeneralEducationArea,
-  setSelectedGeneralEducationArea,
-  selectedGeneralEducationElectiveArea,
-  setSelectedGeneralEducationElectiveArea,
+  selectedFilters,
+  setSelectedFilters,
   onReset,
   courses,
   selected,
@@ -89,26 +47,8 @@ export default function CourseSearch({
         setKeyword={setKeyword}
         professorKeyword={professorKeyword}
         setProfessorKeyword={setProfessorKeyword}
-        filterCategory={filterCategory}
-        setFilterCategory={setFilterCategory}
-        selectedDay={selectedDay}
-        setSelectedDay={setSelectedDay}
-        selectedGrade={selectedGrade}
-        setSelectedGrade={setSelectedGrade}
-        selectedCollege={selectedCollege}
-        setSelectedCollege={setSelectedCollege}
-        selectedMajor={selectedMajor}
-        setSelectedMajor={setSelectedMajor}
-        selectedGeneralEducation={selectedGeneralEducation}
-        setSelectedGeneralEducation={setSelectedGeneralEducation}
-        selectedGeneralEducationArea={selectedGeneralEducationArea}
-        setSelectedGeneralEducationArea={setSelectedGeneralEducationArea}
-        selectedGeneralEducationElectiveArea={
-          selectedGeneralEducationElectiveArea
-        }
-        setSelectedGeneralEducationElectiveArea={
-          setSelectedGeneralEducationElectiveArea
-        }
+        selectedFilters={selectedFilters}
+        setSelectedFilters={setSelectedFilters}
         onReset={onReset}
       />
 

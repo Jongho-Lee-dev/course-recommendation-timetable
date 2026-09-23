@@ -1,8 +1,6 @@
-
-import type { Dispatch, SetStateAction } from "react";
-import { collegeMajors } from "../../data/collegeMajors";
-
-type FilterCategory = "all" | "major" | "general";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { courseFilters } from "../../data/CourseFilters";
+import type { CourseFilterOption } from "../../types/database";
 
 type CourseFiltersProps = {
   keyword: string;
@@ -10,31 +8,9 @@ type CourseFiltersProps = {
 
   professorKeyword: string;
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
-
-  filterCategory: FilterCategory;
-  setFilterCategory: Dispatch<SetStateAction<FilterCategory>>;
-
-  selectedGrade: string;
-  setSelectedGrade: Dispatch<SetStateAction<string>>;
-
-  selectedDay: string;
-  setSelectedDay: Dispatch<SetStateAction<string>>;
-
-  selectedCollege: string;
-  setSelectedCollege: Dispatch<SetStateAction<string>>;
-
-  selectedMajor: string;
-  setSelectedMajor: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducation: string;
-  setSelectedGeneralEducation: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducationArea: string;
-  setSelectedGeneralEducationArea: Dispatch<SetStateAction<string>>;
-
-  selectedGeneralEducationElectiveArea: string;
-  setSelectedGeneralEducationElectiveArea: Dispatch<
-    SetStateAction<string>
+  selectedFilters: Record<number, number[]>;
+  setSelectedFilters: Dispatch<
+    SetStateAction<Record<number, number[]>>
   >;
 
   onReset: () => void;
@@ -46,34 +22,108 @@ const selectClassName =
 const inputClassName =
   "min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none placeholder:text-[#a0a3b0] focus:border-[#a99aed]";
 
+type FilterSelectProps = {
+  options: CourseFilterOption[];
+  selectedPath: number[];
+  onChange: (path: number[]) => void;
+};
+
+function FilterSelect({
+  options,
+  selectedPath,
+  onChange,
+}: FilterSelectProps) {
+  const selectedId = selectedPath[0] ?? null;
+
+  const selectedOption =
+    options.find((option) => option.id === selectedId) ?? null;
+
+  return (
+    <div className="flex flex-wrap gap-[6px]">
+      <button
+        type="button"
+        className={`rounded-md border px-3 py-2 text-[10px] transition ${
+          selectedId === null
+            ? "border-[#7658e9] bg-[#7658e9] text-white"
+            : "border-[#dddfe6] bg-white text-[#777a89]"
+        }`}
+        onClick={() => onChange([])}
+      >
+        전체
+      </button>
+
+      {options.map((option) => (
+        <button
+          key={option.id}
+          type="button"
+          className={`rounded-md border px-3 py-2 text-[10px] transition ${
+            selectedId === option.id
+              ? "border-[#7658e9] bg-[#7658e9] text-white"
+              : "border-[#dddfe6] bg-white text-[#777a89]"
+          }`}
+          onClick={() => onChange([option.id])}
+        >
+          {option.name}
+        </button>
+      ))}
+
+      {selectedOption?.children && (
+        <div className="w-full pl-4">
+          <FilterSelect
+            options={selectedOption.children}
+            selectedPath={selectedPath.slice(1)}
+            onChange={(childPath) => {
+              onChange([selectedOption.id, ...childPath]);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CourseFilters({
   keyword,
   setKeyword,
   professorKeyword,
   setProfessorKeyword,
-  filterCategory,
-  setFilterCategory,
-  selectedGrade,
-  setSelectedGrade,
-  selectedDay,
-  setSelectedDay,
-  selectedCollege,
-  setSelectedCollege,
-  selectedMajor,
-  setSelectedMajor,
-  selectedGeneralEducation,
-  setSelectedGeneralEducation,
-  selectedGeneralEducationArea,
-  setSelectedGeneralEducationArea,
-  selectedGeneralEducationElectiveArea,
-  setSelectedGeneralEducationElectiveArea,
+  selectedFilters,
+  setSelectedFilters,
+
   onReset,
 }: CourseFiltersProps) {
-  const majors = collegeMajors[selectedCollege] ?? [];
+  const [activeFilterId, setActiveFilterId] = useState<number | null>(
+    null,
+  );
+
+  const handleFilterChange = (
+    filterId: number,
+    path: number[],
+  ) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      [filterId]: path,
+    }));
+  };
+
+  const handleReset = () => {
+    setSelectedFilters({});
+    setActiveFilterId(null);
+    onReset();
+  };
+
+  const dynamicFilters = courseFilters.filter(
+    (filter) => !filter.isFixed,
+  );
+
+  const fixedFilters = courseFilters.filter(
+    (filter) => filter.isFixed,
+  );
 
   return (
     <div className="space-y-3 px-[18px] py-4">
-      <div className="grid grid-cols-1 gap-2 min-[701px]:grid-cols-2">
+      {/* 검색 */}
+      <div className="flex flex-wrap items-center gap-[6px]">
         <input
           className={inputClassName}
           value={keyword}
@@ -87,195 +137,82 @@ export default function CourseFilters({
           onChange={(e) => setProfessorKeyword(e.target.value)}
           placeholder="교수명 검색"
         />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        <button
-          type="button"
-          className={`rounded-md px-3 py-2 text-[10px] font-semibold transition ${
-            filterCategory === "all"
-              ? "bg-[#7658e9] text-white"
-              : "border border-[#dddfe6] bg-white text-[#777a89]"
-          }`}
-          onClick={() => setFilterCategory("all")}
-        >
-          전체
-        </button>
 
         <button
           type="button"
-          className={`rounded-md px-3 py-2 text-[10px] font-semibold transition ${
-            filterCategory === "major"
-              ? "bg-[#7658e9] text-white"
-              : "border border-[#dddfe6] bg-white text-[#777a89]"
-          }`}
-          onClick={() => setFilterCategory("major")}
-        >
-          전공
-        </button>
-
-        <button
-          type="button"
-          className={`rounded-md px-3 py-2 text-[10px] font-semibold transition ${
-            filterCategory === "general"
-              ? "bg-[#7658e9] text-white"
-              : "border border-[#dddfe6] bg-white text-[#777a89]"
-          }`}
-          onClick={() => setFilterCategory("general")}
-        >
-          교양
-        </button>
-
-        <button
-          type="button"
-          className="ml-auto rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#777a89] transition hover:bg-[#fafafd]"
-          onClick={onReset}
+          className="rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#777a89] transition hover:bg-[#fafafd]"
+          onClick={handleReset}
         >
           초기화
         </button>
       </div>
 
+      {/* 동적 필터 */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-[6px]">
+          {dynamicFilters.map((filter) => (
+            <button
+              key={filter.id}
+              type="button"
+              className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${
+                activeFilterId === filter.id
+                  ? "border-[#7658e9] bg-[#7658e9] text-white"
+                  : "border-[#dddfe6] bg-white text-[#777a89] hover:bg-[#fafafd]"
+              }`}
+              onClick={() =>
+                setActiveFilterId((prev) =>
+                  prev === filter.id ? null : filter.id,
+                )
+              }
+            >
+              {filter.name}
+            </button>
+          ))}
+        </div>
+
+        {activeFilterId !== null && (
+          <div className="pl-3">
+            {dynamicFilters
+              .filter((filter) => filter.id === activeFilterId)
+              .map((filter) => (
+                <FilterSelect
+                  key={filter.id}
+                  options={filter.options}
+                  selectedPath={selectedFilters[filter.id] ?? []}
+                  onChange={(path) =>
+                    handleFilterChange(filter.id, path)
+                  }
+                />
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* 고정 필터 */}
       <div className="flex flex-wrap gap-[6px]">
-        {filterCategory !== "general" && (
-          <>
-            <select
-              className={selectClassName}
-              value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}
-            >
-              <option value="전체 학년">전체 학년</option>
-              <option value="1학년">1학년</option>
-              <option value="2학년">2학년</option>
-              <option value="3학년">3학년</option>
-              <option value="4학년">4학년</option>
-            </select>
+        {fixedFilters.map((filter) => (
+          <select
+            key={filter.id}
+            className={selectClassName}
+            value={selectedFilters[filter.id]?.[0] ?? ""}
+            onChange={(e) => {
+              const value = e.target.value;
 
-            <select
-              className={selectClassName}
-              value={selectedDay}
-              onChange={(e) => setSelectedDay(e.target.value)}
-            >
-              <option value="전체 요일">전체 요일</option>
-              <option value="월">월</option>
-              <option value="화">화</option>
-              <option value="수">수</option>
-              <option value="목">목</option>
-              <option value="금">금</option>
-            </select>
-          </>
-        )}
+              setSelectedFilters((prev) => ({
+                ...prev,
+                [filter.id]: value ? [Number(value)] : [],
+              }));
+            }}
+          >
+            <option value="">{filter.name}</option>
 
-        {/* 전공 필터 */}
-        {filterCategory === "major" && (
-          <div className="flex flex-wrap gap-[6px]">
-            <select
-              className={selectClassName}
-              value={selectedCollege}
-              onChange={(e) => {
-                setSelectedCollege(e.target.value);
-                setSelectedMajor("전체 전공");
-              }}
-            >
-              <option value="전체 학부">전체 학부</option>
-              <option value="인문사회대학">인문사회대학</option>
-              <option value="경영대학">경영대학</option>
-              <option value="생명보건대학">생명보건대학</option>
-              <option value="AI·SW창의융합대학">
-                AI·SW창의융합대학
+            {filter.options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
               </option>
-              <option value="문화예술대학">문화예술대학</option>
-            </select>
-
-            {selectedCollege !== "전체 학부" && (
-              <select
-                className={selectClassName}
-                value={selectedMajor}
-                onChange={(e) => setSelectedMajor(e.target.value)}
-              >
-                <option value="전체 전공">전체 전공</option>
-
-                {majors.map((major) => (
-                  <option key={major} value={major}>
-                    {major}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        )}
-
-        {/* 교양 필터 */}
-        {filterCategory === "general" && (
-          <div className="flex flex-wrap gap-[6px]">
-            <select
-              className={selectClassName}
-              value={selectedGeneralEducation}
-              onChange={(e) => {
-                setSelectedGeneralEducation(e.target.value);
-                setSelectedGeneralEducationArea("전체 영역");
-                setSelectedGeneralEducationElectiveArea("전체 영역");
-              }}
-            >
-              <option value="전체 교양">전체 교양</option>
-              <option value="교양 필수">교양 필수</option>
-              <option value="교양 필수 선택">교양 필수 선택</option>
-              <option value="교양 선택">교양 선택</option>
-            </select>
-
-            {selectedGeneralEducation === "교양 필수 선택" && (
-              <select
-                className={selectClassName}
-                value={selectedGeneralEducationArea}
-                onChange={(e) => {
-                  setSelectedGeneralEducationArea(e.target.value);
-                  setSelectedGeneralEducationElectiveArea("전체 영역");
-                }}
-              >
-                <option value="전체 영역">전체 영역</option>
-                <option value="심화글쓰기영역(글쓰기와토론영역)">
-                  심화글쓰기영역(글쓰기와토론영역)
-                </option>
-                <option value="AIㆍSW교육영역(미래와기술영역)">
-                  AIㆍSW교육영역(미래와기술영역)
-                </option>
-                <option value="글로벌의사소통영역1(언어)">
-                  글로벌의사소통영역1(언어)
-                </option>
-                <option value="글로벌의사소통영역2(세계시민)">
-                  글로벌의사소통영역2(세계시민)
-                </option>
-                <option value="취.창업실무영역(비전설계영역)">
-                  취.창업실무영역(비전설계영역)
-                </option>
-                <option value="균형기초학문영역(균형학문영역)">
-                  균형기초학문영역(균형학문영역)
-                </option>
-              </select>
-            )}
-
-            {selectedGeneralEducationArea ===
-              "균형기초학문영역(균형학문영역)" && (
-              <select
-                className={selectClassName}
-                value={selectedGeneralEducationElectiveArea}
-                onChange={(e) =>
-                  setSelectedGeneralEducationElectiveArea(e.target.value)
-                }
-              >
-                <option value="전체 영역">전체 영역</option>
-                <option value="과학과 수리(자연과 과학)">
-                  과학과 수리(자연과 과학)
-                </option>
-                <option value="경제와 사회(사회와 문화)">
-                  경제와 사회(사회와 문화)
-                </option>
-                <option value="인문과 철학(인문과 예술)">
-                  인문과 철학(인문과 예술)
-                </option>
-              </select>
-            )}
-          </div>
-        )}
+            ))}
+          </select>
+        ))}
       </div>
     </div>
   );

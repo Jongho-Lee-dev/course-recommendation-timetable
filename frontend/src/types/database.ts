@@ -69,6 +69,21 @@ export interface Student {
   departmentId: number;
 }
 
+export interface CourseFilter {
+  id: number;
+  name: string;
+  isFixed: boolean;
+  options: CourseFilterOption[];
+}
+
+export interface CourseFilterOption {
+  id: number;
+  name: string;
+  field?: string;
+  value?: string | number | boolean;
+  children?: CourseFilterOption[];
+}
+
 // HomePage에서 과목 목록을 표시하기 위해 여러 정보를 조합한 프론트 전용 타입
 export interface CourseListItem {
   id: number;

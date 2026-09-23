@@ -1,33 +1,40 @@
 import { useState } from "react";
-import type { CourseListItem } from "../types/database";
+import type {
+  CourseFilterOption,
+  CourseListItem,
+} from "../types/database";
 import { mockCourses } from "../data/mockCourses";
+import { courseFilters } from "../data/CourseFilters";
 import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
 import CourseSearch from "../components/course/CourseSearch";
 import { useUserStore } from "../store/userStore";
 import { useNavigate } from "react-router-dom";
 
-type FilterCategory = "all" | "major" | "general";
-
 export default function MainPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [activeMenu, setActiveMenu] = useState("대시보드");
+
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
-  const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
-  const [selected, setSelected] = useState<CourseListItem[]>(mockCourses.slice(0, 2));
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiMessage, setAiMessage] = useState("현재 시간표를 분석해 최적의 조합을 추천해드릴게요.");
-  const [selectedDay, setSelectedDay] = useState("전체 요일");
-  const [selectedGrade, setSelectedGrade] = useState("전체 학년");
-  const [selectedCollege, setSelectedCollege] = useState("전체 학부");
-  const [selectedMajor, setSelectedMajor] = useState("전체 전공");
-  const [selectedGeneralEducation, setSelectedGeneralEducation] = useState("전체 교양");
-  const [selectedGeneralEducationArea, setSelectedGeneralEducationArea] = useState("전체 영역");
-  const [selectedGeneralEducationElectiveArea, setSelectedGeneralEducationElectiveArea] = useState("전체 영역");
 
-  const totalCredits = selected.reduce((sum, item) => sum + item.credit, 0);
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<number, number[]>
+  >({});
+
+  const [selected, setSelected] = useState<CourseListItem[]>(
+    mockCourses.slice(0, 2),
+  );
+
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiMessage, setAiMessage] =
+    useState("현재 시간표를 분석해 최적의 조합을 추천해드릴게요.");
+
+  const totalCredits = selected.reduce(
+    (sum, item) => sum + item.credit,
+    0,
+  );
 
   const user = useUserStore((state) => state.user);
   const resetUser = useUserStore((state) => state.reset);
@@ -38,92 +45,173 @@ export default function MainPage() {
     ),
   ).size;
 
+  /*
+   * 점(.)으로 연결된 field를 따라가면서 값을 가져온다.
+   *
+   * 예:
+   * "targetGrade"
+   * "majorName"
+   * "isOnline"
+   * "schedules.dayOfWeek"
+   */
+  const getFieldValues = (
+    course: CourseListItem,
+    field: string,
+  ): unknown[] => {
+    const parts = field.split(".");
+
+    const getValues = (
+      current: unknown,
+      index: number,
+    ): unknown[] => {
+      if (current === null || current === undefined) {
+        return [];
+      }
+
+      if (index >= parts.length) {
+        return [current];
+      }
+
+      if (Array.isArray(current)) {
+        return current.flatMap((item) =>
+          getValues(item, index),
+        );
+      }
+
+      if (
+        typeof current === "object" &&
+        parts[index] in current
+      ) {
+        return getValues(
+          (current as Record<string, unknown>)[parts[index]],
+          index + 1,
+        );
+      }
+
+      return [];
+    };
+
+    return getValues(course, 0);
+  };
+
+  /*
+   * 선택된 option의 실제 데이터를 가져온다.
+   */
+  const findSelectedOptions = (
+    options: CourseFilterOption[],
+    selectedIds: number[],
+  ): CourseFilterOption[] => {
+    const result: CourseFilterOption[] = [];
+
+    const findOptions = (
+      currentOptions: CourseFilterOption[],
+    ) => {
+      for (const option of currentOptions) {
+        if (selectedIds.includes(option.id)) {
+          result.push(option);
+        }
+
+        if (option.children) {
+          findOptions(option.children);
+        }
+      }
+    };
+
+    findOptions(options);
+
+    return result;
+  };
+
+  const matchesOption = (
+    course: CourseListItem,
+    option: CourseFilterOption,
+  ) => {
+    if (!option.field || option.value === undefined) {
+      return true;
+    }
+
+    const values = getFieldValues(course, option.field);
+
+    return values.some((value) => value === option.value);
+  };
+
   const filteredCourses = mockCourses.filter((course) => {
     const matchesKeyword =
       !keyword.trim() ||
-      `${course.title} ${course.courseCode}`.toLowerCase().includes(keyword.toLowerCase());
+      `${course.title} ${course.courseCode}`
+        .toLowerCase()
+        .includes(keyword.toLowerCase());
 
     const matchesProfessor =
       !professorKeyword.trim() ||
-      course.professorName.toLowerCase().includes(professorKeyword.toLowerCase());
+      course.professorName
+        .toLowerCase()
+        .includes(professorKeyword.toLowerCase());
 
-    const matchesDay =
-      selectedDay === "전체 요일" ||
-      course.schedules.some((schedule) => schedule.dayOfWeek === selectedDay);
-
-    const matchesGrade =
-      selectedGrade === "전체 학년" ||
-      course.targetGrade === Number(selectedGrade.replace("학년", ""));
-
-    if (!matchesKeyword || !matchesProfessor || !matchesDay || !matchesGrade) {
+    if (!matchesKeyword || !matchesProfessor) {
       return false;
     }
 
-    if (filterCategory === "major" && course.category !== "전공") {
-      return false;
-    }
+    return Object.entries(selectedFilters).every(
+      ([filterId, selectedPath]) => {
+        if (selectedPath.length === 0) {
+          return true;
+        }
 
-    if (
-      filterCategory === "general" &&
-      !["교양 필수", "교양 필수 선택", "교양 선택"].includes(course.category)
-    ) {
-      return false;
-    }
+        const filter = courseFilters.find(
+          (item) => item.id === Number(filterId),
+        );
 
-    if (selectedCollege !== "전체 학부" && course.collegeName !== selectedCollege) {
-      return false;
-    }
+        if (!filter) {
+          return true;
+        }
 
-    if (selectedMajor !== "전체 전공" && course.majorName !== selectedMajor) {
-      return false;
-    }
+        let options = filter.options;
+        const selectedOptions: CourseFilterOption[] = [];
 
-    if (
-      selectedGeneralEducation !== "전체 교양" &&
-      course.category !== selectedGeneralEducation
-    ) {
-      return false;
-    }
+        for (const selectedId of selectedPath) {
+          const option = options.find(
+            (item) => item.id === selectedId,
+          );
 
-    if (
-      selectedGeneralEducationArea !== "전체 영역" &&
-      course.generalEducationArea !== selectedGeneralEducationArea
-    ) {
-      return false;
-    }
+          if (!option) {
+            return false;
+          }
 
-    if (
-      selectedGeneralEducationElectiveArea !== "전체 영역" &&
-      course.generalEducationElectiveArea !== selectedGeneralEducationElectiveArea
-    ) {
-      return false;
-    }
+          selectedOptions.push(option);
+          options = option.children ?? [];
+        }
 
-    return true;
+        const selectedOption =
+          selectedOptions[selectedOptions.length - 1];
+
+        return matchesOption(course, selectedOption);
+      },
+    );
   });
 
   const handleResetFilters = () => {
     setKeyword("");
     setProfessorKeyword("");
-    setFilterCategory("all");
-    setSelectedDay("전체 요일");
-    setSelectedGrade("전체 학년");
-    setSelectedCollege("전체 학부");
-    setSelectedMajor("전체 전공");
-    setSelectedGeneralEducation("전체 교양");
-    setSelectedGeneralEducationArea("전체 영역");
-    setSelectedGeneralEducationElectiveArea("전체 영역");
+    setSelectedFilters({});
   };
 
   const toggleCourse = (course: CourseListItem) => {
-    const exists = selected.some((item) => item.id === course.id);
+    const exists = selected.some(
+      (item) => item.id === course.id,
+    );
 
     if (exists) {
-      setSelected((prev) => prev.filter((item) => item.id !== course.id));
+      setSelected((prev) =>
+        prev.filter((item) => item.id !== course.id),
+      );
       return;
     }
 
-    if (selected.length >= 6 || totalCredits + course.credit > 18) {
+    if (
+      selected.length >= 6 ||
+      totalCredits + course.credit > 18
+    ) {
       return;
     }
 
@@ -135,7 +223,9 @@ export default function MainPage() {
 
     setTimeout(() => {
       setAiLoading(false);
-      setAiMessage("현재 선택 과목 기준으로 공강과 수업일을 고려한 시간표를 찾았습니다.");
+      setAiMessage(
+        "현재 선택 과목 기준으로 공강과 수업일을 고려한 시간표를 찾았습니다.",
+      );
     }, 700);
   };
 
@@ -228,11 +318,16 @@ export default function MainPage() {
                     {user.graduationCredits}학점
                   </strong>
                 </div>
-                <div className="mt-3 col-span-2 border-t border-[#3b3c46] pt-3">
+
+                <div className="col-span-2 mt-3 border-t border-[#3b3c46] pt-3">
                   <button
                     type="button"
                     onClick={() => {
-                      if (window.confirm("학생 정보를 초기화하시겠습니까?")) {
+                      if (
+                        window.confirm(
+                          "학생 정보를 초기화하시겠습니까?",
+                        )
+                      ) {
                         resetUser();
                         navigate("/");
                       }
@@ -288,26 +383,8 @@ export default function MainPage() {
                 setKeyword={setKeyword}
                 professorKeyword={professorKeyword}
                 setProfessorKeyword={setProfessorKeyword}
-                filterCategory={filterCategory}
-                setFilterCategory={setFilterCategory}
-                selectedDay={selectedDay}
-                setSelectedDay={setSelectedDay}
-                selectedGrade={selectedGrade}
-                setSelectedGrade={setSelectedGrade}
-                selectedCollege={selectedCollege}
-                setSelectedCollege={setSelectedCollege}
-                selectedMajor={selectedMajor}
-                setSelectedMajor={setSelectedMajor}
-                selectedGeneralEducation={selectedGeneralEducation}
-                setSelectedGeneralEducation={setSelectedGeneralEducation}
-                selectedGeneralEducationArea={selectedGeneralEducationArea}
-                setSelectedGeneralEducationArea={setSelectedGeneralEducationArea}
-                selectedGeneralEducationElectiveArea={
-                  selectedGeneralEducationElectiveArea
-                }
-                setSelectedGeneralEducationElectiveArea={
-                  setSelectedGeneralEducationElectiveArea
-                }
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
                 onReset={handleResetFilters}
                 courses={filteredCourses}
                 selected={selected}
@@ -316,10 +393,7 @@ export default function MainPage() {
             )}
           </section>
 
-          <WeeklyTimetable
-            selected={selected}
-          />
-
+          <WeeklyTimetable selected={selected} />
         </div>
 
         <section className="mt-4 grid gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
@@ -346,8 +420,8 @@ export default function MainPage() {
                 <span className="block text-[7px] text-[#9e9ca9]">
                   현재 공강
                 </span>
-                <b className="mt-1 block text-[10px]">{5 - activeDaysCount}
-                  일
+                <b className="mt-1 block text-[10px]">
+                  {5 - activeDaysCount}일
                 </b>
               </div>
 
@@ -375,7 +449,9 @@ export default function MainPage() {
               onClick={generateAi}
               disabled={aiLoading}
             >
-              {aiLoading ? "AI가 분석 중..." : "✦ 최적 시간표 추천받기"}
+              {aiLoading
+                ? "AI가 분석 중..."
+                : "✦ 최적 시간표 추천받기"}
             </button>
           </div>
         </section>
