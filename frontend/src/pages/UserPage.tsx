@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { courseFilters } from "../data/CourseFilters";
@@ -17,7 +17,21 @@ export default function UserPage() {
   const [maxCredits, setMaxCredits] = useState("");
   const [graduationCredits, setGraduationCredits] = useState("");
 
-  // CourseFilters.ts의 전공 데이터를 사용
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      toast.info("학생 정보가 없기 때문에 이전 페이지로 이동할 수 없습니다.");
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
   const majorFilter = courseFilters.find(
     (filter) => filter.name === "전공",
   );
