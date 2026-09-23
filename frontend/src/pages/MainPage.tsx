@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   CourseFilterOption,
   CourseListItem,
 } from "../types/database";
 import { mockCourses } from "../data/mockCourses";
-import { courseFilters } from "../data/CourseFilters";
+import { createCourseFilters } from "../data/CourseFilters";
 import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
 import CourseSearch from "../components/course/CourseSearch";
@@ -28,8 +28,16 @@ export default function MainPage() {
   );
 
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiMessage, setAiMessage] =
-    useState("현재 시간표를 분석해 최적의 조합을 추천해드릴게요.");
+
+  const [aiMessage, setAiMessage] = useState(
+    "현재 시간표를 분석해 최적의 조합을 추천해드릴게요.",
+  );
+
+  // 목업 필터 데이터 사용
+  const courseFilters = useMemo(
+    () => createCourseFilters(),
+    [],
+  );
 
   const totalCredits = selected.reduce(
     (sum, item) => sum + item.credit,
@@ -41,10 +49,13 @@ export default function MainPage() {
 
   const activeDaysCount = new Set(
     selected.flatMap((course) =>
-      course.schedules.map((schedule) => schedule.dayOfWeek),
+      course.schedules.map(
+        (schedule) => schedule.dayOfWeek,
+      ),
     ),
   ).size;
 
+  // "schedules.dayOfWeek"처럼 중첩된 값을 가져오기 위한 함수
   const getFieldValues = (
     course: CourseListItem,
     field: string,
@@ -93,9 +104,14 @@ export default function MainPage() {
       return true;
     }
 
-    const values = getFieldValues(course, option.field);
+    const values = getFieldValues(
+      course,
+      option.field,
+    );
 
-    return values.some((value) => value === option.value);
+    return values.some(
+      (value) => value === option.value,
+    );
   };
 
   const filteredCourses = mockCourses.filter((course) => {
@@ -148,7 +164,10 @@ export default function MainPage() {
         const selectedOption =
           selectedOptions[selectedOptions.length - 1];
 
-        return matchesOption(course, selectedOption);
+        return matchesOption(
+          course,
+          selectedOption,
+        );
       },
     );
   });
@@ -166,7 +185,9 @@ export default function MainPage() {
 
     if (exists) {
       setSelected((prev) =>
-        prev.filter((item) => item.id !== course.id),
+        prev.filter(
+          (item) => item.id !== course.id,
+        ),
       );
       return;
     }
@@ -186,6 +207,7 @@ export default function MainPage() {
 
     setTimeout(() => {
       setAiLoading(false);
+
       setAiMessage(
         "현재 선택 과목 기준으로 공강과 수업일을 고려한 시간표를 찾았습니다.",
       );
@@ -213,15 +235,15 @@ export default function MainPage() {
             <button
               key={label}
               onClick={() => setActiveMenu(label)}
-              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${
-                activeMenu === label
+              className={`rounded-lg px-3 py-3 text-left text-[11px] transition ${activeMenu === label
                   ? "bg-[#30313d] text-white shadow-[inset_3px_0_#7658e9]"
                   : "text-[#9698a4] hover:bg-[#30313d] hover:text-white"
-              }`}
+                }`}
             >
               <span className="mr-2 inline-block w-5 text-[#7d7f8c]">
                 {icon}
               </span>
+
               {label}
             </button>
           ))}
@@ -251,6 +273,7 @@ export default function MainPage() {
                   <span className="block text-[8px] text-[#858796]">
                     학번
                   </span>
+
                   <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
                     {user.studentId}
                   </strong>
@@ -260,6 +283,7 @@ export default function MainPage() {
                   <span className="block text-[8px] text-[#858796]">
                     이수 학점
                   </span>
+
                   <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
                     {user.completedCredits}학점
                   </strong>
@@ -269,6 +293,7 @@ export default function MainPage() {
                   <span className="block text-[8px] text-[#858796]">
                     최대 신청
                   </span>
+
                   <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
                     {user.maxCredits}학점
                   </strong>
@@ -278,6 +303,7 @@ export default function MainPage() {
                   <span className="block text-[8px] text-[#858796]">
                     졸업 필요
                   </span>
+
                   <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
                     {user.graduationCredits}학점
                   </strong>
@@ -314,6 +340,7 @@ export default function MainPage() {
               <span className="block text-[9px] text-[#9699a6]">
                 수강 신청 현황
               </span>
+
               <strong className="mt-1 block text-xs">
                 진행 중
               </strong>
@@ -323,6 +350,7 @@ export default function MainPage() {
               <span className="block text-[9px] text-[#9699a6]">
                 남은 시간
               </span>
+
               <strong className="mt-1 block text-xs">
                 01:25:34
               </strong>
@@ -332,6 +360,7 @@ export default function MainPage() {
               <span className="block text-[9px] text-[#9699a6]">
                 신청 학점
               </span>
+
               <strong className="mt-1 block text-xs">
                 {totalCredits}/{user?.maxCredits}
               </strong>
@@ -339,7 +368,7 @@ export default function MainPage() {
           </div>
         </section>
 
-        <div className="grid min-w-0 gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
+        <div className="grid min-w-0 items-start gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
           <section className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
             {activeMenu === "대시보드" && (
               <CourseSearch
@@ -384,6 +413,7 @@ export default function MainPage() {
                 <span className="block text-[7px] text-[#9e9ca9]">
                   현재 공강
                 </span>
+
                 <b className="mt-1 block text-[10px]">
                   {5 - activeDaysCount}일
                 </b>
@@ -393,6 +423,7 @@ export default function MainPage() {
                 <span className="block text-[7px] text-[#9e9ca9]">
                   수업일
                 </span>
+
                 <b className="mt-1 block text-[10px]">
                   {activeDaysCount}일
                 </b>
@@ -402,6 +433,7 @@ export default function MainPage() {
                 <span className="block text-[7px] text-[#9e9ca9]">
                   충돌
                 </span>
+
                 <b className="mt-1 block text-[10px] text-[#61d0a4]">
                   0건
                 </b>

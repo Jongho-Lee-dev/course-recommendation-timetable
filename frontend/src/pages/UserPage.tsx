@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { courseFilters } from "../data/CourseFilters";
+import { departments } from "../data/departments";
 import { useUserStore } from "../store/userStore";
 
 export default function UserPage() {
@@ -11,8 +11,11 @@ export default function UserPage() {
   const [name, setName] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
   const [studentId, setStudentId] = useState("");
+
   const [selectedCollege, setSelectedCollege] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("");
+
   const [completedCredits, setCompletedCredits] = useState("");
   const [maxCredits, setMaxCredits] = useState("");
   const [graduationCredits, setGraduationCredits] = useState("");
@@ -32,17 +35,98 @@ export default function UserPage() {
     };
   }, []);
 
-  const majorFilter = courseFilters.find(
-    (filter) => filter.name === "전공",
-  );
+  const colleges = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .map((department) => department.collegeName)
+          .filter(Boolean),
+      ),
+    ];
+  }, []);
 
-  const colleges = majorFilter?.options ?? [];
+  const faculties = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .filter(
+            (department) =>
+              department.collegeName === selectedCollege &&
+              department.facultyName,
+          )
+          .map((department) => department.facultyName),
+      ),
+    ];
+  }, [selectedCollege]);
 
-  const selectedCollegeOption = colleges.find(
-    (college) => college.name === selectedCollege,
-  );
+  const collegeMajors = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .filter(
+            (department) =>
+              department.collegeName === selectedCollege &&
+              !department.facultyName,
+          )
+          .map((department) => department.majorName),
+      ),
+    ];
+  }, [selectedCollege]);
 
-  const majors = selectedCollegeOption?.children ?? [];
+  const facultyMajors = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .filter(
+            (department) =>
+              department.facultyName === selectedFaculty,
+          )
+          .map((department) => department.majorName),
+      ),
+    ];
+  }, [selectedFaculty]);
+
+  const independentFaculties = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .filter(
+            (department) =>
+              !department.collegeName &&
+              department.facultyName,
+          )
+          .map((department) => department.facultyName),
+      ),
+    ];
+  }, []);
+
+  const independentMajors = useMemo(() => {
+    return [
+      ...new Set(
+        departments
+          .filter(
+            (department) =>
+              !department.collegeName &&
+              !department.facultyName,
+          )
+          .map((department) => department.majorName),
+      ),
+    ];
+  }, []);
+
+  const handleCollegeChange = (value: string) => {
+    setSelectedCollege(value);
+    setSelectedFaculty("");
+    setSelectedMajor("");
+  };
+  const handleFacultyChange = (value: string) => {
+    setSelectedFaculty(value);
+    setSelectedMajor("");
+  };
+
+  const hasCollegeFaculty = faculties.length > 0;
+
+  const hasIndependentFaculty = independentFaculties.length > 0;
 
   const handleUserSave = () => {
     const completed = Number(completedCredits);
@@ -53,7 +137,6 @@ export default function UserPage() {
       !name.trim() ||
       !selectedGrade ||
       !studentId.trim() ||
-      !selectedCollege ||
       !selectedMajor ||
       !completedCredits ||
       !maxCredits ||
@@ -63,11 +146,7 @@ export default function UserPage() {
       return;
     }
 
-    if (
-      completed < 0 ||
-      max <= 0 ||
-      graduation <= 0
-    ) {
+    if (completed < 0 || max <= 0 || graduation <= 0) {
       toast.error("학점 정보를 올바르게 입력해주세요.");
       return;
     }
@@ -167,52 +246,133 @@ export default function UserPage() {
               />
             </div>
 
-            {/* 학과 */}
+            {/* 소속 */}
             <div>
               <label className="mb-1.5 block text-[11px] font-semibold text-[#5d6070]">
-                학과
+                소속
               </label>
 
               <div className="flex gap-2">
                 {/* 단과대 */}
-                <select
-                  value={selectedCollege}
-                  onChange={(e) => {
-                    setSelectedCollege(e.target.value);
-                    setSelectedMajor("");
-                  }}
-                  className="w-1/2 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
-                >
-                  <option value="">학부 선택</option>
+                {colleges.length > 0 && (
+                  <select
+                    value={selectedCollege}
+                    onChange={(e) => handleCollegeChange(e.target.value)}
+                    className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
+                  >
+                    <option value="">단과대 선택</option>
 
-                  {colleges.map((college) => (
-                    <option
-                      key={college.id}
-                      value={college.name}
-                    >
-                      {college.name}
-                    </option>
-                  ))}
-                </select>
+                    {colleges.map((college) => (
+                      <option key={college} value={college}>
+                        {college}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* 학부 */}
+                {selectedCollege && hasCollegeFaculty && (
+                  <select
+                    value={selectedFaculty}
+                    onChange={(e) => handleFacultyChange(e.target.value)}
+                    disabled={!selectedCollege}
+                    className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed] disabled:bg-[#fafafd] disabled:text-[#a0a3b0]"
+                  >
+                    <option value="">학부 선택</option>
+
+                    {faculties.map((faculty) => (
+                      <option key={faculty} value={faculty}>
+                        {faculty}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 {/* 학과 */}
-                <select
-                  value={selectedMajor}
-                  onChange={(e) => setSelectedMajor(e.target.value)}
-                  disabled={!selectedCollege}
-                  className="w-1/2 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed] disabled:bg-[#fafafd] disabled:text-[#a0a3b0]"
-                >
-                  <option value="">학과 선택</option>
+                {selectedCollege && (
+                  <select
+                    value={selectedMajor}
+                    onChange={(e) => setSelectedMajor(e.target.value)}
+                    disabled={
+                      hasCollegeFaculty
+                        ? !selectedFaculty
+                        : false
+                    }
+                    className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed] disabled:bg-[#fafafd] disabled:text-[#a0a3b0]"
+                  >
+                    <option value="">학과 선택</option>
 
-                  {majors.map((major) => (
-                    <option
-                      key={major.id}
-                      value={major.name}
+                    {(hasCollegeFaculty
+                      ? facultyMajors
+                      : collegeMajors
+                    ).map((major) => (
+                      <option key={major} value={major}>
+                        {major}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* 단과대가 없는 학부 */}
+                {!selectedCollege &&
+                  hasIndependentFaculty && (
+                    <select
+                      value={selectedFaculty}
+                      onChange={(e) => {
+                        handleFacultyChange(e.target.value);
+                      }}
+                      className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
                     >
-                      {major.name}
-                    </option>
-                  ))}
-                </select>
+                      <option value="">학부 선택</option>
+
+                      {independentFaculties.map((faculty) => (
+                        <option key={faculty} value={faculty}>
+                          {faculty}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                {/* 단과대/학부가 없는 학과 */}
+                {!selectedCollege &&
+                  !selectedFaculty &&
+                  independentMajors.length > 0 && (
+                    <select
+                      value={selectedMajor}
+                      onChange={(e) =>
+                        setSelectedMajor(e.target.value)
+                      }
+                      className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
+                    >
+                      <option value="">학과 선택</option>
+
+                      {independentMajors.map((major) => (
+                        <option key={major} value={major}>
+                          {major}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                {/* 단과대가 없는 학부의 학과 */}
+                {!selectedCollege &&
+                  selectedFaculty && (
+                    <select
+                      value={selectedMajor}
+                      onChange={(e) =>
+                        setSelectedMajor(e.target.value)
+                      }
+                      className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
+                    >
+                      <option value="">학과 선택</option>
+
+                      {facultyMajors.map((major) => (
+                        <option key={major} value={major}>
+                          {major}
+                        </option>
+                      ))}
+                    </select>
+                  )}
               </div>
             </div>
 

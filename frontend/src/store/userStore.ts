@@ -5,6 +5,8 @@ interface User {
   studentId: string;
   name: string;
   grade: number;
+  collegeName?: string;
+  facultyName?: string;
   major: string;
   completedCredits: number;
   graduationCredits: number;
@@ -21,11 +23,13 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       user: null,
+
       setUser: (newUser) =>
         set({
           user: newUser,
         }),
-      reset: () => set({ user: null })
+
+      reset: () => set({ user: null }),
     }),
     {
       name: "user-storage",

@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { courseFilters } from "../../data/CourseFilters";
+import { createCourseFilters } from "../../data/CourseFilters";
 import type { CourseFilterOption } from "../../types/database";
 
 type CourseFiltersProps = {
@@ -8,6 +8,7 @@ type CourseFiltersProps = {
 
   professorKeyword: string;
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
+
   selectedFilters: Record<number, number[]>;
   setSelectedFilters: Dispatch<
     SetStateAction<Record<number, number[]>>
@@ -89,12 +90,13 @@ export default function CourseFilters({
   setProfessorKeyword,
   selectedFilters,
   setSelectedFilters,
-
   onReset,
 }: CourseFiltersProps) {
   const [activeFilterId, setActiveFilterId] = useState<number | null>(
     null,
   );
+
+  const courseFilters = createCourseFilters();
 
   const handleFilterChange = (
     filterId: number,
@@ -112,6 +114,17 @@ export default function CourseFilters({
     onReset();
   };
 
+  const handleFilterToggle = (filterId: number) => {
+    setActiveFilterId((prev) => {
+      if (prev === filterId) {
+        return null;
+      }
+
+      setSelectedFilters({});
+      return filterId;
+    });
+  };
+
   const dynamicFilters = courseFilters.filter(
     (filter) => !filter.isFixed,
   );
@@ -122,7 +135,6 @@ export default function CourseFilters({
 
   return (
     <div className="space-y-3 px-[18px] py-4">
-      {/* 검색 */}
       <div className="flex flex-wrap items-center gap-[6px]">
         <input
           className={inputClassName}
@@ -147,7 +159,6 @@ export default function CourseFilters({
         </button>
       </div>
 
-      {/* 동적 필터 */}
       <div className="space-y-2">
         <div className="flex flex-wrap gap-[6px]">
           {dynamicFilters.map((filter) => (
@@ -159,11 +170,7 @@ export default function CourseFilters({
                   ? "border-[#7658e9] bg-[#7658e9] text-white"
                   : "border-[#dddfe6] bg-white text-[#777a89] hover:bg-[#fafafd]"
               }`}
-              onClick={() =>
-                setActiveFilterId((prev) =>
-                  prev === filter.id ? null : filter.id,
-                )
-              }
+              onClick={() => handleFilterToggle(filter.id)}
             >
               {filter.name}
             </button>
@@ -188,7 +195,6 @@ export default function CourseFilters({
         )}
       </div>
 
-      {/* 고정 필터 */}
       <div className="flex flex-wrap gap-[6px]">
         {fixedFilters.map((filter) => (
           <select

@@ -6,13 +6,17 @@ import CourseTable from "./CourseTable";
 type CourseSearchProps = {
   keyword: string;
   setKeyword: Dispatch<SetStateAction<string>>;
+
   professorKeyword: string;
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
+
   selectedFilters: Record<number, number[]>;
   setSelectedFilters: Dispatch<
     SetStateAction<Record<number, number[]>>
   >;
+
   onReset: () => void;
+
   courses: CourseListItem[];
   selected: CourseListItem[];
   toggleCourse: (course: CourseListItem) => void;

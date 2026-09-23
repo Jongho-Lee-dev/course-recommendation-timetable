@@ -41,11 +41,19 @@ export interface CourseCart {
 // 단과대 및 학과 정보
 export interface Department {
   id: number;
-  collegeName: string;
+  collegeName?: string;
+  facultyName?: string;
+  majorName: string;
   generalEducationArea?: string;
   generalEducationElectiveArea?: string;
-  facultyName: string;
-  majorName: string;
+}
+
+// 관리자 페이지에서 관리하는 필터 분류 정보
+// parentId를 통해 상위 필터와 하위 필터의 계층 구조를 표현
+export interface FilterCategory {
+  id: number;
+  name: string;
+  parentId?: number;
 }
 
 // 개설 과목의 수업 시간 및 강의실 정보
@@ -69,6 +77,7 @@ export interface Student {
   departmentId: number;
 }
 
+// 과목 검색에 사용되는 필터 정보
 export interface CourseFilter {
   id: number;
   name: string;
@@ -76,6 +85,7 @@ export interface CourseFilter {
   options: CourseFilterOption[];
 }
 
+// 필터의 선택 항목 및 하위 필터 정보
 export interface CourseFilterOption {
   id: number;
   name: string;
@@ -97,7 +107,8 @@ export interface CourseListItem {
   targetGrade: number;
   departmentId: number;
   majorName: string;
-  collegeName: string;
+  facultyName?: string;
+  collegeName?: string;
   generalEducationArea?: string;
   generalEducationElectiveArea?: string;
   isOnline: boolean;
