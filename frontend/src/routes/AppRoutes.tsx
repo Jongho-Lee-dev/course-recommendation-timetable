@@ -5,6 +5,7 @@ import FeaturePage from "../pages/FeaturePage";
 import { useUserStore } from "../store/userStore";
 import { Navigate, Routes, Route } from "react-router-dom";
 import type { ReactNode } from "react";
+import AdminPage from "../pages/AdminPage";
 
 export default function AppRoutes() {
   const user = useUserStore((state) => state.user);
@@ -26,7 +27,9 @@ export default function AppRoutes() {
         <Route path="/notices" element={protectedPage(<FeaturePage type="notices" />)} />
       </Route>
 
+
       <Route path="*" element={<Navigate to={user ? "/mainPage" : "/"} replace />} />
+      <Route path="/admin" element={<AdminPage />} />
     </Routes>
   );
 }
