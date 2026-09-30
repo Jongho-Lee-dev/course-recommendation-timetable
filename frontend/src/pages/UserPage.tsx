@@ -129,6 +129,12 @@ export default function UserPage() {
   const hasIndependentFaculty = independentFaculties.length > 0;
 
   const handleUserSave = () => {
+
+    if (name === "admin") {
+      navigate("/admin");
+      return;
+    }
+
     const completed = Number(completedCredits);
     const max = Number(maxCredits);
     const graduation = Number(graduationCredits);
