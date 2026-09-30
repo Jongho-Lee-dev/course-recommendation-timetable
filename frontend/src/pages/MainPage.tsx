@@ -80,7 +80,6 @@ export default function MainPage() {
           return true;
         }
 
-        // Apply a configured root condition (for example, category=전공).
         if (!matchesCourseFilter(course, filter)) {
           return false;
         }
@@ -93,7 +92,7 @@ export default function MainPage() {
         const selectedOptions: CourseFilterOption[] = [];
 
         for (const selectedId of selectedPath) {
-          // "전체" at a nested level keeps the filters selected above it.
+          
           if (selectedId === 0) {
             break;
           }
