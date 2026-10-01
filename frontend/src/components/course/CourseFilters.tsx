@@ -1,8 +1,9 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { createCourseFilters } from "../../data/CourseFilters";
-import type { CourseFilterOption } from "../../types/database";
+import type { CourseFilter, CourseFilterOption } from "../../types/database";
 
 type CourseFiltersProps = {
+  filters?: CourseFilter[];
   keyword: string;
   setKeyword: Dispatch<SetStateAction<string>>;
 
@@ -82,6 +83,7 @@ function FilterSelect({
 }
 
 export default function CourseFilters({
+  filters,
   keyword,
   setKeyword,
   professorKeyword,
@@ -90,11 +92,11 @@ export default function CourseFilters({
   setSelectedFilters,
   onReset,
 }: CourseFiltersProps) {
-  const [activeFilterId, setActiveFilterId] = useState<number | null>(
-    null,
-  );
-
-  const courseFilters = createCourseFilters();
+  const courseFilters = filters ?? createCourseFilters();
+  // 버튼 표시와 실제 검색 조건이 항상 같은 상태를 사용한다.
+  const activeFilterId = courseFilters.find(
+    (filter) => !filter.isFixed && selectedFilters[filter.id]?.length,
+  )?.id ?? null;
 
   const handleFilterChange = (
     filterId: number,
@@ -108,18 +110,20 @@ export default function CourseFilters({
 
   const handleReset = () => {
     setSelectedFilters({});
-    setActiveFilterId(null);
     onReset();
   };
 
   const handleFilterToggle = (filterId: number) => {
-    if (activeFilterId === filterId) {
-      setActiveFilterId(null);
-      return;
-    }
-
-    setSelectedFilters({ [filterId]: [0] });
-    setActiveFilterId(filterId);
+    setSelectedFilters((prev) => {
+      const next = { ...prev };
+      // 분류를 해제하거나 전환할 때 하위 조건도 함께 제거한다.
+      // 학년, 요일, 수업 형태 등 독립적인 조건은 유지한다.
+      courseFilters.filter((filter) => !filter.isFixed).forEach((filter) => {
+        delete next[filter.id];
+      });
+      if (!prev[filterId]?.length) next[filterId] = [0];
+      return next;
+    });
   };
 
   const dynamicFilters = courseFilters.filter(
@@ -162,6 +166,7 @@ export default function CourseFilters({
             <button
               key={filter.id}
               type="button"
+              aria-pressed={activeFilterId === filter.id}
               className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${activeFilterId === filter.id
                   ? "border-[#7658e9] bg-[#7658e9] text-white"
                   : "border-[#dddfe6] bg-white text-[#777a89] hover:bg-[#fafafd]"

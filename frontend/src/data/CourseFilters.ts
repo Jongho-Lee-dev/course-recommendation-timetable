@@ -126,7 +126,7 @@ const createDynamicOptions = (
   return options;
 };
 
-export const createCourseFilters = (): CourseFilter[] => {
+export const createCourseFilters = (courses: CourseListItem[] = mockCourses): CourseFilter[] => {
   const categories = mockFilterCategories;
   const childrenByParent = new Map<number, FilterCategory[]>();
 
@@ -173,7 +173,7 @@ export const createCourseFilters = (): CourseFilter[] => {
   return categories
     .filter((category) => category.parentId === undefined)
     .map((category) => {
-      const matchingCourses = mockCourses.filter((course) =>
+      const matchingCourses = courses.filter((course) =>
         matchesCourseFilter(course, category),
       );
       const options = (childrenByParent.get(category.id) ?? []).map(
