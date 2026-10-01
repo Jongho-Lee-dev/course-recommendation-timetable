@@ -1,4 +1,5 @@
 import AdminCourses from '../components/course/AdminCourses';
+import RegistrationSettings from "../components/course/RegistrationSettings";
 import { useState } from "react";
 import { BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
 import { departments } from "../data/departments";
@@ -152,7 +153,7 @@ export default function AdminPage() {
                           type="button"
                           disabled={departmentDraft !== null}
                           onClick={(event) => {
-                            // 수정 클릭이 새로 렌더링된 저장 버튼의 submit으로 이어지지 않도록 한다.
+                        
                             event.preventDefault();
                             setDepartmentDraft({ ...dept });
                           }}
@@ -174,16 +175,9 @@ export default function AdminPage() {
             <AdminCourses courses={courseList} departments={departmentList} onChange={setCourseList} />
           )}
 
-          {selectCategory === "수강신청 설정" && (
-            <div>
-              <h2 className="!mb-4 border-b border-[#ececf0] pb-4 !text-sm !font-bold">수강신청 설정하기</h2>
-              <div className="flex flex-col items-center rounded-xl border border-dashed border-[#d9d9e2] bg-[#fafafd] px-5 py-12 text-center">
-                <div className="mb-3 rounded-xl bg-[#f0edff] p-3 text-[#7658e9]"><Settings2 size={24} aria-hidden="true" /></div>
-                <p className="text-xs font-semibold text-[#454652]">수강신청 설정 준비 중</p>
-                <p className="mt-2 text-[11px] leading-6 text-[#858796]">수강신청 기간과 신청 기준을 관리할 기능이 추가될 예정입니다.</p>
-              </div>
-            </div>
-          )}
+          <div hidden={selectCategory !== "수강신청 설정"}>
+            <RegistrationSettings />
+          </div>
         </div>
       </section>
       </div>

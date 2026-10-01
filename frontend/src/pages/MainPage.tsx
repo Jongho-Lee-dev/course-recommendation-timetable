@@ -13,9 +13,11 @@ import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
 import CourseSearch from "../components/course/CourseSearch";
 import { useNavigate } from "react-router-dom";
+import { useRegistrationStatus } from "../hooks/useRegistrationStatus";
 
 export default function MainPage() {
   const navigate = useNavigate();
+  const { status, statusLabel, remaining, remainingLabel } = useRegistrationStatus();
 
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
@@ -90,18 +92,18 @@ export default function MainPage() {
               수강 신청 현황
             </span>
 
-            <strong className="mt-1 block text-xs">
-              진행 중
+            <strong role="status" className={`mt-1 block text-xs ${status === "open" ? "text-emerald-700" : status === "scheduled" ? "text-[#7658e9]" : "text-[#777985]"}`}>
+              {statusLabel}
             </strong>
           </div>
 
           <div className="min-w-0 rounded-lg border border-[#e4e5eb] bg-white px-3 py-2.5">
             <span className="block text-[9px] text-[#9699a6]">
-              남은 시간
+              {remainingLabel}
             </span>
 
-            <strong className="mt-1 block text-xs">
-              01:25:34
+            <strong className="mt-1 block text-xs tabular-nums">
+              {remaining}
             </strong>
           </div>
 

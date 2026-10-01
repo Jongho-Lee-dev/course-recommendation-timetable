@@ -1,5 +1,4 @@
 // 과목 자체의 기본 정보
-// 관리자 설정으로 분류명을 추가할 수 있도록 자유 문자열로 둔다.
 export type CourseType = string;
 
 export interface Course {
