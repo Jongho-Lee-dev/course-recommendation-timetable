@@ -1,0 +1,141 @@
+import { useMemo, useState } from "react";
+import { BookOpen, Plus } from "lucide-react";
+import type { CourseListItem, Department } from "../../types/database";
+import { createCourseFilters } from "../../data/CourseFilters";
+import { filterCourses } from "../../data/filterCourses";
+import CourseFilters from "./CourseFilters";
+
+const inputClass = "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
+const buttonClass = "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]";
+const primaryClass = `${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6]`;
+const textFields = [
+  ["courseCode", "학수번호"], ["title", "과목명"], ["category", "구분"],
+  ["courseType", "이수구분"], ["sectionNo", "분반"], ["professorName", "담당교수"],
+  ["generalEducationArea", "교양 영역"], ["generalEducationElectiveArea", "선택 교양 영역"],
+] as const;
+const numberFields = [["credit", "학점", 0], ["capacity", "정원", 1], ["targetGrade", "대상학년", 1]] as const;
+
+function CourseForm({ course, departments, onSave, onCancel }: {
+  course: CourseListItem;
+  departments: Department[];
+  onSave: (course: CourseListItem) => void;
+  onCancel: () => void;
+}) {
+  const [draft, setDraft] = useState<CourseListItem>(() => structuredClone(course));
+  const [error, setError] = useState("");
+  return (
+    <form className="space-y-4 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4" onSubmit={(event) => {
+      event.preventDefault();
+      if ([draft.courseCode, draft.title, draft.category, draft.professorName, draft.sectionNo].some((value) => !value.trim())) {
+        setError("학수번호, 과목명, 구분, 분반, 담당교수를 입력하세요."); return;
+      }
+      if (!draft.departmentId) { setError("소속 학과를 선택하세요."); return; }
+      if (!draft.isOnline && (draft.schedules.length === 0 || draft.schedules.some((schedule) => schedule.endPeriod < schedule.startPeriod || !schedule.classroom.trim()))) {
+        setError("강의 시간을 추가하고 종료 교시와 강의실을 확인하세요."); return;
+      }
+      onSave({ ...draft, courseCode: draft.courseCode.trim(), title: draft.title.trim(), professorName: draft.professorName.trim(), category: draft.category.trim(), sectionNo: draft.sectionNo.trim(), schedules: draft.isOnline ? [] : draft.schedules });
+    }}>
+      <div className="grid gap-4 min-[701px]:grid-cols-2">
+        {textFields.map(([key, label]) => (
+          <label key={key} className="space-y-1.5 text-[#5d6070]">
+            <span className="block font-semibold">{label}</span>
+            <input className={inputClass} value={draft[key] ?? ""} required={["courseCode", "title", "category", "sectionNo", "professorName"].includes(key)} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} />
+          </label>
+        ))}
+        {numberFields.map(([key, label, min]) => (
+          <label key={key} className="space-y-1.5 text-[#5d6070]">
+            <span className="block font-semibold">{label}</span>
+            <input className={inputClass} type="number" min={min} step={1} required value={draft[key]} onChange={(event) => setDraft({ ...draft, [key]: Number(event.target.value) })} />
+          </label>
+        ))}
+        <label className="space-y-1.5 text-[#5d6070]">
+          <span className="block font-semibold">소속 학과</span>
+          <select className={inputClass} required value={draft.departmentId || ""} onChange={(event) => {
+            const department = departments.find((item) => item.id === Number(event.target.value));
+            if (department) setDraft({ ...draft, departmentId: department.id, majorName: department.majorName, facultyName: department.facultyName, collegeName: department.collegeName });
+          }}>
+            <option value="">학과 선택</option>
+            {!departments.some((item) => item.id === draft.departmentId) && draft.departmentId !== 0 && <option value={draft.departmentId}>{draft.majorName}</option>}
+            {departments.map((department) => <option key={department.id} value={department.id}>{[department.collegeName, department.facultyName, department.majorName].filter(Boolean).join(" / ")}</option>)}
+          </select>
+        </label>
+        <label className="space-y-1.5 text-[#5d6070]">
+          <span className="block font-semibold">수업형태</span>
+          <select className={inputClass} value={String(draft.isOnline)} onChange={(event) => setDraft({ ...draft, isOnline: event.target.value === "true" })}>
+            <option value="false">오프라인</option><option value="true">온라인</option>
+          </select>
+        </label>
+      </div>
+      <div className="flex items-center justify-between gap-2 border-t border-[#e4e5eb] pt-4">
+        <strong>강의 시간</strong>
+        {!draft.isOnline && <button type="button" className={buttonClass} onClick={() => setDraft({ ...draft, schedules: [...draft.schedules, { id: Math.max(0, ...draft.schedules.map((item) => item.id)) + 1, openCourseId: draft.id, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] })}>시간 추가하기</button>}
+      </div>
+      {draft.isOnline ? <p className="text-[#858796]">온라인 강의는 강의 시간이 없습니다.</p> : draft.schedules.map((schedule) => (
+        <div key={schedule.id} className="grid items-end gap-3 rounded-lg border border-[#e4e5eb] bg-white p-3 min-[501px]:grid-cols-2 min-[1101px]:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+          <label>요일<select className={inputClass} value={schedule.dayOfWeek} onChange={(event) => setDraft({ ...draft, schedules: draft.schedules.map((item) => item.id === schedule.id ? { ...item, dayOfWeek: event.target.value } : item) })}>{["월", "화", "수", "목", "금", "토", "일"].map((day) => <option key={day}>{day}</option>)}</select></label>
+          {(["startPeriod", "endPeriod", "classroom"] as const).map((key) => <label key={key}>{key === "startPeriod" ? "시작 교시" : key === "endPeriod" ? "종료 교시" : "강의실"}<input className={inputClass} required type={key === "classroom" ? "text" : "number"} min={key === "endPeriod" ? schedule.startPeriod : 1} step={1} value={schedule[key]} onChange={(event) => setDraft({ ...draft, schedules: draft.schedules.map((item) => item.id === schedule.id ? { ...item, [key]: key === "classroom" ? event.target.value : Number(event.target.value) } : item) })} /></label>)}
+          <button type="button" className={buttonClass} onClick={() => setDraft({ ...draft, schedules: draft.schedules.filter((item) => item.id !== schedule.id) })}>삭제하기</button>
+        </div>
+      ))}
+      {error && <p role="alert" className="text-red-600">{error}</p>}
+      <div className="flex justify-end gap-2"><button type="button" className={buttonClass} onClick={onCancel}>취소</button><button type="submit" className={primaryClass}>저장하기</button></div>
+    </form>
+  );
+}
+
+export default function AdminCourses({ courses, departments, onChange }: {
+  courses: CourseListItem[];
+  departments: Department[];
+  onChange: (courses: CourseListItem[]) => void;
+}) {
+  const [mode, setMode] = useState<"choose" | "add" | "edit">("choose");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [keyword, setKeyword] = useState("");
+  const [professorKeyword, setProfessorKeyword] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<Record<number, number[]>>({});
+  const filters = useMemo(() => createCourseFilters(courses), [courses]);
+  const filtered = filterCourses(courses, filters, keyword, professorKeyword, selectedFilters);
+  const resetFilters = () => { setKeyword(""); setProfessorKeyword(""); setSelectedFilters({}); };
+  const newId = Math.max(0, ...courses.map((course) => course.id)) + 1;
+  const newCourse: CourseListItem = { id: newId, courseCode: "", title: "", category: "전공", courseType: "", credit: 3, sectionNo: "01", professorName: "", capacity: 40, targetGrade: 1, departmentId: 0, majorName: "", isOnline: false, schedules: [{ id: 1, openCourseId: newId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] };
+
+  if (mode === "choose") return (
+    <div>
+      <h2 className="!mb-4 !text-sm !font-bold">과목 관리</h2>
+      <div className="grid grid-cols-2 gap-3 min-[701px]:gap-4">
+        {([{ mode: "add", title: "과목 추가", description: "새로운 과목과 강의 시간을 등록합니다.", icon: Plus }, { mode: "edit", title: "과목 수정", description: "필터로 과목을 찾아 정보를 수정합니다.", icon: BookOpen }] as const).map(({ mode: next, title, description, icon: Icon }) => (
+          <button key={next} type="button" onClick={() => setMode(next)} className="flex cursor-pointer flex-col items-start gap-3 rounded-xl border border-[#e3e4e9] bg-[#fafafd] p-4 text-left transition hover:border-[#a99aed] hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] min-[701px]:p-7">
+            <span className="rounded-xl bg-[#f0edff] p-3 text-[#7658e9]"><Icon size={24} /></span>
+            <strong className="text-sm">{title}</strong><span className="text-[11px] leading-5 text-[#858796]">{description}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
+        <h2 className="!mb-0 !text-sm !font-bold">{mode === "add" ? "과목 추가하기" : "과목 수정하기"}</h2>
+        <button type="button" className={buttonClass} onClick={() => { setMode("choose"); setEditingId(null); }}>선택 화면으로</button>
+      </div>
+      {mode === "add" ? <CourseForm key="new" course={newCourse} departments={departments} onCancel={() => setMode("choose")} onSave={(course) => { onChange([...courses, course]); resetFilters(); setMode("edit"); }} /> : (
+        <>
+          <CourseFilters filters={filters} keyword={keyword} setKeyword={setKeyword} professorKeyword={professorKeyword} setProfessorKeyword={setProfessorKeyword} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} onReset={resetFilters} />
+          <p className="mb-3 text-[#858796]">총 {filtered.length}개 과목</p>
+          {filtered.map((course) => (
+            <div key={course.id} className="mb-3 overflow-hidden rounded-lg border border-[#dddfe6]">
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="flex flex-wrap gap-x-5 gap-y-2 text-[#5d6070]"><span>{course.courseCode}</span><strong>{course.title}</strong><span>{course.professorName}</span><span>{course.credit}학점</span></div>
+                <div className="flex gap-2"><button type="button" className={buttonClass} onClick={() => setEditingId(editingId === course.id ? null : course.id)}>{editingId === course.id ? "닫기" : "수정하기"}</button><button type="button" className={`${buttonClass} text-red-600`} onClick={() => { onChange(courses.filter((item) => item.id !== course.id)); setSelectedFilters({}); if (editingId === course.id) setEditingId(null); }}>삭제하기</button></div>
+              </div>
+              {editingId === course.id && <CourseForm key={course.id} course={course} departments={departments} onCancel={() => setEditingId(null)} onSave={(saved) => { onChange(courses.map((item) => item.id === saved.id ? saved : item)); setSelectedFilters({}); setEditingId(null); }} />}
+            </div>
+          ))}
+          {filtered.length === 0 && <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">검색 조건에 맞는 과목이 없습니다.</p>}
+        </>
+      )}
+      <p className="mt-3 text-[10px] text-[#858796]">변경 사항은 현재 관리자 화면에 적용되며, 새로고침하면 초기화됩니다.</p>
+    </div>
+  );
+}
