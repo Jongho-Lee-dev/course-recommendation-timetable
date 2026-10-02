@@ -1,17 +1,25 @@
 import { useUserStore } from "../../store/userStore";
 import type { CourseListItem } from "../../types/database";
 import { toast } from "sonner";
+import { Heart } from "lucide-react";
+import { findConflict, getTotalCredits } from "../../utils/courseRules";
 
 interface CourseTableProps {
   courses: CourseListItem[];
   selected: CourseListItem[];
   toggleCourse: (course: CourseListItem) => void;
+  favorites?: CourseListItem[];
+  toggleFavorite?: (course: CourseListItem) => void;
+  onCourseClick?: (course: CourseListItem) => void;
 }
 
 export default function CourseTable({
   courses,
   selected,
   toggleCourse,
+  favorites = [],
+  toggleFavorite,
+  onCourseClick,
 }: CourseTableProps) {
   const user = useUserStore((state) => state.user);
 
@@ -25,40 +33,22 @@ export default function CourseTable({
       return;
     }
 
-    if (!course.isOnline) {
-      const conflictCourse = selected.find((selectedCourse) =>
-        selectedCourse.schedules.some((selectedSchedule) =>
-          course.schedules.some(
-            (schedule) =>
-              selectedSchedule.dayOfWeek === schedule.dayOfWeek &&
-              selectedSchedule.startPeriod <= schedule.endPeriod &&
-              selectedSchedule.endPeriod >= schedule.startPeriod,
-          ),
-        ),
-      );
+    const conflictCourse = selected.find((selectedCourse) => findConflict(selectedCourse, course));
 
-      if (conflictCourse) {
-        toast.error(
-          `'${conflictCourse.title}' 강의와 시간이 겹칩니다.`,
-        );
-        return;
-      }
+    if (conflictCourse) {
+      const conflict = findConflict(conflictCourse, course);
+      toast.error(
+        `'${conflictCourse.title}'와 ${conflict ? `${conflict.detail.day} ${conflict.detail.firstTime}` : "시간"}이 겹칩니다.`,
+      );
+      return;
     }
 
-    const totalCredits = selected.reduce(
-      (sum, item) => sum + item.credit,
-      0,
-    );
+    const totalCredits = getTotalCredits(selected);
 
-    if (
-      user &&
-      totalCredits + course.credit > user.maxCredits
-    ) {
-      const exceededCredits =
-        totalCredits + course.credit - user.maxCredits;
-
+    if (totalCredits + course.credit > (user?.maxCredits ?? 18)) {
+      const exceededCredits = totalCredits + course.credit - (user?.maxCredits ?? 18);
       toast.error(
-        `'${course.title}' 신청 시 학점을 ${exceededCredits}학점 초과합니다. (최대 ${user.maxCredits}학점)`,
+        `'${course.title}' 추가 시 ${exceededCredits}학점 초과합니다. (최대 ${user?.maxCredits ?? 18}학점)`,
       );
       return;
     }
@@ -68,13 +58,14 @@ export default function CourseTable({
 
   return (
     <div className="overflow-x-auto border-t border-[#ececf0]">
-      <div className="grid min-w-[600px] grid-cols-[1.45fr_0.8fr_1.15fr_0.42fr_0.65fr_44px] items-center gap-2 bg-[#fafafd] px-5 py-2.5 text-[8px] text-[#9a9daa]">
+      <div className="grid min-w-[640px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_44px_36px] items-center gap-2 bg-[#fafafd] px-5 py-2.5 text-[8px] text-[#9a9daa]">
         <span>강좌명</span>
         <span>교수명</span>
         <span>요일/시간/강의실</span>
         <span>학점</span>
         <span>정원</span>
         <span>신청</span>
+        <span>관심</span>
       </div>
 
       <div className="max-h-[470px] overflow-y-auto">
@@ -93,14 +84,14 @@ export default function CourseTable({
               .join(", ");
           return (
             <div
-              className={`grid min-h-[47px] min-w-[600px] grid-cols-[1.45fr_0.8fr_1.15fr_0.42fr_0.65fr_44px] items-center gap-2 border-t border-[#f0f0f3] px-5 py-2 text-[9px] transition hover:bg-[#fafafd] ${isSelected ? "bg-[#faf8ff]" : ""
+              className={`grid min-h-[47px] min-w-[640px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_44px_36px] items-center gap-2 border-t border-[#f0f0f3] px-5 py-2 text-[9px] transition hover:bg-[#fafafd] ${isSelected ? "bg-[#faf8ff]" : ""
                 }`}
               key={course.id}
             >
               <div>
-                <b className="block text-[10px]">
+                <button type="button" onClick={() => onCourseClick?.(course)} className="block text-left text-[10px] font-bold hover:text-[#7658e9]">
                   {course.title}
-                </b>
+                </button>
                 <small className="mt-1 block text-[8px] text-[#9b9eab]">
                   {course.courseCode} · {course.courseType ?? course.category}
                 </small>
@@ -119,12 +110,24 @@ export default function CourseTable({
                   ? "bg-[#f0eff6] text-[#777a88]"
                   : "bg-[#7658e9] text-white"
                   }`}
-                onClick={() =>
-                  handleToggleCourse(course)
-                }
+                onClick={() => handleToggleCourse(course)}
               >
                 {isSelected ? "취소" : "신청"}
               </button>
+
+              {toggleFavorite ? (
+                <button
+                  type="button"
+                  aria-label={`${course.title} 관심강좌`}
+                  onClick={() => toggleFavorite(course)}
+                  className={`grid h-7 w-7 place-items-center rounded-md transition ${favorites.some((item) => item.id === course.id)
+                    ? "bg-[#eee9ff] text-[#7658e9]"
+                    : "bg-[#f5f5f8] text-[#a0a2ad] hover:text-[#7658e9]"
+                    }`}
+                >
+                  <Heart size={12} fill={favorites.some((item) => item.id === course.id) ? "currentColor" : "none"} />
+                </button>
+              ) : <span />}
             </div>
           );
         })}
