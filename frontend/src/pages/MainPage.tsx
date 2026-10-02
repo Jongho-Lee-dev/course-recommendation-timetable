@@ -14,9 +14,13 @@ import CourseRegistrationList from "../components/course/CourseRegistrationList"
 import CourseSearch from "../components/course/CourseSearch";
 import { useNavigate } from "react-router-dom";
 import { useRegistrationStatus } from "../hooks/useRegistrationStatus";
+import { useUserStore } from "../store/userStore";
+import { isExcludedFromCourse } from "../data/courseEligibility";
+import { toast } from "sonner";
 
 export default function MainPage() {
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
   const { status, statusLabel, remaining, remainingLabel } = useRegistrationStatus();
 
   const [keyword, setKeyword] = useState("");
@@ -27,7 +31,7 @@ export default function MainPage() {
   >({});
 
   const [selected, setSelected] = useState<CourseListItem[]>(
-    mockCourses.slice(0, 2),
+    () => mockCourses.slice(0, 2).filter((course) => !isExcludedFromCourse(course, user)),
   );
 
   const aiMessage = "AI 추천 기능은 현재 보류 중이며, 추천 페이지 이동만 먼저 연결했습니다.";
@@ -70,6 +74,11 @@ export default function MainPage() {
           (item) => item.id !== course.id,
         ),
       );
+      return;
+    }
+
+    if (isExcludedFromCourse(course, user)) {
+      toast.error("소속 전공이 수강 제외 대상이므로 신청할 수 없습니다.");
       return;
     }
 

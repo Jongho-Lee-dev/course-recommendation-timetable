@@ -1,6 +1,12 @@
 import { useUserStore } from "../../store/userStore";
 import type { CourseListItem } from "../../types/database";
 import { toast } from "sonner";
+import { departments } from "../../data/departments";
+import { isExcludedFromCourse } from "../../data/courseEligibility";
+
+const departmentNames = new Map(
+  departments.map((department) => [department.id, department.majorName]),
+);
 
 interface CourseTableProps {
   courses: CourseListItem[];
@@ -22,6 +28,11 @@ export default function CourseTable({
 
     if (isSelected) {
       toggleCourse(course);
+      return;
+    }
+
+    if (isExcludedFromCourse(course, user)) {
+      toast.error("소속 전공이 수강 제외 대상이므로 신청할 수 없습니다.");
       return;
     }
 
@@ -82,6 +93,9 @@ export default function CourseTable({
           const isSelected = selected.some(
             (item) => item.id === course.id,
           );
+          const excludedDepartments = [...new Set(course.excludedDepartmentIds ?? [])]
+            .map((id) => departmentNames.get(id) ?? `학과 ID ${id}`);
+          const isExcluded = isExcludedFromCourse(course, user);
 
           const scheduleText = course.isOnline
             ? "온라인 강의"
@@ -104,6 +118,9 @@ export default function CourseTable({
                 <small className="mt-1 block text-[8px] text-[#9b9eab]">
                   {course.courseCode} · {course.courseType ?? course.category}
                 </small>
+                <small className={`mt-1 block break-words text-[8px] leading-relaxed ${excludedDepartments.length > 0 ? "text-amber-700" : "text-[#9b9eab]"}`}>
+                  수강 제외 대상: {excludedDepartments.length > 0 ? excludedDepartments.join(", ") : "없음"}
+                </small>
               </div>
               <span>{course.professorName}</span>
               <span>{scheduleText}</span>
@@ -115,7 +132,9 @@ export default function CourseTable({
               </span>
 
               <button
-                className={`rounded-md px-1.5 py-1.5 text-[8px] ${isSelected
+                disabled={isExcluded && !isSelected}
+                title={isExcluded ? "소속 전공이 수강 제외 대상입니다." : undefined}
+                className={`rounded-md px-1.5 py-1.5 text-[8px] disabled:cursor-not-allowed disabled:bg-[#ececf0] disabled:text-[#777a88] ${isSelected
                   ? "bg-[#f0eff6] text-[#777a88]"
                   : "bg-[#7658e9] text-white"
                   }`}
@@ -123,7 +142,7 @@ export default function CourseTable({
                   handleToggleCourse(course)
                 }
               >
-                {isSelected ? "취소" : "신청"}
+                {isSelected ? "취소" : isExcluded ? "제외" : "신청"}
               </button>
             </div>
           );

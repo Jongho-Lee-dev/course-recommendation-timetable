@@ -8,6 +8,7 @@ export const mockCourses: CourseListItem[] = [
   {
     id: 1,
     courseCode: "CS201",
+    excludedDepartmentIds: [3, 4],
     title: "자료구조",
     category: "전공",
     courseType: "전공 필수",
@@ -43,6 +44,7 @@ export const mockCourses: CourseListItem[] = [
   {
     id: 2,
     courseCode: "SW201",
+    excludedDepartmentIds: [5],
     title: "소프트웨어공학",
     category: "전공",
     courseType: "전공 선택",
@@ -70,6 +72,7 @@ export const mockCourses: CourseListItem[] = [
   {
     id: 3,
     courseCode: "IS301",
+    excludedDepartmentIds: [],
     title: "정보보안개론",
     category: "전공",
     courseType: "전공 필수",
@@ -344,6 +347,7 @@ export const mockCourses: CourseListItem[] = [
   {
     id: 13,
     courseCode: "GE304",
+    excludedDepartmentIds: [1, 2],
     title: "디지털 시대의 이해",
     category: "교양",
     courseType: "교양 필수",
@@ -395,6 +399,7 @@ export const mockCourses: CourseListItem[] = [
   {
     id: 14,
     courseCode: "MD201",
+    excludedDepartmentIds: [1],
     title: "인공지능 기초",
     category: "마이크로디그리",
     courseType: "마이크로",
