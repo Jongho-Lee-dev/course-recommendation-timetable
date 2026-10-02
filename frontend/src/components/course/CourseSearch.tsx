@@ -20,6 +20,8 @@ type CourseSearchProps = {
   courses: CourseListItem[];
   selected: CourseListItem[];
   toggleCourse: (course: CourseListItem) => void;
+  favorites: CourseListItem[];
+  toggleFavorite: (course: CourseListItem) => void;
 };
 
 export default function CourseSearch({
@@ -33,6 +35,8 @@ export default function CourseSearch({
   courses,
   selected,
   toggleCourse,
+  favorites,
+  toggleFavorite,
 }: CourseSearchProps) {
   return (
     <>
@@ -60,6 +64,8 @@ export default function CourseSearch({
         courses={courses}
         selected={selected}
         toggleCourse={toggleCourse}
+        favorites={favorites}
+        toggleFavorite={toggleFavorite}
       />
     </>
   );

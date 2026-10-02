@@ -33,6 +33,8 @@ export default function MainPage() {
 
   const selected = useCourseStore((state) => state.selected);
   const toggleSelected = useCourseStore((state) => state.toggleSelected);
+  const favorites = useCourseStore((state) => state.favorites);
+  const toggleFavorite = useCourseStore((state) => state.toggleFavorite);
 
   const user = useUserStore((state) => state.user);
 
@@ -162,6 +164,8 @@ export default function MainPage() {
             courses={filteredCourses}
             selected={selected}
             toggleCourse={toggleCourse}
+            favorites={favorites}
+            toggleFavorite={toggleFavorite}
           />
         </section>
 

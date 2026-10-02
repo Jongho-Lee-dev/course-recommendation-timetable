@@ -11,9 +11,11 @@ export default function MainLayout() {
         <Sidebar />
         <div className="min-w-0 flex-1">
           <Outlet />
-          <Footer />
+
         </div>
+
       </div>
+      <Footer />
     </div>
   );
 }
