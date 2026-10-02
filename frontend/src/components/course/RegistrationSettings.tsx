@@ -29,7 +29,7 @@ export default function RegistrationSettings() {
       setError(immediate ? "종료 날짜와 시간을 입력해주세요." : "시작과 종료 날짜·시간을 모두 입력해주세요.");
       return;
     }
-    // 입력 시간은 브라우저의 지역 설정과 무관하게 한국 시간으로 해석한다.
+
     const startsAt = immediate ? currentTime : Date.parse(`${fields.startDate}T${fields.startTime}:00+09:00`);
     const endsAt = Date.parse(`${fields.endDate}T${fields.endTime}:00+09:00`);
     if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt)) {
