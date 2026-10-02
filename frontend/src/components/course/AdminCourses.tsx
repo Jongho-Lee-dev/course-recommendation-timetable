@@ -5,6 +5,7 @@ import { createCourseFilters } from "../../data/CourseFilters";
 import { filterCourses } from "../../data/filterCourses";
 import { getClassificationPath, withClassificationPath } from "../../data/courseClassification";
 import ClassificationEditor from "./ClassificationEditor";
+import DepartmentTreeSelect from "./DepartmentTreeSelect";
 import CourseFilters from "./CourseFilters";
 
 const inputClass = "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
@@ -85,6 +86,12 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
           </select>
         </label>
       </div>
+      <fieldset className="min-w-0 space-y-3 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4">
+        <legend className="px-2 font-semibold">수강 제외 대상 (선택)</legend>
+        <p className="text-[#858796]">대학·학부를 선택하면 현재 소속된 학과가 모두 선택됩니다. 학과별로 선택을 해제할 수 있으며, 선택하지 않으면 제외 대상이 없습니다.</p>
+        <DepartmentTreeSelect departments={departments} selectedIds={draft.excludedDepartmentIds ?? []}
+          onChange={(excludedDepartmentIds) => setDraft({ ...draft, excludedDepartmentIds })} />
+      </fieldset>
       {!draft.isOnline && <>
       <div className="flex items-center justify-between gap-2 border-t border-[#e4e5eb] pt-4">
         <strong>강의 시간</strong>
