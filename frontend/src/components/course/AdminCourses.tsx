@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
-import type { CourseListItem, Department } from "../../types/database";
+import type { CourseListItem, CourseSchedule, Department } from "../../types/database";
 import { createCourseFilters } from "../../data/CourseFilters";
 import { filterCourses } from "../../data/filterCourses";
 import CourseFilters from "./CourseFilters";
@@ -15,13 +15,21 @@ const textFields = [
 ] as const;
 const numberFields = [["credit", "학점", 0], ["capacity", "정원", 1], ["targetGrade", "대상학년", 1]] as const;
 
+function createSchedule(openCourseId: number, id = 1): CourseSchedule {
+  return { id, openCourseId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" };
+}
+
 function CourseForm({ course, departments, onSave, onCancel }: {
   course: CourseListItem;
   departments: Department[];
   onSave: (course: CourseListItem) => void;
   onCancel: () => void;
 }) {
-  const [draft, setDraft] = useState<CourseListItem>(() => structuredClone(course));
+  const [draft, setDraft] = useState<CourseListItem>(() => {
+    const initial = structuredClone(course);
+    if (!initial.isOnline && initial.schedules.length === 0) initial.schedules = [createSchedule(initial.id)];
+    return initial;
+  });
   const [error, setError] = useState("");
   return (
     <form className="space-y-4 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4" onSubmit={(event) => {
@@ -61,22 +69,29 @@ function CourseForm({ course, departments, onSave, onCancel }: {
         </label>
         <label className="space-y-1.5 text-[#5d6070]">
           <span className="block font-semibold">수업형태</span>
-          <select className={inputClass} value={String(draft.isOnline)} onChange={(event) => setDraft({ ...draft, isOnline: event.target.value === "true" })}>
-            <option value="false">오프라인</option><option value="true">온라인</option>
+          <select className={inputClass} value={draft.isOnline ? "online" : "offline"} onChange={(event) => {
+            const isOnline = event.target.value === "online";
+            setDraft({ ...draft, isOnline, schedules: !isOnline && draft.schedules.length === 0 ? [createSchedule(draft.id)] : draft.schedules });
+            setError("");
+          }}>
+            <option value="offline">오프라인</option><option value="online">온라인</option>
           </select>
         </label>
       </div>
+      {!draft.isOnline && <>
       <div className="flex items-center justify-between gap-2 border-t border-[#e4e5eb] pt-4">
         <strong>강의 시간</strong>
-        {!draft.isOnline && <button type="button" className={buttonClass} onClick={() => setDraft({ ...draft, schedules: [...draft.schedules, { id: Math.max(0, ...draft.schedules.map((item) => item.id)) + 1, openCourseId: draft.id, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] })}>시간 추가하기</button>}
+        <button type="button" className={buttonClass} onClick={() => setDraft({ ...draft, schedules: [...draft.schedules, createSchedule(draft.id, Math.max(0, ...draft.schedules.map((item) => item.id)) + 1)] })}>시간 추가하기</button>
       </div>
-      {draft.isOnline ? <p className="text-[#858796]">온라인 강의는 강의 시간이 없습니다.</p> : draft.schedules.map((schedule) => (
+      <p className="text-[#858796]">오프라인 강의는 강의 시간을 최소 1개 입력해야 합니다.</p>
+      {draft.schedules.map((schedule) => (
         <div key={schedule.id} className="grid items-end gap-3 rounded-lg border border-[#e4e5eb] bg-white p-3 min-[501px]:grid-cols-2 min-[1101px]:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
           <label>요일<select className={inputClass} value={schedule.dayOfWeek} onChange={(event) => setDraft({ ...draft, schedules: draft.schedules.map((item) => item.id === schedule.id ? { ...item, dayOfWeek: event.target.value } : item) })}>{["월", "화", "수", "목", "금", "토", "일"].map((day) => <option key={day}>{day}</option>)}</select></label>
           {(["startPeriod", "endPeriod", "classroom"] as const).map((key) => <label key={key}>{key === "startPeriod" ? "시작 교시" : key === "endPeriod" ? "종료 교시" : "강의실"}<input className={inputClass} required type={key === "classroom" ? "text" : "number"} min={key === "endPeriod" ? schedule.startPeriod : 1} step={1} value={schedule[key]} onChange={(event) => setDraft({ ...draft, schedules: draft.schedules.map((item) => item.id === schedule.id ? { ...item, [key]: key === "classroom" ? event.target.value : Number(event.target.value) } : item) })} /></label>)}
-          <button type="button" className={buttonClass} onClick={() => setDraft({ ...draft, schedules: draft.schedules.filter((item) => item.id !== schedule.id) })}>삭제하기</button>
+          <button type="button" className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-40`} disabled={draft.schedules.length <= 1} onClick={() => setDraft({ ...draft, schedules: draft.schedules.length > 1 ? draft.schedules.filter((item) => item.id !== schedule.id) : draft.schedules })}>삭제하기</button>
         </div>
       ))}
+      </>}
       {error && <p role="alert" className="text-red-600">{error}</p>}
       <div className="flex justify-end gap-2"><button type="button" className={buttonClass} onClick={onCancel}>취소</button><button type="submit" className={primaryClass}>저장하기</button></div>
     </form>
