@@ -8,6 +8,8 @@ import { getClassificationPath, withClassificationPath } from "../../data/course
 import ClassificationEditor from "./ClassificationEditor";
 import DepartmentTreeSelect from "./DepartmentTreeSelect";
 import CourseFilters from "./CourseFilters";
+import SyllabusLink, { PdfLink } from "./SyllabusLink";
+import { useCourseCatalogStore } from "../../store/courseCatalogStore";
 
 const inputClass = "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
 const buttonClass = "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]";
@@ -26,7 +28,7 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
   course: CourseListItem;
   courses: CourseListItem[];
   departments: Department[];
-  onSave: (course: CourseListItem) => void;
+  onSave: (course: CourseListItem, syllabus: File | null) => void;
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<CourseListItem>(() => {
@@ -35,9 +37,14 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
     return initial;
   });
   const [error, setError] = useState("");
+  const savedSyllabus = useCourseCatalogStore((state) => state.syllabi[course.id]);
+  const [syllabus, setSyllabus] = useState<File | null>(savedSyllabus ?? null);
+  const [readingPdf, setReadingPdf] = useState(false);
+  const [fileError, setFileError] = useState("");
   return (
     <form className="space-y-4 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4" onSubmit={(event) => {
       event.preventDefault();
+      if (readingPdf || fileError) return;
       if ([draft.courseCode, draft.title, draft.category, draft.professorName, draft.sectionNo].some((value) => !value.trim())) {
         setError("학수번호, 과목명, 구분, 분반, 담당교수를 입력하세요."); return;
       }
@@ -46,7 +53,7 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
       if (!draft.isOnline && (draft.schedules.length === 0 || draft.schedules.some((schedule) => schedule.endPeriod < schedule.startPeriod || !schedule.classroom.trim()))) {
         setError("강의 시간을 추가하고 종료 교시와 강의실을 확인하세요."); return;
       }
-      onSave({ ...withClassificationPath(draft, getClassificationPath(draft).map((value) => value.trim())), courseType: draft.courseType?.trim() ?? "", courseCode: draft.courseCode.trim(), title: draft.title.trim(), professorName: draft.professorName.trim(), category: draft.category.trim(), sectionNo: draft.sectionNo.trim(), schedules: draft.isOnline ? [] : draft.schedules });
+      onSave({ ...withClassificationPath(draft, getClassificationPath(draft).map((value) => value.trim())), courseType: draft.courseType?.trim() ?? "", courseCode: draft.courseCode.trim(), title: draft.title.trim(), professorName: draft.professorName.trim(), category: draft.category.trim(), sectionNo: draft.sectionNo.trim(), schedules: draft.isOnline ? [] : draft.schedules }, syllabus);
     }}>
       <ClassificationEditor path={getClassificationPath(draft)} courses={[...courses, course]} onChange={(path) => {
         setDraft(withClassificationPath(draft, path));
@@ -87,6 +94,30 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
           </select>
         </label>
       </div>
+      <div className="space-y-2 rounded-lg border border-[#e4e5eb] bg-white p-4">
+        <label className="block space-y-2 font-semibold">
+          <span>강의계획서 (PDF, 선택)</span>
+          <input type="file" accept=".pdf,application/pdf" disabled={readingPdf} className={inputClass} onChange={async (event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            setFileError("");
+            if (!file.name.toLowerCase().endsWith(".pdf")) { setFileError("PDF 파일만 첨부할 수 있습니다."); return; }
+            if (file.size > 20 * 1024 * 1024) { setFileError("20MB 이하의 PDF 파일을 선택하세요."); return; }
+            setReadingPdf(true);
+            try {
+              const header = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
+              if (header !== "%PDF-") { setFileError("올바른 PDF 파일을 선택하세요."); return; }
+              setSyllabus(file);
+            } catch { setFileError("파일을 읽을 수 없습니다. 다시 선택하세요."); }
+            finally { setReadingPdf(false); }
+          }} />
+        </label>
+        <p className="text-[10px] text-[#858796]">최대 20MB · 다른 파일을 선택하면 저장 시 교체됩니다.</p>
+        {readingPdf && <p role="status">PDF 확인 중…</p>}
+        {fileError && <p role="alert" className="text-red-600">{fileError} <button type="button" className={buttonClass} onClick={() => setFileError("")}>선택 취소</button></p>}
+        {syllabus ? <div className="flex flex-wrap items-center gap-3"><PdfLink file={syllabus} /><button type="button" disabled={readingPdf} className={buttonClass} onClick={() => { setSyllabus(null); setFileError(""); }}>첨부 삭제</button></div> : <p className="text-[10px] text-[#858796]">첨부된 강의계획서가 없습니다.</p>}
+      </div>
       <fieldset className="min-w-0 space-y-3 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4">
         <legend className="px-2 font-semibold">수강 제외 대상 (선택)</legend>
         <p className="text-[#858796]">대학·학부를 선택하면 현재 소속된 학과가 모두 선택됩니다. 학과별로 선택을 해제할 수 있으며, 선택하지 않으면 제외 대상이 없습니다.</p>
@@ -108,7 +139,7 @@ function CourseForm({ course, courses, departments, onSave, onCancel }: {
       ))}
       </>}
       {error && <p role="alert" className="text-red-600">{error}</p>}
-      <div className="flex justify-end gap-2"><button type="button" className={buttonClass} onClick={onCancel}>취소</button><button type="submit" className={primaryClass}>저장하기</button></div>
+      <div className="flex justify-end gap-2"><button type="button" className={buttonClass} onClick={onCancel}>취소</button><button type="submit" disabled={readingPdf || !!fileError} className={`${primaryClass} disabled:opacity-50`}>저장하기</button></div>
     </form>
   );
 }
@@ -119,6 +150,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
   onChange: (courses: CourseListItem[]) => void;
 }) {
   const [mode, setMode] = useState<"choose" | "add" | "edit">("choose");
+  const setSyllabus = useCourseCatalogStore((state) => state.setSyllabus);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("default");
@@ -150,7 +182,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
         <h2 className="!mb-0 !text-sm !font-bold">{mode === "add" ? "과목 추가하기" : "과목 수정하기"}</h2>
         <button type="button" className={buttonClass} onClick={() => { setMode("choose"); setEditingId(null); }}>선택 화면으로</button>
       </div>
-      {mode === "add" ? <CourseForm key="new" course={newCourse} courses={courses} departments={departments} onCancel={() => setMode("choose")} onSave={(course) => { onChange([...courses, course]); resetFilters(); setMode("edit"); }} /> : (
+      {mode === "add" ? <CourseForm key="new" course={newCourse} courses={courses} departments={departments} onCancel={() => setMode("choose")} onSave={(course, syllabus) => { onChange([...courses, course]); setSyllabus(course.id, syllabus); resetFilters(); setMode("edit"); }} /> : (
         <>
           <CourseFilters filters={filters} keyword={keyword} setKeyword={setKeyword} professorKeyword={professorKeyword} setProfessorKeyword={setProfessorKeyword} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} onReset={resetFilters} sort={sort} setSort={setSort} />
           <p className="mb-3 text-[#858796]">총 {filtered.length}개 과목</p>
@@ -158,15 +190,15 @@ export default function AdminCourses({ courses, departments, onChange }: {
             <div key={course.id} className="mb-3 overflow-hidden rounded-lg border border-[#dddfe6]">
               <div className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div className="flex flex-wrap gap-x-5 gap-y-2 text-[#5d6070]"><span>{course.courseCode}</span><strong>{course.title}</strong><span>{course.professorName}</span><span>{course.credit}학점</span></div>
-                <div className="flex gap-2"><button type="button" className={buttonClass} onClick={() => setEditingId(editingId === course.id ? null : course.id)}>{editingId === course.id ? "닫기" : "수정하기"}</button><button type="button" className={`${buttonClass} text-red-600`} onClick={() => { onChange(courses.filter((item) => item.id !== course.id)); setSelectedFilters({}); if (editingId === course.id) setEditingId(null); }}>삭제하기</button></div>
+                <SyllabusLink courseId={course.id} /><div className="flex gap-2"><button type="button" className={buttonClass} onClick={() => setEditingId(editingId === course.id ? null : course.id)}>{editingId === course.id ? "닫기" : "수정하기"}</button><button type="button" className={`${buttonClass} text-red-600`} onClick={() => { onChange(courses.filter((item) => item.id !== course.id)); setSelectedFilters({}); if (editingId === course.id) setEditingId(null); }}>삭제하기</button></div>
               </div>
-              {editingId === course.id && <CourseForm key={course.id} course={course} courses={courses} departments={departments} onCancel={() => setEditingId(null)} onSave={(saved) => { onChange(courses.map((item) => item.id === saved.id ? saved : item)); setSelectedFilters({}); setEditingId(null); }} />}
+              {editingId === course.id && <CourseForm key={course.id} course={course} courses={courses} departments={departments} onCancel={() => setEditingId(null)} onSave={(saved, syllabus) => { onChange(courses.map((item) => item.id === saved.id ? saved : item)); setSyllabus(saved.id, syllabus); setSelectedFilters({}); setEditingId(null); }} />}
             </div>
           ))}
           {filtered.length === 0 && <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">검색 조건에 맞는 과목이 없습니다.</p>}
         </>
       )}
-      <p className="mt-3 text-[10px] text-[#858796]">변경 사항은 현재 관리자 화면에 적용되며, 새로고침하면 초기화됩니다.</p>
+      <p className="mt-3 text-[10px] text-[#858796]">저장한 과목과 강의계획서는 검색 화면에도 적용됩니다. 새로고침하면 초기화됩니다.</p>
     </div>
   );
 }
