@@ -3,6 +3,7 @@ import { BookOpen, Plus } from "lucide-react";
 import type { CourseListItem, CourseSchedule, Department } from "../../types/database";
 import { createCourseFilters } from "../../data/CourseFilters";
 import { filterCourses } from "../../data/filterCourses";
+import { sortCourses } from "../../data/sortCourses";
 import { getClassificationPath, withClassificationPath } from "../../data/courseClassification";
 import ClassificationEditor from "./ClassificationEditor";
 import DepartmentTreeSelect from "./DepartmentTreeSelect";
@@ -120,11 +121,12 @@ export default function AdminCourses({ courses, departments, onChange }: {
   const [mode, setMode] = useState<"choose" | "add" | "edit">("choose");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState("default");
   const [professorKeyword, setProfessorKeyword] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Record<number, number[]>>({});
   const filters = useMemo(() => createCourseFilters(courses), [courses]);
-  const filtered = filterCourses(courses, filters, keyword, professorKeyword, selectedFilters);
-  const resetFilters = () => { setKeyword(""); setProfessorKeyword(""); setSelectedFilters({}); };
+  const filtered = sortCourses(filterCourses(courses, filters, keyword, professorKeyword, selectedFilters), sort);
+  const resetFilters = () => { setKeyword(""); setProfessorKeyword(""); setSelectedFilters({}); setSort("default"); };
   const newId = Math.max(0, ...courses.map((course) => course.id)) + 1;
   const newCourse: CourseListItem = { id: newId, courseCode: "", title: "", category: "", courseType: "", credit: 3, sectionNo: "01", professorName: "", capacity: 40, targetGrade: 1, departmentId: 0, majorName: "", isOnline: false, schedules: [{ id: 1, openCourseId: newId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] };
 
@@ -150,7 +152,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
       </div>
       {mode === "add" ? <CourseForm key="new" course={newCourse} courses={courses} departments={departments} onCancel={() => setMode("choose")} onSave={(course) => { onChange([...courses, course]); resetFilters(); setMode("edit"); }} /> : (
         <>
-          <CourseFilters filters={filters} keyword={keyword} setKeyword={setKeyword} professorKeyword={professorKeyword} setProfessorKeyword={setProfessorKeyword} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} onReset={resetFilters} />
+          <CourseFilters filters={filters} keyword={keyword} setKeyword={setKeyword} professorKeyword={professorKeyword} setProfessorKeyword={setProfessorKeyword} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} onReset={resetFilters} sort={sort} setSort={setSort} />
           <p className="mb-3 text-[#858796]">총 {filtered.length}개 과목</p>
           {filtered.map((course) => (
             <div key={course.id} className="mb-3 overflow-hidden rounded-lg border border-[#dddfe6]">

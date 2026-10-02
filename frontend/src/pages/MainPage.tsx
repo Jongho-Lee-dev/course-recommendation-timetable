@@ -1,4 +1,5 @@
 import { filterCourses } from "../data/filterCourses";
+import { sortCourses } from "../data/sortCourses";
 import { useMemo, useState } from "react";
 import type { CourseListItem } from "../types/database";
 import { mockCourses } from "../data/mockCourses";
@@ -25,6 +26,7 @@ export default function MainPage() {
   } = useRegistrationStatus();
 
   const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState("default");
   const [professorKeyword, setProfessorKeyword] = useState("");
 
   const [selectedFilters, setSelectedFilters] = useState<
@@ -63,15 +65,16 @@ export default function MainPage() {
     ),
   ).size;
 
-  const filteredCourses = filterCourses(
+  const filteredCourses = sortCourses(filterCourses(
     mockCourses,
     courseFilters,
     keyword,
     professorKeyword,
     selectedFilters,
-  );
+  ), sort);
 
   const handleResetFilters = () => {
+    setSort("default");
     setKeyword("");
     setProfessorKeyword("");
     setSelectedFilters({});
@@ -161,6 +164,8 @@ export default function MainPage() {
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             onReset={handleResetFilters}
+            sort={sort}
+            setSort={setSort}
             courses={filteredCourses}
             selected={selected}
             toggleCourse={toggleCourse}

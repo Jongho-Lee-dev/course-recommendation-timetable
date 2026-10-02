@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Search } from "lucide-react";
 import { createCourseFilters } from "../../data/CourseFilters";
 import type { CourseFilter, CourseFilterOption } from "../../types/database";
 
@@ -16,13 +17,15 @@ type CourseFiltersProps = {
   >;
 
   onReset: () => void;
+  sort: string;
+  setSort: Dispatch<SetStateAction<string>>;
 };
 
 const selectClassName =
   "min-w-[90px] rounded-md border border-[#dddfe6] bg-white px-[9px] py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]";
 
 const inputClassName =
-  "min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none placeholder:text-[#a0a3b0] focus:border-[#a99aed]";
+  "w-full rounded-lg border border-[#dddfe6] py-2.5 pl-9 pr-3 text-[9px] outline-none focus:border-[#a99aed]";
 
 type FilterSelectProps = {
   options: CourseFilterOption[];
@@ -91,6 +94,8 @@ export default function CourseFilters({
   selectedFilters,
   setSelectedFilters,
   onReset,
+  sort,
+  setSort,
 }: CourseFiltersProps) {
   const courseFilters = filters ?? createCourseFilters();
   // 버튼 표시와 실제 검색 조건이 항상 같은 상태를 사용한다.
@@ -136,24 +141,43 @@ export default function CourseFilters({
 
   return (
     <div className="space-y-3 px-[18px] py-4">
-      <div className="flex flex-wrap items-center gap-[6px]">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[220px] flex-1">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]" />
         <input
           className={inputClassName}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="강좌명 또는 학수번호 검색"
+          aria-label="강좌명 또는 학수번호 검색"
         />
+        </div>
 
+        <div className="relative min-w-[180px] flex-1">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]" />
         <input
           className={inputClassName}
           value={professorKeyword}
           onChange={(e) => setProfessorKeyword(e.target.value)}
           placeholder="교수명 검색"
+          aria-label="교수명 검색"
         />
+        </div>
+
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            aria-label="강좌 정렬"
+            className="rounded-lg border border-[#dddfe6] bg-white px-3 py-2.5 text-[9px] text-[#777985] outline-none"
+          >
+            <option value="default">기본 정렬</option>
+            <option value="name">강좌명순</option>
+            <option value="credit">학점 높은순</option>
+          </select>
 
         <button
           type="button"
-          className="rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#777a89] transition hover:bg-[#fafafd]"
+          className="rounded-lg border border-[#dedfe5] px-3 py-2.5 text-[9px] font-semibold text-[#777985]"
           onClick={handleReset}
         >
           초기화

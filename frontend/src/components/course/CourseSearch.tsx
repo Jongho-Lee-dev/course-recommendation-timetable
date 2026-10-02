@@ -16,6 +16,8 @@ type CourseSearchProps = {
   >;
 
   onReset: () => void;
+  sort: string;
+  setSort: Dispatch<SetStateAction<string>>;
 
   courses: CourseListItem[];
   selected: CourseListItem[];
@@ -32,6 +34,8 @@ export default function CourseSearch({
   selectedFilters,
   setSelectedFilters,
   onReset,
+  sort,
+  setSort,
   courses,
   selected,
   toggleCourse,
@@ -58,6 +62,8 @@ export default function CourseSearch({
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
         onReset={onReset}
+        sort={sort}
+        setSort={setSort}
       />
 
       <CourseTable
