@@ -3,7 +3,7 @@ import RegistrationSettings from "../components/course/RegistrationSettings";
 import { useState } from "react";
 import { BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
 import { departments } from "../data/departments";
-import { mockCourses } from "../data/mockCourses";
+import { useCourseCatalogStore } from "../store/courseCatalogStore";
 import type { Department } from "../types/database";
 
 const departmentFields = [
@@ -51,7 +51,8 @@ export default function AdminPage() {
     : departmentList;
 
   const [selectCategory, setSelectCategory] = useState("학과");
-  const [courseList, setCourseList] = useState(mockCourses);
+  const courseList = useCourseCatalogStore((state) => state.courses);
+  const setCourseList = useCourseCatalogStore((state) => state.setCourses);
 
   return (
     <main className="min-h-screen bg-[#f5f6f9] px-4 py-6 font-['Pretendard',sans-serif] text-[11px] text-[#20212b] min-[1101px]:px-7">

@@ -1,9 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { CourseListItem } from "../../types/database";
+import type { CourseFilter, CourseListItem } from "../../types/database";
 import CourseFilters from "./CourseFilters";
 import CourseTable from "./CourseTable";
 
 type CourseSearchProps = {
+  filters: CourseFilter[];
   keyword: string;
   setKeyword: Dispatch<SetStateAction<string>>;
 
@@ -27,6 +28,7 @@ type CourseSearchProps = {
 };
 
 export default function CourseSearch({
+  filters,
   keyword,
   setKeyword,
   professorKeyword,
@@ -55,6 +57,7 @@ export default function CourseSearch({
       </div>
 
       <CourseFilters
+        filters={filters}
         keyword={keyword}
         setKeyword={setKeyword}
         professorKeyword={professorKeyword}

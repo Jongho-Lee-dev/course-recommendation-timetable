@@ -2,7 +2,7 @@ import { filterCourses } from "../data/filterCourses";
 import { sortCourses } from "../data/sortCourses";
 import { useMemo, useState } from "react";
 import type { CourseListItem } from "../types/database";
-import { mockCourses } from "../data/mockCourses";
+import { useCourseCatalogStore } from "../store/courseCatalogStore";
 import { createCourseFilters } from "../data/CourseFilters";
 import WeeklyTimetable from "../components/course/WeeklyTimetable";
 import CourseRegistrationList from "../components/course/CourseRegistrationList";
@@ -17,6 +17,7 @@ import { getConflicts } from "../utils/courseRules";
 
 export default function MainPage() {
   const navigate = useNavigate();
+  const courses = useCourseCatalogStore((state) => state.courses);
 
   const {
     status,
@@ -46,8 +47,8 @@ export default function MainPage() {
     "현재 시간표를 분석하고 있습니다. AI 추천 페이지에서 원하는 조건을 설정할 수 있습니다.";
 
   const courseFilters = useMemo(
-    () => createCourseFilters(),
-    [],
+    () => createCourseFilters(courses),
+    [courses],
   );
 
   const totalCredits = selected.reduce(
@@ -66,7 +67,7 @@ export default function MainPage() {
   ).size;
 
   const filteredCourses = sortCourses(filterCourses(
-    mockCourses,
+    courses,
     courseFilters,
     keyword,
     professorKeyword,
@@ -157,6 +158,7 @@ export default function MainPage() {
 
         <section className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           <CourseSearch
+            filters={courseFilters}
             keyword={keyword}
             setKeyword={setKeyword}
             professorKeyword={professorKeyword}
