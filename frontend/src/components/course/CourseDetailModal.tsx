@@ -1,6 +1,7 @@
 import { X, Heart, MapPin, UserRound, Clock3, BookOpen } from "lucide-react";
 import type { ReactNode } from "react";
 import type { CourseListItem } from "../../types/database";
+import SyllabusLink from "./SyllabusLink";
 
 type Props = {
   course: CourseListItem | null;
@@ -55,6 +56,11 @@ export default function CourseDetailModal({
             ))}
           </div>
         </div>
+
+        <section className="px-6 pb-5">
+          <h3 className="text-xs font-bold text-[#30313b]">강의계획서</h3>
+          <SyllabusLink courseId={course.id} />
+        </section>
 
         <div className="border-t border-[#ececf0] bg-[#fafafd] px-6 py-4">
           <div className="flex items-center justify-between gap-3">

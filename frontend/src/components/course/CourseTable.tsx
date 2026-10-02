@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { findConflict, getTotalCredits } from "../../utils/courseRules";
 import { departments } from "../../data/departments";
 import { isExcludedFromCourse } from "../../data/courseEligibility";
+import SyllabusLink from "./SyllabusLink";
 
 const departmentNames = new Map(
   departments.map((department) => [department.id, department.majorName]),
@@ -109,6 +110,7 @@ export default function CourseTable({
                 <small className="mt-1 block text-[8px] text-[#9b9eab]">
                   {course.courseCode} · {course.courseType ?? course.category}
                 </small>
+                <SyllabusLink courseId={course.id} />
                 <small className={`mt-1 block break-words text-[8px] leading-relaxed ${excludedDepartments.length > 0 ? "text-amber-700" : "text-[#9b9eab]"}`}>
                   수강 제외 대상: {excludedDepartments.length > 0 ? excludedDepartments.join(", ") : "없음"}
                 </small>
