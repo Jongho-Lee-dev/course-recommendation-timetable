@@ -3,15 +3,16 @@ import { BookOpen, Plus } from "lucide-react";
 import type { CourseListItem, CourseSchedule, Department } from "../../types/database";
 import { createCourseFilters } from "../../data/CourseFilters";
 import { filterCourses } from "../../data/filterCourses";
+import { getClassificationPath, withClassificationPath } from "../../data/courseClassification";
+import ClassificationEditor from "./ClassificationEditor";
 import CourseFilters from "./CourseFilters";
 
 const inputClass = "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
 const buttonClass = "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]";
 const primaryClass = `${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6]`;
 const textFields = [
-  ["courseCode", "학수번호"], ["title", "과목명"], ["category", "구분"],
-  ["courseType", "이수구분"], ["sectionNo", "분반"], ["professorName", "담당교수"],
-  ["generalEducationArea", "교양 영역"], ["generalEducationElectiveArea", "선택 교양 영역"],
+  ["courseCode", "학수번호"], ["title", "과목명"],
+  ["sectionNo", "분반"], ["professorName", "담당교수"],
 ] as const;
 const numberFields = [["credit", "학점", 0], ["capacity", "정원", 1], ["targetGrade", "대상학년", 1]] as const;
 
@@ -19,8 +20,9 @@ function createSchedule(openCourseId: number, id = 1): CourseSchedule {
   return { id, openCourseId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" };
 }
 
-function CourseForm({ course, departments, onSave, onCancel }: {
+function CourseForm({ course, courses, departments, onSave, onCancel }: {
   course: CourseListItem;
+  courses: CourseListItem[];
   departments: Department[];
   onSave: (course: CourseListItem) => void;
   onCancel: () => void;
@@ -38,11 +40,16 @@ function CourseForm({ course, departments, onSave, onCancel }: {
         setError("학수번호, 과목명, 구분, 분반, 담당교수를 입력하세요."); return;
       }
       if (!draft.departmentId) { setError("소속 학과를 선택하세요."); return; }
+      if (!draft.courseType?.trim()) { setError("이수구분을 선택하거나 입력하세요."); return; }
       if (!draft.isOnline && (draft.schedules.length === 0 || draft.schedules.some((schedule) => schedule.endPeriod < schedule.startPeriod || !schedule.classroom.trim()))) {
         setError("강의 시간을 추가하고 종료 교시와 강의실을 확인하세요."); return;
       }
-      onSave({ ...draft, courseCode: draft.courseCode.trim(), title: draft.title.trim(), professorName: draft.professorName.trim(), category: draft.category.trim(), sectionNo: draft.sectionNo.trim(), schedules: draft.isOnline ? [] : draft.schedules });
+      onSave({ ...withClassificationPath(draft, getClassificationPath(draft).map((value) => value.trim())), courseType: draft.courseType?.trim() ?? "", courseCode: draft.courseCode.trim(), title: draft.title.trim(), professorName: draft.professorName.trim(), category: draft.category.trim(), sectionNo: draft.sectionNo.trim(), schedules: draft.isOnline ? [] : draft.schedules });
     }}>
+      <ClassificationEditor path={getClassificationPath(draft)} courses={[...courses, course]} onChange={(path) => {
+        setDraft(withClassificationPath(draft, path));
+        setError("");
+      }} />
       <div className="grid gap-4 min-[701px]:grid-cols-2">
         {textFields.map(([key, label]) => (
           <label key={key} className="space-y-1.5 text-[#5d6070]">
@@ -112,7 +119,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
   const filtered = filterCourses(courses, filters, keyword, professorKeyword, selectedFilters);
   const resetFilters = () => { setKeyword(""); setProfessorKeyword(""); setSelectedFilters({}); };
   const newId = Math.max(0, ...courses.map((course) => course.id)) + 1;
-  const newCourse: CourseListItem = { id: newId, courseCode: "", title: "", category: "전공", courseType: "", credit: 3, sectionNo: "01", professorName: "", capacity: 40, targetGrade: 1, departmentId: 0, majorName: "", isOnline: false, schedules: [{ id: 1, openCourseId: newId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] };
+  const newCourse: CourseListItem = { id: newId, courseCode: "", title: "", category: "", courseType: "", credit: 3, sectionNo: "01", professorName: "", capacity: 40, targetGrade: 1, departmentId: 0, majorName: "", isOnline: false, schedules: [{ id: 1, openCourseId: newId, dayOfWeek: "월", startPeriod: 1, endPeriod: 1, classroom: "" }] };
 
   if (mode === "choose") return (
     <div>
@@ -134,7 +141,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
         <h2 className="!mb-0 !text-sm !font-bold">{mode === "add" ? "과목 추가하기" : "과목 수정하기"}</h2>
         <button type="button" className={buttonClass} onClick={() => { setMode("choose"); setEditingId(null); }}>선택 화면으로</button>
       </div>
-      {mode === "add" ? <CourseForm key="new" course={newCourse} departments={departments} onCancel={() => setMode("choose")} onSave={(course) => { onChange([...courses, course]); resetFilters(); setMode("edit"); }} /> : (
+      {mode === "add" ? <CourseForm key="new" course={newCourse} courses={courses} departments={departments} onCancel={() => setMode("choose")} onSave={(course) => { onChange([...courses, course]); resetFilters(); setMode("edit"); }} /> : (
         <>
           <CourseFilters filters={filters} keyword={keyword} setKeyword={setKeyword} professorKeyword={professorKeyword} setProfessorKeyword={setProfessorKeyword} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} onReset={resetFilters} />
           <p className="mb-3 text-[#858796]">총 {filtered.length}개 과목</p>
@@ -144,7 +151,7 @@ export default function AdminCourses({ courses, departments, onChange }: {
                 <div className="flex flex-wrap gap-x-5 gap-y-2 text-[#5d6070]"><span>{course.courseCode}</span><strong>{course.title}</strong><span>{course.professorName}</span><span>{course.credit}학점</span></div>
                 <div className="flex gap-2"><button type="button" className={buttonClass} onClick={() => setEditingId(editingId === course.id ? null : course.id)}>{editingId === course.id ? "닫기" : "수정하기"}</button><button type="button" className={`${buttonClass} text-red-600`} onClick={() => { onChange(courses.filter((item) => item.id !== course.id)); setSelectedFilters({}); if (editingId === course.id) setEditingId(null); }}>삭제하기</button></div>
               </div>
-              {editingId === course.id && <CourseForm key={course.id} course={course} departments={departments} onCancel={() => setEditingId(null)} onSave={(saved) => { onChange(courses.map((item) => item.id === saved.id ? saved : item)); setSelectedFilters({}); setEditingId(null); }} />}
+              {editingId === course.id && <CourseForm key={course.id} course={course} courses={courses} departments={departments} onCancel={() => setEditingId(null)} onSave={(saved) => { onChange(courses.map((item) => item.id === saved.id ? saved : item)); setSelectedFilters({}); setEditingId(null); }} />}
             </div>
           ))}
           {filtered.length === 0 && <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">검색 조건에 맞는 과목이 없습니다.</p>}

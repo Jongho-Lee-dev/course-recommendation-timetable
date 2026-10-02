@@ -6,11 +6,12 @@ import type {
 } from "../types/database";
 import { mockFilterCategories } from "./mockFilterCategories";
 import { mockCourses } from "./mockCourses";
+import { getClassificationPath } from "./courseClassification";
 
 type FilterValue = NonNullable<CourseFilterOption["value"]>;
 
 const isFilterValue = (value: unknown): value is FilterValue =>
-  typeof value === "string" ||
+  (typeof value === "string" && value.trim().length > 0) ||
   typeof value === "number" ||
   typeof value === "boolean";
 
@@ -55,6 +56,10 @@ export const matchesCourseFilter = (
 ): boolean => {
   if (!filter.field || filter.value === undefined) {
     return true;
+  }
+
+  if (filter.field.startsWith("classificationPath.")) {
+    return getClassificationPath(course)[Number(filter.field.split(".")[1])] === filter.value;
   }
 
   return getCourseFieldValues(course, filter.field).some(
@@ -170,7 +175,7 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
     };
   };
 
-  return categories
+  const filters = categories
     .filter((category) => category.parentId === undefined)
     .map((category) => {
       const matchingCourses = courses.filter((course) =>
@@ -189,4 +194,28 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
         options,
       };
     });
+
+  // Merge course paths into the configured tree, including custom roots and arbitrary depths.
+  courses.forEach((course) => {
+    const path = getClassificationPath(course);
+    if (!path[0]) return;
+    let root = filters.find((filter) => filter.field === "category" && filter.value === path[0]);
+    if (!root) {
+      root = { id: nextId(), name: path[0], isFixed: false, field: "category", value: path[0], options: [] };
+      filters.push(root);
+    }
+    let options = root.options;
+    path.slice(1).forEach((value, index) => {
+      const depth = index + 1;
+      const legacyField = ["category", "courseType", "generalEducationArea", "generalEducationElectiveArea"][depth];
+      let option = options.find((item) => item.value === value && (item.field === legacyField || item.field === `classificationPath.${depth}`));
+      if (!option) {
+        option = { id: nextId(), name: value, field: `classificationPath.${depth}`, value, children: [] };
+        options.push(option);
+      }
+      option.children ??= [];
+      options = option.children;
+    });
+  });
+  return filters;
 };

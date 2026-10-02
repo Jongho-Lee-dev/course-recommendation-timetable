@@ -105,6 +105,7 @@ export interface CourseFilterOption {
 
 // HomePage에서 과목 목록을 표시하기 위해 여러 정보를 조합한 프론트 전용 타입
 export interface CourseListItem {
+  classificationPath?: string[];
   id: number;
   courseCode: string;
   title: string;
