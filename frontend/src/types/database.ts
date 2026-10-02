@@ -329,22 +329,4 @@ export interface DatabaseTables {
  *   진행 상태/분류 경로/학과 표시명은 JOIN 또는 계산으로 제공한다.
  * - CourseFilter/options는 filter_categories를 트리로 조립한 DTO이며 별도 테이블이 아니다.
  * - DB 제약/트랜잭션은 백엔드에서 구현해야 한다. TS 타입만으로 강제되지 않는다.
- *
- * 초기 데이터 이관 기준 (실제 학사 데이터가 아닌 목업임)
- * 1. data/departments.ts → departments. 기존 ID 유지, 교양 분류 필드는 분류로 분리.
- * 2. 학기를 먼저 생성한 뒤 data/mockCourses.ts를 courseCode로 묶어 courses 생성.
- *    동일 학수번호의 제목/학점 불일치는 검토하며 theoryHours/labHours는 원천 자료 필요.
- * 3. classificationPath 또는 category/courseType/교양영역 경로를 부모별로 중복 제거하여
- *    classifications 생성. 강좌의 classificationId에는 마지막 노드 ID 연결.
- * 4. mockCourses의 id를 open_courses.id로 유지하고 semesterId를 명시하여 이관.
- *    schedules → course_schedules, excludedDepartmentIds → 제외 학과 연결 테이블.
- * 5. data/mockFilterCategories.ts → filter_categories; 누락 isFixed=false,
- *    parentId/field/value=null, childFields=[], sortOrder는 원본 배열 순서로 보완.
- * 6. userStore의 소속 문자열은 학과 ID로 매핑한다. 현재 localStorage는 계정별로
- *    분리되지 않으므로 selected/favorites/history를 운영 DB로 자동 이관하지 않는다.
- * 7. registrationStore의 밀리초 타임스탬프는 UTC ISO 문자열로 변환한다.
- *    courseCatalogStore의 File은 업로드 후 저장소 키와 메타데이터를 저장한다.
- *
- * 실제 이수 성적/졸업요건 계산은 현재 화면에 원천 데이터가 없으며 별도 학사 연동 대상이다.
- * completedCredits/graduationCredits는 현재 학생 요약값만 보존한다.
  */
