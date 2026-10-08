@@ -1,5 +1,4 @@
-
-import { ArrowUp, BookOpen, ChevronRight } from "lucide-react";
+import { ArrowUp, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
@@ -36,7 +35,7 @@ export default function Footer() {
             type="button"
             onClick={() => window.scrollTo({
               top: 0,
-              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+              behavior: "smooth",
             })}
             className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-[10px] font-semibold text-[#777985] transition-colors hover:bg-[#f0edff] hover:text-[#7658e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9]"
           >
