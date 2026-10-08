@@ -17,6 +17,7 @@ import DepartmentTreeSelect from "./DepartmentTreeSelect";
 import CourseFilters from "../../shared/components/CourseFilters";
 import SyllabusLink, { PdfLink } from "../../shared/components/SyllabusLink";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
+import CourseExcelImport from "./CourseExcelImport";
 
 const inputClass =
   "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
@@ -593,7 +594,7 @@ export default function AdminCourses({
         />
       ) : mode === "excel" ? (
         <>
-
+          <CourseExcelImport />
         </>
       ) : (
         <>
