@@ -1,4 +1,3 @@
-
 import type { CourseListItem } from "../types/database";
 
 export const mockCourses: CourseListItem[] = [
@@ -470,4 +469,3 @@ export const mockCourses: CourseListItem[] = [
     schedules: [],
   },
 ];
-

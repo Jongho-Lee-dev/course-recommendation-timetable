@@ -21,10 +21,7 @@ export const getCourseFieldValues = (
 ): unknown[] => {
   const parts = field.split(".");
 
-  const getValues = (
-    current: unknown,
-    index: number,
-  ): unknown[] => {
+  const getValues = (current: unknown, index: number): unknown[] => {
     if (current === null || current === undefined) {
       return [];
     }
@@ -59,7 +56,10 @@ export const matchesCourseFilter = (
   }
 
   if (filter.field.startsWith("classificationPath.")) {
-    return getClassificationPath(course)[Number(filter.field.split(".")[1])] === filter.value;
+    return (
+      getClassificationPath(course)[Number(filter.field.split(".")[1])] ===
+      filter.value
+    );
   }
 
   return getCourseFieldValues(course, filter.field).some(
@@ -82,9 +82,7 @@ const createDynamicOptions = (
 
   courses.forEach((course) => {
     const values = Array.from(
-      new Set(
-        getCourseFieldValues(course, field).filter(isFilterValue),
-      ),
+      new Set(getCourseFieldValues(course, field).filter(isFilterValue)),
     );
 
     if (values.length === 0) {
@@ -120,18 +118,16 @@ const createDynamicOptions = (
 
   if (remainingFields.length > 0 && coursesWithoutValue.length > 0) {
     options.push(
-      ...createDynamicOptions(
-        coursesWithoutValue,
-        remainingFields,
-        nextId,
-      ),
+      ...createDynamicOptions(coursesWithoutValue, remainingFields, nextId),
     );
   }
 
   return options;
 };
 
-export const createCourseFilters = (courses: CourseListItem[] = mockCourses): CourseFilter[] => {
+export const createCourseFilters = (
+  courses: CourseListItem[] = mockCourses,
+): CourseFilter[] => {
   const categories = mockFilterCategories;
   const childrenByParent = new Map<number, FilterCategory[]>();
 
@@ -145,8 +141,7 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
     childrenByParent.set(category.parentId, children);
   });
 
-  let optionId =
-    Math.max(...categories.map((category) => category.id), 0) + 1;
+  let optionId = Math.max(...categories.map((category) => category.id), 0) + 1;
   const nextId = () => optionId++;
 
   const buildOption = (
@@ -156,9 +151,9 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
     const matchingCourses = availableCourses.filter((course) =>
       matchesCourseFilter(course, category),
     );
-    const configuredChildren = (
-      childrenByParent.get(category.id) ?? []
-    ).map((child) => buildOption(child, matchingCourses));
+    const configuredChildren = (childrenByParent.get(category.id) ?? []).map(
+      (child) => buildOption(child, matchingCourses),
+    );
     const dynamicChildren = createDynamicOptions(
       matchingCourses,
       category.childFields ?? [],
@@ -181,8 +176,8 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
       const matchingCourses = courses.filter((course) =>
         matchesCourseFilter(course, category),
       );
-      const options = (childrenByParent.get(category.id) ?? []).map(
-        (child) => buildOption(child, matchingCourses),
+      const options = (childrenByParent.get(category.id) ?? []).map((child) =>
+        buildOption(child, matchingCourses),
       );
 
       return {
@@ -199,18 +194,43 @@ export const createCourseFilters = (courses: CourseListItem[] = mockCourses): Co
   courses.forEach((course) => {
     const path = getClassificationPath(course);
     if (!path[0]) return;
-    let root = filters.find((filter) => filter.field === "category" && filter.value === path[0]);
+    let root = filters.find(
+      (filter) => filter.field === "category" && filter.value === path[0],
+    );
     if (!root) {
-      root = { id: nextId(), name: path[0], isFixed: false, field: "category", value: path[0], options: [] };
+      root = {
+        id: nextId(),
+        name: path[0],
+        isFixed: false,
+        field: "category",
+        value: path[0],
+        options: [],
+      };
       filters.push(root);
     }
     let options = root.options;
     path.slice(1).forEach((value, index) => {
       const depth = index + 1;
-      const legacyField = ["category", "courseType", "generalEducationArea", "generalEducationElectiveArea"][depth];
-      let option = options.find((item) => item.value === value && (item.field === legacyField || item.field === `classificationPath.${depth}`));
+      const legacyField = [
+        "category",
+        "courseType",
+        "generalEducationArea",
+        "generalEducationElectiveArea",
+      ][depth];
+      let option = options.find(
+        (item) =>
+          item.value === value &&
+          (item.field === legacyField ||
+            item.field === `classificationPath.${depth}`),
+      );
       if (!option) {
-        option = { id: nextId(), name: value, field: `classificationPath.${depth}`, value, children: [] };
+        option = {
+          id: nextId(),
+          name: value,
+          field: `classificationPath.${depth}`,
+          value,
+          children: [],
+        };
         options.push(option);
       }
       option.children ??= [];

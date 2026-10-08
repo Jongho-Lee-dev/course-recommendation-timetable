@@ -12,9 +12,7 @@ type CourseFiltersProps = {
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
 
   selectedFilters: Record<number, number[]>;
-  setSelectedFilters: Dispatch<
-    SetStateAction<Record<number, number[]>>
-  >;
+  setSelectedFilters: Dispatch<SetStateAction<Record<number, number[]>>>;
 
   onReset: () => void;
   sort: string;
@@ -33,11 +31,7 @@ type FilterSelectProps = {
   onChange: (path: number[]) => void;
 };
 
-function FilterSelect({
-  options,
-  selectedPath,
-  onChange,
-}: FilterSelectProps) {
+function FilterSelect({ options, selectedPath, onChange }: FilterSelectProps) {
   const selectedId = selectedPath[0] ?? null;
 
   const selectedOption =
@@ -47,10 +41,11 @@ function FilterSelect({
     <div className="flex flex-wrap gap-[6px]">
       <button
         type="button"
-        className={`rounded-md border px-3 py-2 text-[10px] transition ${selectedId === null || selectedId === 0
+        className={`rounded-md border px-3 py-2 text-[10px] transition ${
+          selectedId === null || selectedId === 0
             ? "border-[#7658e9] bg-[#7658e9] text-white"
             : "border-[#dddfe6] bg-white text-[#777a89]"
-          }`}
+        }`}
         onClick={() => onChange([0])}
       >
         전체
@@ -60,10 +55,11 @@ function FilterSelect({
         <button
           key={option.id}
           type="button"
-          className={`rounded-md border px-3 py-2 text-[10px] transition ${selectedId === option.id
+          className={`rounded-md border px-3 py-2 text-[10px] transition ${
+            selectedId === option.id
               ? "border-[#7658e9] bg-[#7658e9] text-white"
               : "border-[#dddfe6] bg-white text-[#777a89]"
-            }`}
+          }`}
           onClick={() => onChange([option.id])}
         >
           {option.name}
@@ -99,14 +95,12 @@ export default function CourseFilters({
 }: CourseFiltersProps) {
   const courseFilters = filters ?? createCourseFilters();
   // 버튼 표시와 실제 검색 조건이 항상 같은 상태를 사용한다.
-  const activeFilterId = courseFilters.find(
-    (filter) => !filter.isFixed && selectedFilters[filter.id]?.length,
-  )?.id ?? null;
+  const activeFilterId =
+    courseFilters.find(
+      (filter) => !filter.isFixed && selectedFilters[filter.id]?.length,
+    )?.id ?? null;
 
-  const handleFilterChange = (
-    filterId: number,
-    path: number[],
-  ) => {
+  const handleFilterChange = (filterId: number, path: number[]) => {
     setSelectedFilters((prev) => ({
       ...prev,
       [filterId]: path,
@@ -123,57 +117,61 @@ export default function CourseFilters({
       const next = { ...prev };
       // 분류를 해제하거나 전환할 때 하위 조건도 함께 제거한다.
       // 학년, 요일, 수업 형태 등 독립적인 조건은 유지한다.
-      courseFilters.filter((filter) => !filter.isFixed).forEach((filter) => {
-        delete next[filter.id];
-      });
+      courseFilters
+        .filter((filter) => !filter.isFixed)
+        .forEach((filter) => {
+          delete next[filter.id];
+        });
       if (!prev[filterId]?.length) next[filterId] = [0];
       return next;
     });
   };
 
-  const dynamicFilters = courseFilters.filter(
-    (filter) => !filter.isFixed,
-  );
+  const dynamicFilters = courseFilters.filter((filter) => !filter.isFixed);
 
-  const fixedFilters = courseFilters.filter(
-    (filter) => filter.isFixed,
-  );
+  const fixedFilters = courseFilters.filter((filter) => filter.isFixed);
 
   return (
     <div className="space-y-3 px-[18px] py-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] flex-1">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]" />
-        <input
-          className={inputClassName}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="강좌명 또는 학수번호 검색"
-          aria-label="강좌명 또는 학수번호 검색"
-        />
+          <Search
+            size={13}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]"
+          />
+          <input
+            className={inputClassName}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="강좌명 또는 학수번호 검색"
+            aria-label="강좌명 또는 학수번호 검색"
+          />
         </div>
 
         <div className="relative min-w-[180px] flex-1">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]" />
-        <input
-          className={inputClassName}
-          value={professorKeyword}
-          onChange={(e) => setProfessorKeyword(e.target.value)}
-          placeholder="교수명 검색"
-          aria-label="교수명 검색"
-        />
+          <Search
+            size={13}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a0a3b0]"
+          />
+          <input
+            className={inputClassName}
+            value={professorKeyword}
+            onChange={(e) => setProfessorKeyword(e.target.value)}
+            placeholder="교수명 검색"
+            aria-label="교수명 검색"
+          />
         </div>
 
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            aria-label="강좌 정렬"
-            className="rounded-lg border border-[#dddfe6] bg-white px-3 py-2.5 text-[9px] text-[#777985] outline-none"
-          >
-            <option value="default">기본 정렬</option>
-            <option value="name">강좌명순</option>
-            <option value="credit">학점 높은순</option>
-          </select>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          aria-label="강좌 정렬"
+          className="rounded-lg border border-[#dddfe6] bg-white px-3 py-2.5 text-[9px] text-[#777985] outline-none"
+        >
+          <option value="default">기본 정렬</option>
+          <option value="name">강좌명순</option>
+          <option value="credit">학점 높은순</option>
+        </select>
 
         <button
           type="button"
@@ -191,10 +189,11 @@ export default function CourseFilters({
               key={filter.id}
               type="button"
               aria-pressed={activeFilterId === filter.id}
-              className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${activeFilterId === filter.id
+              className={`rounded-md border px-3 py-2 text-[10px] font-semibold transition ${
+                activeFilterId === filter.id
                   ? "border-[#7658e9] bg-[#7658e9] text-white"
                   : "border-[#dddfe6] bg-white text-[#777a89] hover:bg-[#fafafd]"
-                }`}
+              }`}
               onClick={() => handleFilterToggle(filter.id)}
             >
               {filter.name}
@@ -211,9 +210,7 @@ export default function CourseFilters({
                   key={filter.id}
                   options={filter.options}
                   selectedPath={selectedFilters[filter.id] ?? []}
-                  onChange={(path) =>
-                    handleFilterChange(filter.id, path)
-                  }
+                  onChange={(path) => handleFilterChange(filter.id, path)}
                 />
               ))}
           </div>

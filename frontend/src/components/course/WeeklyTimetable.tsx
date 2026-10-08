@@ -73,12 +73,11 @@ export default function WeeklyTimetable({ selected }: WeeklyTimetableProps) {
                         key={`${course.id}-${schedule.id}`}
                         style={{
                           top: `${(schedule.startPeriod - 1) * 48 + 1}px`,
-                          height: `${(schedule.endPeriod -
-                            schedule.startPeriod +
-                            1) *
-                            48 -
+                          height: `${
+                            (schedule.endPeriod - schedule.startPeriod + 1) *
+                              48 -
                             2
-                            }px`,
+                          }px`,
                         }}
                       >
                         <b className="block text-[7px] text-[#7658e9]">

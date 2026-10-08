@@ -1,38 +1,39 @@
-
 import { useMemo, useState } from "react";
 import { BookOpen, Heart, ListFilter, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import CourseFilters from "../components/course/CourseFilters";
 import CourseTable from "../components/course/CourseTable";
 import CourseDetailModal from "../components/course/CourseDetailModal";
-import { createCourseFilters, matchesCourseFilter } from "../data/CourseFilters";
+import {
+  createCourseFilters,
+  matchesCourseFilter,
+} from "../data/CourseFilters";
 import { sortCourses } from "../data/sortCourses";
 import { useCourseCatalogStore } from "../store/courseCatalogStore";
 import { useCourseStore } from "../store/courseStore";
 import type { CourseFilterOption, CourseListItem } from "../types/database";
 
 export default function CourseSearchPage() {
-  const courses = useCourseCatalogStore(state => state.courses);
+  const courses = useCourseCatalogStore((state) => state.courses);
 
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState<Record<number, number[]>>({});
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<number, number[]>
+  >({});
   const [sort, setSort] = useState("default");
   const [detail, setDetail] = useState<CourseListItem | null>(null);
   const [mobileFilter, setMobileFilter] = useState(false);
 
-  const selected = useCourseStore(s => s.selected);
-  const favorites = useCourseStore(s => s.favorites);
-  const toggleSelected = useCourseStore(s => s.toggleSelected);
-  const toggleFavorite = useCourseStore(s => s.toggleFavorite);
+  const selected = useCourseStore((s) => s.selected);
+  const favorites = useCourseStore((s) => s.favorites);
+  const toggleSelected = useCourseStore((s) => s.toggleSelected);
+  const toggleFavorite = useCourseStore((s) => s.toggleFavorite);
 
-  const courseFilters = useMemo(
-    () => createCourseFilters(courses),
-    [courses]
-  );
+  const courseFilters = useMemo(() => createCourseFilters(courses), [courses]);
 
   const filteredCourses = useMemo(() => {
-    const result = courses.filter(course => {
+    const result = courses.filter((course) => {
       const keywordMatch =
         !keyword.trim() ||
         `${course.title} ${course.courseCode}`
@@ -51,7 +52,7 @@ export default function CourseSearchPage() {
         if (!path.length) return true;
 
         const filter = courseFilters.find(
-          item => item.id === Number(filterId)
+          (item) => item.id === Number(filterId),
         );
 
         if (!filter || !matchesCourseFilter(course, filter)) return false;
@@ -63,14 +64,14 @@ export default function CourseSearchPage() {
         for (const id of path) {
           if (id === 0) break;
 
-          const option = options.find(item => item.id === id);
+          const option = options.find((item) => item.id === id);
           if (!option) return false;
 
           chosen.push(option);
           options = option.children ?? [];
         }
 
-        return chosen.every(option => matchesCourseFilter(course, option));
+        return chosen.every((option) => matchesCourseFilter(course, option));
       });
     });
 
@@ -81,13 +82,10 @@ export default function CourseSearchPage() {
     professorKeyword,
     selectedFilters,
     courseFilters,
-    sort
+    sort,
   ]);
 
-  const totalCredits = selected.reduce(
-    (sum, c) => sum + c.credit,
-    0
-  );
+  const totalCredits = selected.reduce((sum, c) => sum + c.credit, 0);
 
   const reset = () => {
     setKeyword("");
@@ -97,9 +95,12 @@ export default function CourseSearchPage() {
   };
 
   const toggleCourse = (course: CourseListItem) => {
-    const exists = selected.some(item => item.id === course.id);
+    const exists = selected.some((item) => item.id === course.id);
 
-    if (!exists && (selected.length >= 6 || totalCredits + course.credit > 18)) {
+    if (
+      !exists &&
+      (selected.length >= 6 || totalCredits + course.credit > 18)
+    ) {
       toast.error("최대 18학점까지 선택할 수 있습니다.");
       return;
     }
@@ -118,9 +119,7 @@ export default function CourseSearchPage() {
               </div>
 
               <div>
-                <h1 className="text-sm font-extrabold">
-                  강의 검색
-                </h1>
+                <h1 className="text-sm font-extrabold">강의 검색</h1>
                 <p className="mt-1 text-[9px] text-[#9699a7]">
                   강좌를 찾고 상세 정보를 확인한 뒤 시간표에 추가하세요.
                 </p>
@@ -133,7 +132,7 @@ export default function CourseSearchPage() {
               </div>
 
               <button
-                onClick={() => setMobileFilter(v => !v)}
+                onClick={() => setMobileFilter((v) => !v)}
                 className="rounded-lg border border-[#dedfe5] p-2 text-[#777985] min-[801px]:hidden"
               >
                 <SlidersHorizontal size={14} />
@@ -142,7 +141,9 @@ export default function CourseSearchPage() {
           </div>
         </header>
 
-        <div className={`${mobileFilter ? "block" : "hidden"} min-[801px]:block`}>
+        <div
+          className={`${mobileFilter ? "block" : "hidden"} min-[801px]:block`}
+        >
           <CourseFilters
             filters={courseFilters}
             keyword={keyword}
@@ -161,9 +162,7 @@ export default function CourseSearchPage() {
           <span className="flex items-center gap-1.5 text-[9px] text-[#777985]">
             <ListFilter size={12} />
             검색 결과
-            <b className="text-[#30313b]">
-              {filteredCourses.length}개
-            </b>
+            <b className="text-[#30313b]">{filteredCourses.length}개</b>
           </span>
 
           <span className="text-[8px] text-[#a0a3ae]">
@@ -184,9 +183,7 @@ export default function CourseSearchPage() {
       <div className="mt-4 grid gap-4 min-[901px]:grid-cols-2">
         <section className="rounded-xl border border-[#e3e4e9] bg-white p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold">
-              선택한 강좌
-            </h2>
+            <h2 className="text-xs font-bold">선택한 강좌</h2>
 
             <span className="text-[9px] text-[#7658e9]">
               {selected.length}/6과목
@@ -199,15 +196,13 @@ export default function CourseSearchPage() {
             </p>
           ) : (
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {selected.map(c => (
+              {selected.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setDetail(c)}
                   className="rounded-lg bg-[#fafafd] p-3 text-left hover:bg-[#f6f3ff]"
                 >
-                  <b className="block text-[10px]">
-                    {c.title}
-                  </b>
+                  <b className="block text-[10px]">{c.title}</b>
 
                   <span className="mt-1 block text-[8px] text-[#9699a7]">
                     {c.courseCode} · {c.credit}학점
@@ -220,9 +215,7 @@ export default function CourseSearchPage() {
 
         <section className="rounded-xl border border-[#e3e4e9] bg-white p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold">
-              관심강좌
-            </h2>
+            <h2 className="text-xs font-bold">관심강좌</h2>
 
             <Heart size={15} className="text-[#7658e9]" />
           </div>
@@ -240,8 +233,8 @@ export default function CourseSearchPage() {
       {detail && (
         <CourseDetailModal
           course={detail}
-          isFavorite={favorites.some(c => c.id === detail.id)}
-          isSelected={selected.some(c => c.id === detail.id)}
+          isFavorite={favorites.some((c) => c.id === detail.id)}
+          isSelected={selected.some((c) => c.id === detail.id)}
           onClose={() => setDetail(null)}
           onToggleFavorite={() => toggleFavorite(detail)}
           onToggleSelected={() => toggleCourse(detail)}

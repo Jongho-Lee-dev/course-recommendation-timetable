@@ -1,7 +1,17 @@
-import type { CourseFilter, CourseFilterOption, CourseListItem } from '../types/database';
-import { matchesCourseFilter } from './CourseFilters';
+import type {
+  CourseFilter,
+  CourseFilterOption,
+  CourseListItem,
+} from "../types/database";
+import { matchesCourseFilter } from "./CourseFilters";
 
-export function filterCourses(courses: CourseListItem[], courseFilters: CourseFilter[], keyword: string, professorKeyword: string, selectedFilters: Record<number, number[]>): CourseListItem[] {
+export function filterCourses(
+  courses: CourseListItem[],
+  courseFilters: CourseFilter[],
+  keyword: string,
+  professorKeyword: string,
+  selectedFilters: Record<number, number[]>,
+): CourseListItem[] {
   return courses.filter((course) => {
     const matchesKeyword =
       !keyword.trim() ||
@@ -19,56 +29,46 @@ export function filterCourses(courses: CourseListItem[], courseFilters: CourseFi
       return false;
     }
 
+    return Object.entries(selectedFilters).every(([filterId, selectedPath]) => {
+      if (selectedPath.length === 0) {
+        return true;
+      }
 
-    return Object.entries(selectedFilters).every(
-      ([filterId, selectedPath]) => {
-        if (selectedPath.length === 0) {
-          return true;
+      const filter = courseFilters.find((item) => item.id === Number(filterId));
+
+      if (!filter) {
+        return true;
+      }
+
+      if (!matchesCourseFilter(course, filter)) {
+        return false;
+      }
+
+      if (!filter.isFixed && selectedPath[0] === 0) {
+        return true;
+      }
+
+      let options = filter.options;
+      const selectedOptions: CourseFilterOption[] = [];
+
+      for (const selectedId of selectedPath) {
+        if (selectedId === 0) {
+          break;
         }
 
-        const filter = courseFilters.find(
-          (item) => item.id === Number(filterId),
-        );
+        const option = options.find((item) => item.id === selectedId);
 
-        if (!filter) {
-          return true;
-        }
-
-        if (!matchesCourseFilter(course, filter)) {
+        if (!option) {
           return false;
         }
 
-        if (!filter.isFixed && selectedPath[0] === 0) {
-          return true;
-        }
+        selectedOptions.push(option);
+        options = option.children ?? [];
+      }
 
-        let options = filter.options;
-        const selectedOptions: CourseFilterOption[] = [];
-
-        for (const selectedId of selectedPath) {
-
-          if (selectedId === 0) {
-            break;
-          }
-
-          const option = options.find(
-            (item) => item.id === selectedId,
-          );
-
-          if (!option) {
-            return false;
-          }
-
-          selectedOptions.push(option);
-          options = option.children ?? [];
-        }
-
-        return selectedOptions.every((option) =>
-          matchesCourseFilter(course, option),
-        );
-      },
-    );
-
+      return selectedOptions.every((option) =>
+        matchesCourseFilter(course, option),
+      );
+    });
   });
-
 }

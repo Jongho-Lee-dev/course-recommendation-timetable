@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getRegistrationSummary, useRegistrationStore } from "../store/registrationStore";
+import {
+  getRegistrationSummary,
+  useRegistrationStore,
+} from "../store/registrationStore";
 
 export function useRegistrationStatus() {
   const preview = useRegistrationStore((state) => state.preview);

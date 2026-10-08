@@ -12,9 +12,7 @@ type CourseSearchProps = {
   setProfessorKeyword: Dispatch<SetStateAction<string>>;
 
   selectedFilters: Record<number, number[]>;
-  setSelectedFilters: Dispatch<
-    SetStateAction<Record<number, number[]>>
-  >;
+  setSelectedFilters: Dispatch<SetStateAction<Record<number, number[]>>>;
 
   onReset: () => void;
   sort: string;
@@ -47,9 +45,7 @@ export default function CourseSearch({
   return (
     <>
       <div className="border-b border-[#ececf0] px-5 py-4">
-        <h2 className="text-sm font-bold">
-          강의 검색
-        </h2>
+        <h2 className="text-sm font-bold">강의 검색</h2>
 
         <p className="mt-1 text-[9px] text-[#9699a7]">
           원하는 조건으로 강좌를 검색하세요.

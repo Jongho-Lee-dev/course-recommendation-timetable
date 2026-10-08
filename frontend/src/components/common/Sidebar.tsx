@@ -42,9 +42,7 @@ export default function Sidebar() {
               }`
             }
           >
-            <span className="mr-2 inline-block w-5 text-[#7d7f8c]">
-              {icon}
-            </span>
+            <span className="mr-2 inline-block w-5 text-[#7d7f8c]">{icon}</span>
             {label}
           </NavLink>
         ))}
@@ -70,19 +68,33 @@ export default function Sidebar() {
             <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#3b3c46] pt-3">
               <div>
                 <span className="block text-[8px] text-[#858796]">학번</span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">{user.studentId}</strong>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.studentId}
+                </strong>
               </div>
               <div>
-                <span className="block text-[8px] text-[#858796]">이수 학점</span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">{user.completedCredits}학점</strong>
+                <span className="block text-[8px] text-[#858796]">
+                  이수 학점
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.completedCredits}학점
+                </strong>
               </div>
               <div>
-                <span className="block text-[8px] text-[#858796]">최대 신청</span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">{user.maxCredits}학점</strong>
+                <span className="block text-[8px] text-[#858796]">
+                  최대 신청
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.maxCredits}학점
+                </strong>
               </div>
               <div>
-                <span className="block text-[8px] text-[#858796]">졸업 필요</span>
-                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">{user.graduationCredits}학점</strong>
+                <span className="block text-[8px] text-[#858796]">
+                  졸업 필요
+                </span>
+                <strong className="mt-0.5 block text-[9px] font-medium text-[#d7d8df]">
+                  {user.graduationCredits}학점
+                </strong>
               </div>
               <div className="col-span-2 mt-3 border-t border-[#3b3c46] pt-3">
                 <button

@@ -38,9 +38,7 @@ export default function UserPage() {
   const colleges = useMemo(() => {
     return [
       ...new Set(
-        departments
-          .map((department) => department.collegeName)
-          .filter(Boolean),
+        departments.map((department) => department.collegeName).filter(Boolean),
       ),
     ];
   }, []);
@@ -77,10 +75,7 @@ export default function UserPage() {
     return [
       ...new Set(
         departments
-          .filter(
-            (department) =>
-              department.facultyName === selectedFaculty,
-          )
+          .filter((department) => department.facultyName === selectedFaculty)
           .map((department) => department.majorName),
       ),
     ];
@@ -91,9 +86,7 @@ export default function UserPage() {
       ...new Set(
         departments
           .filter(
-            (department) =>
-              !department.collegeName &&
-              department.facultyName,
+            (department) => !department.collegeName && department.facultyName,
           )
           .map((department) => department.facultyName),
       ),
@@ -105,9 +98,7 @@ export default function UserPage() {
       ...new Set(
         departments
           .filter(
-            (department) =>
-              !department.collegeName &&
-              !department.facultyName,
+            (department) => !department.collegeName && !department.facultyName,
           )
           .map((department) => department.majorName),
       ),
@@ -129,7 +120,6 @@ export default function UserPage() {
   const hasIndependentFaculty = independentFaculties.length > 0;
 
   const handleUserSave = () => {
-
     if (name === "admin") {
       navigate("/admin");
       return;
@@ -180,9 +170,7 @@ export default function UserPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#fafafd] px-6">
       <div className="w-full max-w-3xl">
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-[#5d6070]">
-            수강신청 사이트
-          </h1>
+          <h1 className="text-xl font-bold text-[#5d6070]">수강신청 사이트</h1>
 
           <p className="mt-1 text-xs text-[#777a89]">
             수강신청에 필요한 학생 정보를 입력해주세요.
@@ -192,9 +180,7 @@ export default function UserPage() {
         <div className="rounded-xl border border-[#dddfe6] bg-white">
           {/* 제목 */}
           <div className="border-b border-[#ececf0] px-5 py-4">
-            <h2 className="text-sm font-bold text-[#5d6070]">
-              학생 정보
-            </h2>
+            <h2 className="text-sm font-bold text-[#5d6070]">학생 정보</h2>
 
             <p className="mt-1 text-[10px] text-[#a0a3b0]">
               입력한 정보를 바탕으로 맞춤형 과목을 추천받을 수 있습니다.
@@ -299,45 +285,39 @@ export default function UserPage() {
                   <select
                     value={selectedMajor}
                     onChange={(e) => setSelectedMajor(e.target.value)}
-                    disabled={
-                      hasCollegeFaculty
-                        ? !selectedFaculty
-                        : false
-                    }
+                    disabled={hasCollegeFaculty ? !selectedFaculty : false}
                     className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed] disabled:bg-[#fafafd] disabled:text-[#a0a3b0]"
                   >
                     <option value="">학과 선택</option>
 
-                    {(hasCollegeFaculty
-                      ? facultyMajors
-                      : collegeMajors
-                    ).map((major) => (
-                      <option key={major} value={major}>
-                        {major}
-                      </option>
-                    ))}
+                    {(hasCollegeFaculty ? facultyMajors : collegeMajors).map(
+                      (major) => (
+                        <option key={major} value={major}>
+                          {major}
+                        </option>
+                      ),
+                    )}
                   </select>
                 )}
 
                 {/* 단과대가 없는 학부 */}
-                {!selectedCollege &&
-                  hasIndependentFaculty && (
-                    <select
-                      value={selectedFaculty}
-                      onChange={(e) => {
-                        handleFacultyChange(e.target.value);
-                      }}
-                      className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
-                    >
-                      <option value="">학부 선택</option>
+                {!selectedCollege && hasIndependentFaculty && (
+                  <select
+                    value={selectedFaculty}
+                    onChange={(e) => {
+                      handleFacultyChange(e.target.value);
+                    }}
+                    className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
+                  >
+                    <option value="">학부 선택</option>
 
-                      {independentFaculties.map((faculty) => (
-                        <option key={faculty} value={faculty}>
-                          {faculty}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                    {independentFaculties.map((faculty) => (
+                      <option key={faculty} value={faculty}>
+                        {faculty}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 {/* 단과대/학부가 없는 학과 */}
                 {!selectedCollege &&
@@ -345,9 +325,7 @@ export default function UserPage() {
                   independentMajors.length > 0 && (
                     <select
                       value={selectedMajor}
-                      onChange={(e) =>
-                        setSelectedMajor(e.target.value)
-                      }
+                      onChange={(e) => setSelectedMajor(e.target.value)}
                       className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
                     >
                       <option value="">학과 선택</option>
@@ -361,24 +339,21 @@ export default function UserPage() {
                   )}
 
                 {/* 단과대가 없는 학부의 학과 */}
-                {!selectedCollege &&
-                  selectedFaculty && (
-                    <select
-                      value={selectedMajor}
-                      onChange={(e) =>
-                        setSelectedMajor(e.target.value)
-                      }
-                      className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
-                    >
-                      <option value="">학과 선택</option>
+                {!selectedCollege && selectedFaculty && (
+                  <select
+                    value={selectedMajor}
+                    onChange={(e) => setSelectedMajor(e.target.value)}
+                    className="min-w-0 flex-1 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[10px] text-[#5d6070] outline-none transition focus:border-[#a99aed]"
+                  >
+                    <option value="">학과 선택</option>
 
-                      {facultyMajors.map((major) => (
-                        <option key={major} value={major}>
-                          {major}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                    {facultyMajors.map((major) => (
+                      <option key={major} value={major}>
+                        {major}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 

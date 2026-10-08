@@ -13,10 +13,11 @@ export function isExcludedFromCourse(
 ): boolean {
   if (!user) return false;
 
-  return departments.some((department) =>
-    department.majorName === user.major &&
-    (!user.collegeName || department.collegeName === user.collegeName) &&
-    (!user.facultyName || department.facultyName === user.facultyName) &&
-    course.excludedDepartmentIds?.includes(department.id),
+  return departments.some(
+    (department) =>
+      department.majorName === user.major &&
+      (!user.collegeName || department.collegeName === user.collegeName) &&
+      (!user.facultyName || department.facultyName === user.facultyName) &&
+      course.excludedDepartmentIds?.includes(department.id),
   );
 }
