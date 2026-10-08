@@ -9,7 +9,6 @@ interface CourseCatalogStore {
   setSyllabus: (courseId: number, file: File | null) => void;
 }
 
-// Files live separately from the persisted selection/favorites snapshots.
 export const useCourseCatalogStore = create<CourseCatalogStore>((set) => ({
   courses: mockCourses,
   syllabi: {},
