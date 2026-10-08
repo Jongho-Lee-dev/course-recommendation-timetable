@@ -17,19 +17,19 @@ export default function Sidebar() {
   const resetUser = useUserStore((state) => state.reset);
 
   return (
-    <aside className="hidden min-h-[calc(100vh-72px)] w-[210px] shrink-0 flex-col bg-[#20212a] px-3.5 py-6 text-[#d7d8df] min-[701px]:flex">
+    <aside className="hidden min-h-0 w-[210px] shrink-0 flex-col bg-[#20212a] px-3.5 py-6 text-[#d7d8df] min-[701px]:flex">
       <button
         type="button"
         onClick={() => navigate("/mainPage")}
-        className="whitespace-nowrap px-3 text-left text-[15px] font-extrabold leading-tight tracking-[-0.5px] text-white"
+        className="shrink-0 whitespace-nowrap px-3 text-left text-[15px] font-extrabold leading-tight tracking-[-0.5px] text-white"
       >
         수강 신청
       </button>
-      <div className="px-3 pb-6 pt-1 text-[10px] text-[#858796]">
+      <div className="shrink-0 px-3 pb-6 pt-1 text-[10px] text-[#858796]">
         2026학년도 2학기
       </div>
 
-      <nav className="flex flex-col gap-1">
+      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
         {menu.map(([icon, label, path]) => (
           <NavLink
             key={path}
@@ -49,7 +49,7 @@ export default function Sidebar() {
       </nav>
 
       {user && (
-        <div className="mt-auto border-t border-[#373843] pt-4">
+        <div className="mt-auto shrink-0 border-t border-[#373843] pt-4">
           <div className="rounded-lg bg-[#2d2e38] px-3 py-3">
             <div className="flex items-center gap-2.5">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">

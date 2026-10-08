@@ -15,7 +15,7 @@ export default function Header() {
   const user = useUserStore((state) => state.user);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e7e8ee] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-[#e7e8ee] bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1500px] items-center gap-6 px-4 min-[1101px]:px-7">
         <button
           type="button"
