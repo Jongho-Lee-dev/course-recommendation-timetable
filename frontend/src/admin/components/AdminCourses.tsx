@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Sheet } from "lucide-react";
 import type {
   CourseListItem,
   CourseSchedule,
@@ -338,7 +338,7 @@ function CourseForm({
                     createSchedule(
                       draft.id,
                       Math.max(0, ...draft.schedules.map((item) => item.id)) +
-                        1,
+                      1,
                     ),
                   ],
                 })
@@ -397,12 +397,12 @@ function CourseForm({
                           schedules: draft.schedules.map((item) =>
                             item.id === schedule.id
                               ? {
-                                  ...item,
-                                  [key]:
-                                    key === "classroom"
-                                      ? event.target.value
-                                      : Number(event.target.value),
-                                }
+                                ...item,
+                                [key]:
+                                  key === "classroom"
+                                    ? event.target.value
+                                    : Number(event.target.value),
+                              }
                               : item,
                           ),
                         })
@@ -421,8 +421,8 @@ function CourseForm({
                     schedules:
                       draft.schedules.length > 1
                         ? draft.schedules.filter(
-                            (item) => item.id !== schedule.id,
-                          )
+                          (item) => item.id !== schedule.id,
+                        )
                         : draft.schedules,
                   })
                 }
@@ -463,7 +463,7 @@ export default function AdminCourses({
   departments: Department[];
   onChange: (courses: CourseListItem[]) => void;
 }) {
-  const [mode, setMode] = useState<"choose" | "add" | "edit">("choose");
+  const [mode, setMode] = useState<"choose" | "add" | "edit" | "excel">("choose");
   const setSyllabus = useCourseCatalogStore((state) => state.setSyllabus);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
@@ -529,6 +529,12 @@ export default function AdminCourses({
                 description: "필터로 과목을 찾아 정보를 수정합니다.",
                 icon: BookOpen,
               },
+              {
+                mode: "excel",
+                title: "엑셀 데이터 적용",
+                description: "엑셀 파일에 작성한 내용을 저장합니다.",
+                icon: Sheet,
+              }
             ] as const
           ).map(({ mode: next, title, description, icon: Icon }) => (
             <button
@@ -554,7 +560,11 @@ export default function AdminCourses({
     <div>
       <div className="mb-4 flex items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
         <h2 className="!mb-0 !text-sm !font-bold">
-          {mode === "add" ? "과목 추가하기" : "과목 수정하기"}
+          {mode === "add"
+            ? "과목 추가하기"
+            : mode === "excel"
+              ? "엑셀 파일 업로드"
+              : "과목 수정하기"}
         </h2>
         <button
           type="button"
@@ -581,6 +591,10 @@ export default function AdminCourses({
             setMode("edit");
           }}
         />
+      ) : mode === "excel" ? (
+        <>
+
+        </>
       ) : (
         <>
           <CourseFilters
