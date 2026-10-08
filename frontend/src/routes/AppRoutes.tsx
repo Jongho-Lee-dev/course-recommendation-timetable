@@ -1,16 +1,16 @@
-import MainLayout from "../layout/MainLayout";
-import MainPage from "../pages/MainPage";
-import UserPage from "../pages/UserPage";
-import CourseSearchPage from "../pages/CourseSearchPage";
-import TimetablePage from "../pages/TimetablePage";
-import FavoritesPage from "../pages/FavoritesPage";
-import HistoryPage from "../pages/HistoryPage";
-import AIRecommendationPage from "../pages/AIRecommendationPage";
-import NoticesPage from "../pages/NoticesPage";
-import { useUserStore } from "../store/userStore";
+import MainLayout from "../registration/layout/MainLayout";
+import MainPage from "../registration/pages/MainPage";
+import UserPage from "../registration/pages/UserPage";
+import CourseSearchPage from "../registration/pages/CourseSearchPage";
+import TimetablePage from "../registration/pages/TimetablePage";
+import FavoritesPage from "../registration/pages/FavoritesPage";
+import HistoryPage from "../registration/pages/HistoryPage";
+import AIRecommendationPage from "../registration/pages/AIRecommendationPage";
+import NoticesPage from "../registration/pages/NoticesPage";
+import { useUserStore } from "../registration/store/userStore";
 import { Navigate, Routes, Route } from "react-router-dom";
 import type { ReactNode } from "react";
-import AdminPage from "../pages/AdminPage";
+import AdminPage from "../admin/pages/AdminPage";
 
 export default function AppRoutes() {
   const user = useUserStore((state) => state.user);
