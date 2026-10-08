@@ -9,13 +9,11 @@ export default function MainLayout() {
       <Header />
       <div className="flex min-h-[calc(100vh-72px)] items-stretch">
         <Sidebar />
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col">
           <Outlet />
-
+          <Footer />
         </div>
-
       </div>
-      <Footer />
     </div>
   );
 }
