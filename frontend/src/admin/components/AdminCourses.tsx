@@ -18,7 +18,7 @@ import CourseFilters from "../../shared/components/CourseFilters";
 import SyllabusLink, { PdfLink } from "../../shared/components/SyllabusLink";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import CourseExcelImport from "./CourseExcelImport";
-import { appendCourseExcel } from "../utils/saveCourseExcel";
+import { appendCourseExcel, updateCourseExcel } from "../utils/saveCourseExcel";
 
 const inputClass =
   "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
@@ -638,6 +638,14 @@ export default function AdminCourses({
           선택 화면으로
         </button>
       </div>
+      {mode !== "excel" && (
+        <div className="mb-4 flex items-center gap-3">
+          <button type="button" className={buttonClass} onClick={selectExcelFile} disabled={savingExcel}>
+            저장할 엑셀 선택
+          </button>
+          <span>{excelHandle ? excelHandle.name : "선택된 파일 없음"}</span>
+        </div>
+      )}
       {mode === "add" ? (
         <CourseForm
           key="new"
@@ -647,7 +655,7 @@ export default function AdminCourses({
           onCancel={() => setMode("choose")}
           onSave={async (course, syllabus) => {
             if (!excelHandle) {
-              throw new Error("선택 화면에서 저장할 엑셀 파일을 먼저 선택하세요.");
+              throw new Error("위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.");
             }
             if (courses.some((item) => item.courseCode === course.courseCode && item.sectionNo === course.sectionNo)) {
               throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
@@ -700,6 +708,7 @@ export default function AdminCourses({
                   <button
                     type="button"
                     className={buttonClass}
+                    disabled={savingExcel}
                     onClick={() =>
                       setEditingId(editingId === course.id ? null : course.id)
                     }
@@ -709,6 +718,7 @@ export default function AdminCourses({
                   <button
                     type="button"
                     className={`${buttonClass} text-red-600`}
+                    disabled={savingExcel}
                     onClick={() => {
                       onChange(courses.filter((item) => item.id !== course.id));
                       setSelectedFilters({});
@@ -726,7 +736,19 @@ export default function AdminCourses({
                   courses={courses}
                   departments={departments}
                   onCancel={() => setEditingId(null)}
-                  onSave={(saved, syllabus) => {
+                  onSave={async (saved, syllabus) => {
+                    if (!excelHandle) {
+                      throw new Error("위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.");
+                    }
+                    if (courses.some((item) => item.id !== course.id && item.courseCode === saved.courseCode && item.sectionNo === saved.sectionNo)) {
+                      throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
+                    }
+                    setSavingExcel(true);
+                    try {
+                      await updateCourseExcel(excelHandle, course, saved);
+                    } finally {
+                      setSavingExcel(false);
+                    }
                     onChange(
                       courses.map((item) =>
                         item.id === saved.id ? saved : item,
@@ -748,8 +770,8 @@ export default function AdminCourses({
         </>
       )}
       <p className="mt-3 text-[10px] text-[#858796]">
-        저장한 과목과 강의계획서는 검색 화면에도 적용됩니다. 새로고침하면
-        초기화됩니다.
+        추가·수정한 과목은 선택한 엑셀 파일에 저장됩니다. 화면 목록과
+        강의계획서는 새로고침하면 초기화됩니다.
       </p>
     </div>
   );
