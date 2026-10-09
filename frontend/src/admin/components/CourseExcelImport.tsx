@@ -83,6 +83,14 @@ export default function CourseExcelImport() {
           </table>
         </div>
       )}
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          className="cursor-pointer rounded-md bg-[#7658e9] px-4 py-2 font-semibold text-white hover:bg-[#6546d6] active:bg-[#5538bd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9]"
+        >
+          엑셀 시트 적용하기
+        </button>
+      </div>
     </div>
   )
 }
