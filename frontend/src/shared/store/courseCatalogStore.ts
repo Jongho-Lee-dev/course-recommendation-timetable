@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { mockCourses } from "../data/mockCourses";
 import type { CourseListItem } from "../types/database";
 
 interface CourseCatalogStore {
+  loaded: boolean;
   courses: CourseListItem[];
   syllabi: Record<number, File>;
   setCourses: (courses: CourseListItem[]) => void;
@@ -10,11 +10,13 @@ interface CourseCatalogStore {
 }
 
 export const useCourseCatalogStore = create<CourseCatalogStore>((set) => ({
-  courses: mockCourses,
+  loaded: false,
+  courses: [],
   syllabi: {},
   setCourses: (courses) =>
     set((state) => ({
-      courses,
+      courses: courses.map(course => ({ ...course, remainingSeats: Math.max(0, course.capacity - (course.enrolledCount ?? 0)), isFull: (course.enrolledCount ?? 0) >= course.capacity })),
+      loaded: true,
       syllabi: Object.fromEntries(
         Object.entries(state.syllabi).filter(([id]) =>
           courses.some((course) => course.id === Number(id)),

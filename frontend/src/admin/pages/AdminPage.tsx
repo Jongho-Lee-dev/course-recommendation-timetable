@@ -3,7 +3,7 @@ import AdminCourses from "../components/AdminCourses";
 import RegistrationSettings from "../components/RegistrationSettings";
 import { useState } from "react";
 import { Bell, BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
-import { departments } from "../../shared/data/departments";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import type { Department } from "../../shared/types/database";
 
@@ -26,6 +26,7 @@ const buttonClass =
   "cursor-pointer rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] font-semibold text-[#5d6070] transition hover:border-[#a99aed] hover:bg-[#f0edff] hover:text-[#7658e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9]";
 
 export default function AdminPage() {
+  const { departments } = useCatalog().data!;
   const [departmentList, setDepartmentList] =
     useState<Department[]>(departments);
   const [departmentDraft, setDepartmentDraft] = useState<Department | null>(
@@ -69,6 +70,7 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f5f6f9] px-4 py-6 font-['Pretendard',sans-serif] text-[11px] text-[#20212b] min-[1101px]:px-7">
       <div className="mx-auto w-full max-w-[1500px]">
+        <p className="mb-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">학과와 강의는 DB에서 조회합니다. 이 화면의 편집과 수강신청 설정은 미리보기이며 DB에 저장되지 않습니다.</p>
         <header className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#e3e4e9] bg-white p-5 shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f0edff] text-[#7658e9]">
@@ -77,7 +79,7 @@ export default function AdminPage() {
             <div>
               <h2 className="!mb-1 !text-lg !font-bold">관리자 페이지</h2>
               <p className="text-[11px] leading-5 text-[#858796]">
-                학과와 개설 과목, 공지사항, 수강신청 설정을 관리합니다.
+                DB에서 조회한 목록을 사용합니다. 관리자 수정·엑셀 가져오기·공지·강의계획서 파일은 현재 브라우저의 미리보기이며 서버에 저장되지 않습니다.
               </p>
             </div>
           </div>

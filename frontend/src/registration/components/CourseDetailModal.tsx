@@ -112,7 +112,7 @@ export default function CourseDetailModal({
             <div>
               <p className="text-[9px] text-[#9699a7]">수강 정원</p>
               <p className="mt-1 text-[10px] font-semibold text-[#454652]">
-                현재 18명 / {course.capacity}명
+                현재 {course.enrolledCount ?? 0}명 / {course.capacity}명 · 잔여 {course.remainingSeats ?? Math.max(0, course.capacity - (course.enrolledCount ?? 0))}석
               </p>
             </div>
             <div className="flex gap-2">

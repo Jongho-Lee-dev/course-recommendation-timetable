@@ -1,3 +1,5 @@
+import { useUserStore } from "../store/userStore";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useMemo, useState } from "react";
 import { BookOpen, Heart, ListFilter, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
@@ -14,8 +16,10 @@ import { useCourseStore } from "../store/courseStore";
 import type { CourseFilterOption, CourseListItem } from "../../shared/types/database";
 
 export default function CourseSearchPage() {
+  const { categories } = useCatalog().data!;
   const courses = useCourseCatalogStore((state) => state.courses);
 
+  const maxCredits = useUserStore(state => state.user?.maxCredits ?? 18);
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<
@@ -30,7 +34,7 @@ export default function CourseSearchPage() {
   const toggleSelected = useCourseStore((s) => s.toggleSelected);
   const toggleFavorite = useCourseStore((s) => s.toggleFavorite);
 
-  const courseFilters = useMemo(() => createCourseFilters(courses), [courses]);
+  const courseFilters = useMemo(() => createCourseFilters(courses, categories), [courses, categories]);
 
   const filteredCourses = useMemo(() => {
     const result = courses.filter((course) => {
@@ -99,9 +103,9 @@ export default function CourseSearchPage() {
 
     if (
       !exists &&
-      (selected.length >= 6 || totalCredits + course.credit > 18)
+      (selected.length >= 6 || totalCredits + course.credit > maxCredits)
     ) {
-      toast.error("최대 18학점까지 선택할 수 있습니다.");
+      toast.error(`최대 ${maxCredits}학점까지 선택할 수 있습니다.`);
       return;
     }
 
@@ -128,7 +132,7 @@ export default function CourseSearchPage() {
 
             <div className="flex items-center gap-2">
               <div className="rounded-lg bg-[#f6f3ff] px-3 py-2 text-[9px] font-bold text-[#7658e9]">
-                선택 {selected.length}개 · {totalCredits}/18학점
+                선택 {selected.length}개 · {totalCredits}/{maxCredits}학점
               </div>
 
               <button
@@ -192,7 +196,7 @@ export default function CourseSearchPage() {
 
           {selected.length === 0 ? (
             <p className="mt-4 text-[10px] text-[#9699a7]">
-              강의 검색 결과에서 신청을 누르면 이곳에 표시됩니다.
+              강의 검색 결과에서 추가를 누르면 이곳에 표시됩니다.
             </p>
           ) : (
             <div className="mt-3 grid gap-2 sm:grid-cols-2">

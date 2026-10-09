@@ -15,7 +15,7 @@ export default function HistoryPage() {
     selected.forEach(addHistory);
     toast.success(
       selected.length
-        ? `${selected.length}개 강좌를 신청내역에 반영했습니다.`
+        ? `${selected.length}개 강좌를 신청 시뮬레이션에 반영했습니다.`
         : "현재 시간표가 비어 있습니다.",
     );
   };
@@ -23,7 +23,7 @@ export default function HistoryPage() {
     () =>
       history.filter(
         (c) =>
-          (tab === "전체" || tab === "신청완료") &&
+          (tab === "전체" || tab === "임시반영") &&
           (!keyword.trim() ||
             `${c.title} ${c.courseCode} ${c.professorName}`
               .toLowerCase()
@@ -34,7 +34,7 @@ export default function HistoryPage() {
   return (
     <main className="mx-auto w-full max-w-[1500px] px-4 py-6 font-['Pretendard',sans-serif] text-[#20212b] min-[1101px]:px-7">
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <Metric label="신청 완료" value={`${history.length}과목`} />
+        <Metric label="임시 반영" value={`${history.length}과목`} />
         <Metric
           label="신청 학점"
           value={`${history.reduce((s, c) => s + c.credit, 0)}학점`}
@@ -49,7 +49,7 @@ export default function HistoryPage() {
                 <ClipboardList size={18} />
               </div>
               <div>
-                <h1 className="text-sm font-extrabold">신청내역</h1>
+                <h1 className="text-sm font-extrabold">신청 시뮬레이션</h1>
                 <p className="mt-1 text-[9px] text-[#9699a7]">
                   현재 학기의 수강신청 기록을 확인하고 관리합니다.
                 </p>
@@ -66,7 +66,7 @@ export default function HistoryPage() {
                 onClick={() => {
                   if (
                     history.length &&
-                    window.confirm("신청내역을 모두 삭제할까요?")
+                    window.confirm("신청 시뮬레이션을 모두 삭제할까요?")
                   )
                     clearHistory();
                 }}
@@ -89,7 +89,7 @@ export default function HistoryPage() {
                 className="w-full rounded-lg border border-[#dddfe6] py-2.5 pl-9 pr-3 text-[9px] outline-none focus:border-[#a99aed]"
               />
             </div>
-            {["전체", "신청완료"].map((t) => (
+            {["전체", "임시반영"].map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -104,7 +104,7 @@ export default function HistoryPage() {
           <div className="py-20 text-center text-[10px] text-[#9699a7]">
             {history.length
               ? "검색 결과가 없습니다."
-              : "아직 신청내역이 없습니다. 현재 시간표의 강좌를 신청내역으로 반영해 보세요."}
+              : "아직 신청 시뮬레이션이 없습니다. 현재 시간표의 강좌를 신청 시뮬레이션으로 반영해 보세요."}
           </div>
         ) : (
           <div>
@@ -120,7 +120,7 @@ export default function HistoryPage() {
                   <div className="flex items-center gap-2">
                     <b className="text-[10px]">{course.title}</b>
                     <span className="rounded-md bg-[#eef8f6] px-2 py-1 text-[7px] font-bold text-[#348f79]">
-                      신청완료
+                      임시반영
                     </span>
                   </div>
                   <p className="mt-1 text-[8px] text-[#9699a7]">
@@ -141,7 +141,7 @@ export default function HistoryPage() {
                 <button
                   onClick={() => {
                     removeHistory(course.id);
-                    toast.success("신청내역에서 삭제했습니다.");
+                    toast.success("신청 시뮬레이션에서 삭제했습니다.");
                   }}
                   className="rounded-lg border border-[#dedfe5] p-2 text-[#9a9daa] hover:text-[#df6471]"
                 >

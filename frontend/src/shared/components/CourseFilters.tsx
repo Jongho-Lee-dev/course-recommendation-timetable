@@ -1,6 +1,7 @@
+import { useCatalog } from "../hooks/useCatalog";
+import { createCourseFilters } from "../data/CourseFilters";
 import type { Dispatch, SetStateAction } from "react";
 import { Search } from "lucide-react";
-import { createCourseFilters } from "../data/CourseFilters";
 import type { CourseFilter, CourseFilterOption } from "../types/database";
 
 type CourseFiltersProps = {
@@ -93,7 +94,8 @@ export default function CourseFilters({
   sort,
   setSort,
 }: CourseFiltersProps) {
-  const courseFilters = filters ?? createCourseFilters();
+  const { courses, categories } = useCatalog().data!;
+  const courseFilters = filters ?? createCourseFilters(courses, categories);
   // 버튼 표시와 실제 검색 조건이 항상 같은 상태를 사용한다.
   const activeFilterId =
     courseFilters.find(

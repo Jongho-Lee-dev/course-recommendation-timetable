@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Check, Clock3, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { mockCourses } from "../../shared/data/mockCourses";
+import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
+import { getSelectionError } from "../utils/courseRules";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
@@ -29,6 +30,7 @@ function buildRecommendation(
   preferences: Preferences,
   courses: CourseListItem[],
   seed: number,
+  user: ReturnType<typeof useUserStore.getState>["user"],
 ) {
   const pool = [...courses]
     .filter(
@@ -43,6 +45,7 @@ function buildRecommendation(
   const result: CourseListItem[] = [];
   let credits = 0;
   for (const course of pool) {
+    if (getSelectionError(course, result, user)) continue;
     if (credits + course.credit > preferences.credits) continue;
     if (
       preferences.avoidMorning &&
@@ -58,6 +61,7 @@ function buildRecommendation(
 }
 
 export default function AIRecommendationPage() {
+  const courses = useCourseCatalogStore(state => state.courses);
   const user = useUserStore((s) => s.user);
   const selected = useCourseStore((s) => s.selected);
   const setSelected = useCourseStore((s) => s.setSelected);
@@ -73,9 +77,9 @@ export default function AIRecommendationPage() {
   const recommendations = useMemo(
     () =>
       [0, 1, 2].map((seed) =>
-        buildRecommendation(preferences, mockCourses, seed),
+        buildRecommendation(preferences, courses, seed, user),
       ),
-    [preferences],
+    [preferences, courses, user],
   );
   const current = recommendations[active];
   const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
@@ -92,7 +96,7 @@ export default function AIRecommendationPage() {
       !window.confirm("현재 시간표를 이 추천안으로 교체할까요?")
     )
       return;
-    setSelected(current);
+    if (!setSelected(current)) return;
     toast.success(`${current.length}개 강의를 나의 시간표에 반영했습니다.`);
   };
 

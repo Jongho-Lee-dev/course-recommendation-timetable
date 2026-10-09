@@ -21,7 +21,7 @@ export default function CourseRegistrationList({
         </div>
 
         <strong className="text-[9px] text-[#7658e9]">
-          신청 총 학점: {totalCredits}학점
+          선택 총 학점: {totalCredits}학점
         </strong>
       </div>
 

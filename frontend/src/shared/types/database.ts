@@ -115,6 +115,9 @@ export interface CourseFilterOption {
 
 // 여러 테이블을 JOIN하여 만드는 화면용 DTO. 이 형태 전체를 DB에 중복 저장하지 않는다.
 export interface CourseListItem {
+  enrolledCount?: number;
+  remainingSeats?: number;
+  isFull?: boolean;
   classificationPath?: string[];
   excludedDepartmentIds?: number[];
   id: number;

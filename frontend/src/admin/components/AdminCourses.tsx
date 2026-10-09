@@ -1,3 +1,4 @@
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useMemo, useState } from "react";
 import { BookOpen, Plus, Sheet } from "lucide-react";
 import type {
@@ -470,10 +471,11 @@ export default function AdminCourses({
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("default");
   const [professorKeyword, setProfessorKeyword] = useState("");
+  const { categories } = useCatalog().data!;
   const [selectedFilters, setSelectedFilters] = useState<
     Record<number, number[]>
   >({});
-  const filters = useMemo(() => createCourseFilters(courses), [courses]);
+  const filters = useMemo(() => createCourseFilters(courses, categories), [courses, categories]);
   const filtered = sortCourses(
     filterCourses(courses, filters, keyword, professorKeyword, selectedFilters),
     sort,

@@ -53,7 +53,7 @@ export default function Sidebar() {
           <div className="rounded-lg bg-[#2d2e38] px-3 py-3">
             <div className="flex items-center gap-2.5">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ece9ff] text-xs font-extrabold text-[#7658e9]">
-                {user.name.slice(0, 1)}
+                {(user.name || "학생").slice(0, 1)}
               </div>
               <div className="min-w-0">
                 <strong className="block truncate text-[11px] font-bold text-white">

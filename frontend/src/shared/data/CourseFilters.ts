@@ -4,8 +4,6 @@ import type {
   CourseListItem,
   FilterCategory,
 } from "../types/database";
-import { mockFilterCategories } from "./mockFilterCategories";
-import { mockCourses } from "./mockCourses";
 import { getClassificationPath } from "./courseClassification";
 
 type FilterValue = NonNullable<CourseFilterOption["value"]>;
@@ -126,9 +124,9 @@ const createDynamicOptions = (
 };
 
 export const createCourseFilters = (
-  courses: CourseListItem[] = mockCourses,
+  courses: CourseListItem[],
+  categories: FilterCategory[],
 ): CourseFilter[] => {
-  const categories = mockFilterCategories;
   const childrenByParent = new Map<number, FilterCategory[]>();
 
   categories.forEach((category) => {

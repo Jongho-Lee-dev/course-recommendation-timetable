@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { departments } from "../../shared/data/departments";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useUserStore } from "../store/userStore";
 
 export default function UserPage() {
+  const { departments } = useCatalog().data!;
   const navigate = useNavigate();
   const setUser = useUserStore((state) => state.setUser);
 
@@ -41,7 +42,7 @@ export default function UserPage() {
         departments.map((department) => department.collegeName).filter(Boolean),
       ),
     ];
-  }, []);
+  }, [departments]);
 
   const faculties = useMemo(() => {
     return [
@@ -55,7 +56,7 @@ export default function UserPage() {
           .map((department) => department.facultyName),
       ),
     ];
-  }, [selectedCollege]);
+  }, [departments, selectedCollege]);
 
   const collegeMajors = useMemo(() => {
     return [
@@ -69,7 +70,7 @@ export default function UserPage() {
           .map((department) => department.majorName),
       ),
     ];
-  }, [selectedCollege]);
+  }, [departments, selectedCollege]);
 
   const facultyMajors = useMemo(() => {
     return [
@@ -79,7 +80,7 @@ export default function UserPage() {
           .map((department) => department.majorName),
       ),
     ];
-  }, [selectedFaculty]);
+  }, [departments, selectedFaculty]);
 
   const independentFaculties = useMemo(() => {
     return [
@@ -91,7 +92,7 @@ export default function UserPage() {
           .map((department) => department.facultyName),
       ),
     ];
-  }, []);
+  }, [departments]);
 
   const independentMajors = useMemo(() => {
     return [
@@ -103,7 +104,7 @@ export default function UserPage() {
           .map((department) => department.majorName),
       ),
     ];
-  }, []);
+  }, [departments]);
 
   const handleCollegeChange = (value: string) => {
     setSelectedCollege(value);
@@ -153,6 +154,9 @@ export default function UserPage() {
     }
 
     setUser({
+      departmentId: departments.find(d => d.majorName === selectedMajor)?.id,
+      collegeName: selectedCollege || undefined,
+      facultyName: selectedFaculty || undefined,
       studentId: studentId.trim(),
       name: name.trim(),
       grade: Number(selectedGrade),
@@ -162,7 +166,7 @@ export default function UserPage() {
       major: selectedMajor,
     });
 
-    toast.success("학생 정보가 저장되었습니다.");
+    toast.success("학생 정보를 이 브라우저에 저장했습니다.");
     navigate("/mainPage");
   };
 
@@ -183,7 +187,7 @@ export default function UserPage() {
             <h2 className="text-sm font-bold text-[#5d6070]">학생 정보</h2>
 
             <p className="mt-1 text-[10px] text-[#a0a3b0]">
-              입력한 정보를 바탕으로 맞춤형 과목을 추천받을 수 있습니다.
+              입력한 정보는 이 브라우저에 저장됩니다. 실제 로그인 및 학생 DB 저장은 아직 연결되지 않았습니다.
             </p>
           </div>
 

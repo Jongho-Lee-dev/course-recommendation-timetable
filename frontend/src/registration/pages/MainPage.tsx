@@ -1,3 +1,4 @@
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { filterCourses } from "../../shared/data/filterCourses";
 import { sortCourses } from "../../shared/data/sortCourses";
 import { useMemo, useState } from "react";
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import { getConflicts } from "../utils/courseRules";
 
 export default function MainPage() {
+  const { categories } = useCatalog().data!;
   const navigate = useNavigate();
   const courses = useCourseCatalogStore((state) => state.courses);
 
@@ -42,7 +44,7 @@ export default function MainPage() {
   const aiMessage =
     "현재 시간표를 분석하고 있습니다. AI 추천 페이지에서 원하는 조건을 설정할 수 있습니다.";
 
-  const courseFilters = useMemo(() => createCourseFilters(courses), [courses]);
+  const courseFilters = useMemo(() => createCourseFilters(courses, categories), [courses, categories]);
 
   const totalCredits = selected.reduce((sum, item) => sum + item.credit, 0);
 
@@ -97,7 +99,7 @@ export default function MainPage() {
         <div className="mt-3 mb-3 ml-auto grid w-full grid-cols-3 gap-2 min-[701px]:w-auto">
           <div className="min-w-0 rounded-lg border border-[#e4e5eb] bg-white px-3 py-2.5">
             <span className="block text-[9px] text-[#9699a6]">
-              수강신청 현황
+              수강신청 시뮬레이션 현황
             </span>
 
             <strong

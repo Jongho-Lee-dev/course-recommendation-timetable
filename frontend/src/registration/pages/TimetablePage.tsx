@@ -50,7 +50,7 @@ export default function TimetablePage() {
       if (!Array.isArray(snapshot.courses)) {
         throw new Error();
       }
-      useCourseStore.setState({ selected: snapshot.courses });
+      if (!useCourseStore.getState().setSelected(snapshot.courses)) return;
       setSavedAt(snapshot.savedAt ?? null);
       toast.success("저장된 시간표를 불러왔습니다.");
     } catch {
@@ -215,7 +215,7 @@ export default function TimetablePage() {
               </p>
             )}
             <p className="mt-2 text-[8px] text-[#a0a3ae]">
-              백엔드 연결 후 실제 수강신청 가능 여부를 함께 검증할 수 있습니다.
+              백엔드 연결 후 수강신청 시뮬레이션 가능 여부를 함께 검증할 수 있습니다.
             </p>
           </div>
         </section>

@@ -1,6 +1,5 @@
 import * as XLSX from "xlsx"
-import { departments } from "../../shared/data/departments";
-import type { CourseListItem } from "../../shared/types/database";
+import type { Department, CourseListItem } from "../../shared/types/database";
 
 const EXPECTED_HEADERS = [
   "구분", "이수 구분", "영역", "하위 영역 1", "하위 영역 2",
@@ -30,6 +29,7 @@ export type ExcelValidationError = {
 
 export function validateCourseExcel(
   rows: unknown[][],
+  departments: Department[],
 ): ExcelValidationError[] {
   const errors: ExcelValidationError[] = [];
   const text = (value: unknown) => String(value ?? "").trim();
@@ -176,11 +176,12 @@ export function validateCourseExcel(
 export function convertCourseExcel(
   rows: unknown[][],
   existingCourses: CourseListItem[],
+  departments: Department[],
 ): {
   courses: CourseListItem[];
   errors: ExcelValidationError[];
 } {
-  const errors = validateCourseExcel(rows);
+  const errors = validateCourseExcel(rows, departments);
 
   if (errors.length > 0) {
     return { courses: [], errors };
@@ -291,6 +292,9 @@ export function convertCourseExcel(
         signature,
         course: {
           ...basicInfo,
+          enrolledCount: existing?.enrolledCount ?? 0,
+          remainingSeats: Math.max(0, basicInfo.capacity - (existing?.enrolledCount ?? 0)),
+          isFull: (existing?.enrolledCount ?? 0) >= basicInfo.capacity,
           id: existing ? existing.id : nextCourseId++,
           schedules: [],
         },
