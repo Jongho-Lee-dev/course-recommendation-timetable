@@ -18,6 +18,7 @@ import CourseFilters from "../../shared/components/CourseFilters";
 import SyllabusLink, { PdfLink } from "../../shared/components/SyllabusLink";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import CourseExcelImport from "./CourseExcelImport";
+import { appendCourseExcel } from "../utils/saveCourseExcel";
 
 const inputClass =
   "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
@@ -35,6 +36,7 @@ const numberFields = [
   ["capacity", "정원", 1],
   ["targetGrade", "대상학년", 1],
 ] as const;
+
 
 function createSchedule(openCourseId: number, id = 1): CourseSchedule {
   return {
@@ -57,7 +59,7 @@ function CourseForm({
   course: CourseListItem;
   courses: CourseListItem[];
   departments: Department[];
-  onSave: (course: CourseListItem, syllabus: File | null) => void;
+  onSave: (course: CourseListItem, syllabus: File | null) => void | Promise<void>;
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<CourseListItem>(() => {
@@ -67,18 +69,20 @@ function CourseForm({
     return initial;
   });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const savedSyllabus = useCourseCatalogStore(
     (state) => state.syllabi[course.id],
   );
   const [syllabus, setSyllabus] = useState<File | null>(savedSyllabus ?? null);
   const [readingPdf, setReadingPdf] = useState(false);
   const [fileError, setFileError] = useState("");
+
   return (
     <form
       className="space-y-4 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
-        if (readingPdf || fileError) return;
+        if (saving || readingPdf || fileError) return;
         if (
           [
             draft.courseCode,
@@ -111,7 +115,10 @@ function CourseForm({
           setError("강의 시간을 추가하고 종료 교시와 강의실을 확인하세요.");
           return;
         }
-        onSave(
+        setError("");
+        setSaving(true);
+        try {
+        await onSave(
           {
             ...withClassificationPath(
               draft,
@@ -127,6 +134,11 @@ function CourseForm({
           },
           syllabus,
         );
+        } catch (error) {
+          setError(error instanceof Error ? error.message : "엑셀 저장에 실패했습니다. 다시 시도하세요.");
+        } finally {
+          setSaving(false);
+        }
       }}
     >
       <ClassificationEditor
@@ -440,15 +452,15 @@ function CourseForm({
         </p>
       )}
       <div className="flex justify-end gap-2">
-        <button type="button" className={buttonClass} onClick={onCancel}>
+        <button type="button" className={buttonClass} onClick={onCancel} disabled={saving}>
           취소
         </button>
         <button
           type="submit"
-          disabled={readingPdf || !!fileError}
+          disabled={saving || readingPdf || !!fileError}
           className={`${primaryClass} disabled:opacity-50`}
         >
-          저장하기
+          {saving ? "저장 중..." : "저장하기"}
         </button>
       </div>
     </form>
@@ -473,6 +485,38 @@ export default function AdminCourses({
   const [selectedFilters, setSelectedFilters] = useState<
     Record<number, number[]>
   >({});
+  const [excelHandle, setExcelHandle] =
+    useState<FileSystemFileHandle | null>(null);
+  const [savingExcel, setSavingExcel] = useState(false);
+
+  async function selectExcelFile() {
+    if (!("showOpenFilePicker" in window)) {
+      alert("엑셀 직접 저장은 데스크톱 Chrome 또는 Edge에서 사용하세요.");
+      return;
+    }
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: "엑셀 파일",
+            accept: {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                [".xlsx"],
+            },
+          },
+        ],
+      });
+
+      setExcelHandle(handle);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      alert("엑셀 파일을 선택하지 못했습니다.");
+    }
+  }
+
   const filters = useMemo(() => createCourseFilters(courses), [courses]);
   const filtered = sortCourses(
     filterCourses(courses, filters, keyword, professorKeyword, selectedFilters),
@@ -515,6 +559,21 @@ export default function AdminCourses({
     return (
       <div>
         <h2 className="!mb-4 !text-sm !font-bold">과목 관리</h2>
+
+        <div className="mb-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={selectExcelFile}
+            className={buttonClass}
+          >
+            저장할 엑셀 선택
+          </button>
+
+          <span>
+            {excelHandle ? excelHandle.name : "선택된 파일 없음"}
+          </span>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 min-[701px]:gap-4">
           {(
             [
@@ -570,6 +629,7 @@ export default function AdminCourses({
         <button
           type="button"
           className={buttonClass}
+          disabled={savingExcel}
           onClick={() => {
             setMode("choose");
             setEditingId(null);
@@ -585,7 +645,19 @@ export default function AdminCourses({
           courses={courses}
           departments={departments}
           onCancel={() => setMode("choose")}
-          onSave={(course, syllabus) => {
+          onSave={async (course, syllabus) => {
+            if (!excelHandle) {
+              throw new Error("선택 화면에서 저장할 엑셀 파일을 먼저 선택하세요.");
+            }
+            if (courses.some((item) => item.courseCode === course.courseCode && item.sectionNo === course.sectionNo)) {
+              throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
+            }
+            setSavingExcel(true);
+            try {
+              await appendCourseExcel(excelHandle, course);
+            } finally {
+              setSavingExcel(false);
+            }
             onChange([...courses, course]);
             setSyllabus(course.id, syllabus);
             resetFilters();
