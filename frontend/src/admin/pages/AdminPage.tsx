@@ -1,7 +1,8 @@
+import AdminNotices from "../components/AdminNotices";
 import AdminCourses from "../components/AdminCourses";
 import RegistrationSettings from "../components/RegistrationSettings";
 import { useState } from "react";
-import { BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
+import { Bell, BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
 import { departments } from "../../shared/data/departments";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import type { Department } from "../../shared/types/database";
@@ -15,6 +16,7 @@ const departmentFields = [
 const categories = [
   { label: "학과", icon: Building2 },
   { label: "과목", icon: BookOpen },
+  { label: "공지사항", icon: Bell },
   { label: "수강신청 설정", icon: Settings2 },
 ];
 
@@ -75,7 +77,7 @@ export default function AdminPage() {
             <div>
               <h2 className="!mb-1 !text-lg !font-bold">관리자 페이지</h2>
               <p className="text-[11px] leading-5 text-[#858796]">
-                학과와 개설 과목, 수강신청 설정을 관리합니다.
+                학과와 개설 과목, 공지사항, 수강신청 설정을 관리합니다.
               </p>
             </div>
           </div>
@@ -285,6 +287,10 @@ export default function AdminPage() {
                 onChange={setCourseList}
               />
             )}
+
+            <div hidden={selectCategory !== "공지사항"}>
+              <AdminNotices />
+            </div>
 
             <div hidden={selectCategory !== "수강신청 설정"}>
               <RegistrationSettings />
