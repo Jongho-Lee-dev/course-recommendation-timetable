@@ -306,6 +306,7 @@ export interface DatabaseTables {
   syllabi: Syllabus;
   filter_categories: FilterCategoryRow;
   recommendation_preferences: RecommendationPreference;
+  notices: NoticeRow;
 }
 
 /**
@@ -330,3 +331,19 @@ export interface DatabaseTables {
  * - CourseFilter/options는 filter_categories를 트리로 조립한 DTO이며 별도 테이블이 아니다.
  * - DB 제약/트랜잭션은 백엔드에서 구현해야 한다. TS 타입만으로 강제되지 않는다.
  */
+
+/**
+ * notices: 수강신청 페이지와 관리자 공지사항 관리에서 공통으로 사용하는 테이블.
+ * 실제 테이블 생성/연결 코드는 아니며, 모든 필드는 NOT NULL이다.
+ */
+export interface NoticeRow {
+  id: number; // BIGINT, PK
+  category: "수강신청" | "학사" | "장애안내" | "일반"; // VARCHAR(20)
+  title: string; // VARCHAR(200), 공백만 있는 제목 불가
+  body: string; // TEXT, 공지 본문
+  noticeDate: string; // notice_date: DATE, YYYY-MM-DD, 화면에서 지정하는 작성일
+  isImportant: boolean; // is_important: BOOLEAN, 기본값 false
+  createdAt: DateTime; // created_at: TIMESTAMP, 실제 등록 시각
+  updatedAt: DateTime; // updated_at: TIMESTAMP, 마지막 수정 시각
+}
+
