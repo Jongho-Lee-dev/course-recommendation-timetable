@@ -27,8 +27,8 @@ export default function AppRoutes() {
         element={user ? <Navigate to="/mainPage" replace /> : <LoginPage />}
       />
 
-      <Route path="/login" element={user ? <Navigate to="/mainPage" replace /> : <LoginPage />} />
-      <Route path="/signup" element={user ? <Navigate to="/mainPage" replace /> : <UserPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<UserPage />} />
 
       {/* 메인 서비스 영역 */}
       <Route element={<MainLayout />}>

@@ -2,13 +2,11 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { departments } from "../../shared/data/departments";
-import { registerAccount } from "../store/localAuth";
 
 export default function UserPage() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [pending, setPending] = useState(false);
 
   const [name, setName] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
@@ -106,8 +104,7 @@ export default function UserPage() {
 
   const hasIndependentFaculty = independentFaculties.length > 0;
 
-  const handleUserSave = async () => {
-    if (pending) return;
+  const handleUserSave = () => {
     if (password.length < 8) {
       toast.error("비밀번호를 8자 이상 입력해 주세요.");
       return;
@@ -144,24 +141,9 @@ export default function UserPage() {
       return;
     }
 
-    setPending(true);
-    try {
-      await registerAccount({
-      studentId: studentId.trim(),
-      name: name.trim(),
-      grade: Number(selectedGrade),
-      completedCredits: completed,
-      graduationCredits: graduation,
-      maxCredits: max,
-      major: selectedMajor,
-      }, password);
-      toast.success("회원가입이 완료되었습니다. 로그인해 주세요.");
-      navigate("/login", { replace: true });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "회원가입에 실패했습니다.");
-    } finally {
-      setPending(false);
-    }
+    // 회원가입 API 연결 전에는 입력값만 검증하고 저장하지 않습니다.
+    toast.info("입력 확인이 완료되었습니다. 현재는 임시 사용자로 이용할 수 있습니다.");
+    navigate("/login");
   };
 
   return (
@@ -418,10 +400,9 @@ export default function UserPage() {
             <Link to="/login" className="text-xs text-[#7658e9] hover:underline">로그인으로 돌아가기</Link>
             <button
               type="submit"
-              disabled={pending}
               className="rounded-md bg-[#7658e9] px-4 py-2 text-[10px] font-semibold text-white transition hover:bg-[#a99aed]"
             >
-              {pending ? "가입 중..." : "회원가입"}
+              회원가입
             </button>
           </div>
         </form>
