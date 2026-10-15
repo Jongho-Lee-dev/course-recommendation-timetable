@@ -1,6 +1,7 @@
 import MainLayout from "../registration/layout/MainLayout";
 import MainPage from "../registration/pages/MainPage";
 import UserPage from "../registration/pages/UserPage";
+import LoginPage from "../registration/pages/LoginPage";
 import CourseSearchPage from "../registration/pages/CourseSearchPage";
 import TimetablePage from "../registration/pages/TimetablePage";
 import FavoritesPage from "../registration/pages/FavoritesPage";
@@ -23,8 +24,11 @@ export default function AppRoutes() {
       {/* 로그인 / 사용자 페이지 */}
       <Route
         path="/"
-        element={user ? <Navigate to="/mainPage" replace /> : <UserPage />}
+        element={user ? <Navigate to="/mainPage" replace /> : <LoginPage />}
       />
+
+      <Route path="/login" element={user ? <Navigate to="/mainPage" replace /> : <LoginPage />} />
+      <Route path="/signup" element={user ? <Navigate to="/mainPage" replace /> : <UserPage />} />
 
       {/* 메인 서비스 영역 */}
       <Route element={<MainLayout />}>
