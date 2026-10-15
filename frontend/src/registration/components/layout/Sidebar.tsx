@@ -100,14 +100,14 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm("학생 정보를 초기화하시겠습니까?")) {
+                    if (window.confirm("로그아웃하시겠습니까?")) {
                       resetUser();
                       navigate("/");
                     }
                   }}
                   className="w-full rounded-md bg-[#383944] py-1.5 text-[9px] font-medium text-[#a8a9b4] transition hover:bg-[#444550] hover:text-white"
                 >
-                  학생 정보 초기화
+                  로그아웃
                 </button>
               </div>
             </div>
