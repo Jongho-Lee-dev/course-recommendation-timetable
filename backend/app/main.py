@@ -11,6 +11,8 @@ from .models import Course, Student
 from .excel import parse_excel, export_excel
 
 load_dotenv(Path(__file__).resolve().parents[1]/'.env')
+from .notice import router as notice_router
+
 @asynccontextmanager
 async def lifespan(application):
     async with httpx.AsyncClient(timeout=20) as client:
@@ -19,7 +21,9 @@ async def lifespan(application):
     application.state.http=None
 
 app=FastAPI(title='수강신청 API',version='1.0.0',lifespan=lifespan)
-app.add_middleware(CORSMiddleware,allow_origins=os.getenv('CORS_ORIGINS','http://localhost:5173').split(','),allow_methods=['GET','POST','PUT','DELETE'],allow_headers=['Authorization','Content-Type'])
+app.add_middleware(CORSMiddleware,allow_origins=os.getenv('CORS_ORIGINS','http://localhost:5173').split(','),allow_methods=['GET','POST','PUT','PATCH','DELETE'],allow_headers=['Authorization','Content-Type'])
+
+app.include_router(notice_router)
 
 async def db(method,path,body=None,params=None):
     url=os.getenv('SUPABASE_URL','').rstrip('/');key=os.getenv('SUPABASE_SERVICE_ROLE_KEY','')
