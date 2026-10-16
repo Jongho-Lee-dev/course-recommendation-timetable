@@ -1,24 +1,17 @@
 import { useMemo, useState } from "react";
 import { ClipboardList, CheckCircle2, Search, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { useCourseStore } from "../store/courseStore";
 
 export default function HistoryPage() {
   const selected = useCourseStore((s) => s.selected),
     history = useCourseStore((s) => s.history),
-    addHistory = useCourseStore((s) => s.addHistory),
+    changeEnrollments = useCourseStore((s) => s.changeEnrollments),
+    busy = useCourseStore((s) => s.enrollmentBusy),
     removeHistory = useCourseStore((s) => s.removeHistory),
     clearHistory = useCourseStore((s) => s.clearHistory);
   const [keyword, setKeyword] = useState("");
   const [tab, setTab] = useState("전체");
-  const addAll = () => {
-    selected.forEach(addHistory);
-    toast.success(
-      selected.length
-        ? `${selected.length}개 강좌를 신청내역에 반영했습니다.`
-        : "현재 시간표가 비어 있습니다.",
-    );
-  };
+  const addAll = () => { void changeEnrollments(selected.map(c=>c.id),"add"); };
   const filtered = useMemo(
     () =>
       history.filter(
@@ -57,6 +50,7 @@ export default function HistoryPage() {
             </div>
             <div className="flex gap-2">
               <button
+                disabled={busy}
                 onClick={addAll}
                 className="rounded-lg bg-[#7658e9] px-3 py-2 text-[9px] font-bold text-white"
               >
@@ -141,7 +135,6 @@ export default function HistoryPage() {
                 <button
                   onClick={() => {
                     removeHistory(course.id);
-                    toast.success("신청내역에서 삭제했습니다.");
                   }}
                   className="rounded-lg border border-[#dedfe5] p-2 text-[#9a9daa] hover:text-[#df6471]"
                 >
@@ -152,8 +145,7 @@ export default function HistoryPage() {
           </div>
         )}
         <div className="border-t border-[#f0f0f3] px-5 py-3 text-[8px] text-[#a0a3ae]">
-          ※ 현재는 프론트 목업 데이터입니다. 실제 수강신청 결과는 백엔드의 신청
-          상태 API와 연결됩니다.
+          ※ DB에 저장된 실제 신청내역입니다. 삭제하면 수강신청이 취소되고 남은 자리가 복원됩니다.
         </div>
       </section>
     </main>

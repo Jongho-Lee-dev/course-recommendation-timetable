@@ -1,3 +1,5 @@
+import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
+import { useCourseStore } from "../store/courseStore";
 import { X, Heart, MapPin, UserRound, Clock3, BookOpen } from "lucide-react";
 import type { ReactNode } from "react";
 import type { CourseListItem } from "../../shared/types/database";
@@ -13,13 +15,16 @@ type Props = {
 };
 
 export default function CourseDetailModal({
-  course,
+  course: initialCourse,
   isFavorite = false,
   isSelected = false,
   onClose,
   onToggleFavorite,
   onToggleSelected,
 }: Props) {
+  const latest = useCourseCatalogStore(s=>s.courses.find(c=>c.id===initialCourse?.id));
+  const busy = useCourseStore(s=>s.enrollmentBusy);
+  const course = latest ?? initialCourse;
   if (!course) return null;
 
   return (
@@ -112,7 +117,7 @@ export default function CourseDetailModal({
             <div>
               <p className="text-[9px] text-[#9699a7]">수강 정원</p>
               <p className="mt-1 text-[10px] font-semibold text-[#454652]">
-                현재 18명 / {course.capacity}명
+                현재 {course.enrolledCount ?? 0}명 / {course.capacity}명
               </p>
             </div>
             <div className="flex gap-2">
@@ -130,6 +135,7 @@ export default function CourseDetailModal({
               )}
               {onToggleSelected && (
                 <button
+                  disabled={busy || (!isSelected && course.remainingSeats === 0)}
                   onClick={onToggleSelected}
                   className={`rounded-lg px-4 py-2 text-[9px] font-bold ${isSelected ? "bg-[#ececf1] text-[#666976]" : "bg-[#7658e9] text-white"}`}
                 >

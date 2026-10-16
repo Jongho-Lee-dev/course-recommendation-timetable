@@ -13,6 +13,7 @@ export default function FavoritesPage() {
     selected = useCourseStore((s) => s.selected);
   const toggleFavorite = useCourseStore((s) => s.toggleFavorite),
     toggleSelected = useCourseStore((s) => s.toggleSelected),
+    changeEnrollments = useCourseStore((s) => s.changeEnrollments),
     clearFavorites = useCourseStore((s) => s.clearFavorites);
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("전체");
@@ -31,7 +32,6 @@ export default function FavoritesPage() {
   );
   const addAll = () => {
     let count = 0;
-    let skipped = 0;
     let workingCredits = getTotalCredits(selected);
     const working = [...selected];
     for (const course of filtered) {
@@ -42,18 +42,15 @@ export default function FavoritesPage() {
         workingCredits + course.credit > (user?.maxCredits ?? 18) ||
         working.length >= 6
       ) {
-        skipped++;
         continue;
       }
       working.push(course);
       workingCredits += course.credit;
       count++;
     }
-    working.slice(selected.length).forEach(toggleSelected);
+
     if (count)
-      toast.success(
-        `${count}개 강의를 시간표에 추가했습니다.${skipped ? ` ${skipped}개는 충돌/학점 제한으로 제외되었습니다.` : ""}`,
-      );
+      void changeEnrollments(working.slice(selected.length).map(c=>c.id),"add");
     else
       toast.info(
         "추가할 수 있는 강의가 없습니다. 충돌 또는 학점 제한을 확인하세요.",

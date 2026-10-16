@@ -1,3 +1,4 @@
+import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export default function CourseTable({
   toggleFavorite,
   onCourseClick,
 }: CourseTableProps) {
+  const enrollmentBusy = useCourseStore(s=>s.enrollmentBusy);
   const user = useUserStore((state) => state.user);
 
   const handleToggleCourse = (course: CourseListItem) => {
@@ -129,11 +131,11 @@ export default function CourseTable({
               <span>{scheduleText}</span>
               <span>{course.credit} cr</span>
               <span className="text-[#8b8e9c]">
-                {isSelected ? "신청완료" : `18/${course.capacity}`}
+                {isSelected ? "신청완료" : `${course.enrolledCount ?? 0}/${course.capacity}`}
               </span>
 
               <button
-                disabled={isExcluded && !isSelected}
+                disabled={enrollmentBusy || (!isSelected && (isExcluded || course.remainingSeats === 0))}
                 title={
                   isExcluded ? "소속 전공이 수강 제외 대상입니다." : undefined
                 }

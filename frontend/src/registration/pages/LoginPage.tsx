@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { mockUser, useUserStore } from "../store/userStore";
+import { useUserStore } from "../store/userStore";
+
+import { api } from "../../shared/api";
+import { toUser, type StudentProfile } from "../../shared/studentSession";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const setUser = useUserStore((state) => state.setUser);
   const [studentId, setStudentId] = useState("");
   const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#fafafd] px-6 py-10">
@@ -18,15 +22,22 @@ export default function LoginPage() {
         <p className="mb-5 mt-1 text-xs text-[#777a89]">
           학번과 비밀번호로 로그인해 주세요.
           </p>
-        <form className="rounded-xl border border-[#dddfe6] bg-white" onSubmit={(event) => {
+        <form className="rounded-xl border border-[#dddfe6] bg-white" onSubmit={async (event) => {
           event.preventDefault();
           if (!studentId.trim() || !password) {
             toast.error("학번과 비밀번호를 입력해 주세요.");
             return;
           }
           
-          setUser(mockUser);
-          navigate("/mainPage", { replace: true });
+          if (busy) return;
+          setBusy(true);
+          try {
+            const result = await api<{token:string;student:StudentProfile}>("/auth/login", {method:"POST",body:JSON.stringify({studentId:studentId.trim(),password})});
+            sessionStorage.setItem("student-token",result.token);
+            setUser(toUser(result.student));
+            navigate("/mainPage", { replace: true });
+          } catch(e) { toast.error(e instanceof Error ? e.message : "로그인 실패"); }
+          finally { setBusy(false); }
         }}>
           <h2 className="border-b border-[#ececf0] px-5 py-4 text-sm font-bold text-[#5d6070]">
             로그인
@@ -44,7 +55,7 @@ export default function LoginPage() {
                 </label>
               <input id="login-password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호를 입력하세요" className="w-full rounded-md border border-[#dddfe6] px-3 py-2.5 text-xs outline-none focus:border-[#a99aed]" />
             </div>
-            <button type="submit" className="w-full rounded-md bg-[#7658e9] py-2.5 text-xs font-semibold text-white transition hover:bg-[#a99aed]">
+            <button disabled={busy} type="submit" className="w-full rounded-md bg-[#7658e9] py-2.5 text-xs font-semibold text-white transition hover:bg-[#a99aed]">
               로그인
               </button>
           </div>
