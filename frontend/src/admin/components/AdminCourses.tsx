@@ -1,3 +1,4 @@
+import { api, saveCourse } from "../../shared/api";
 import { useMemo, useState } from "react";
 import { BookOpen, Plus, Sheet } from "lucide-react";
 import type {
@@ -663,10 +664,12 @@ export default function AdminCourses({
             setSavingExcel(true);
             try {
               await appendCourseExcel(excelHandle, course);
+              try { onChange(await saveCourse(course)); }
+              catch (e) { throw new Error(`엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`, {cause:e}); }
             } finally {
               setSavingExcel(false);
             }
-            onChange([...courses, course]);
+
             setSyllabus(course.id, syllabus);
             resetFilters();
             setMode("edit");
@@ -719,10 +722,14 @@ export default function AdminCourses({
                     type="button"
                     className={`${buttonClass} text-red-600`}
                     disabled={savingExcel}
-                    onClick={() => {
-                      onChange(courses.filter((item) => item.id !== course.id));
-                      setSelectedFilters({});
-                      if (editingId === course.id) setEditingId(null);
+                    onClick={async () => {
+                      setSavingExcel(true);
+                      try {
+                        onChange(await api<CourseListItem[]>(`/admin/courses/${course.id}`, {method: "DELETE"}));
+                        setSelectedFilters({});
+                        if (editingId === course.id) setEditingId(null);
+                      } catch(e) {alert(e instanceof Error ? e.message : "DB 삭제 실패");}
+                      finally {setSavingExcel(false);}
                     }}
                   >
                     삭제하기
@@ -746,14 +753,12 @@ export default function AdminCourses({
                     setSavingExcel(true);
                     try {
                       await updateCourseExcel(excelHandle, course, saved);
+                      try { onChange(await saveCourse(saved, course.id)); }
+                      catch (e) { throw new Error(`엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`, {cause:e}); }
                     } finally {
                       setSavingExcel(false);
                     }
-                    onChange(
-                      courses.map((item) =>
-                        item.id === saved.id ? saved : item,
-                      ),
-                    );
+
                     setSyllabus(saved.id, syllabus);
                     setSelectedFilters({});
                     setEditingId(null);

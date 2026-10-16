@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { mockCourses } from "../data/mockCourses";
+
 import type { CourseListItem } from "../types/database";
 
 interface CourseCatalogStore {
@@ -10,7 +10,7 @@ interface CourseCatalogStore {
 }
 
 export const useCourseCatalogStore = create<CourseCatalogStore>((set) => ({
-  courses: mockCourses,
+  courses: [],
   syllabi: {},
   setCourses: (courses) =>
     set((state) => ({

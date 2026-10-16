@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Check, Clock3, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { mockCourses } from "../../shared/data/mockCourses";
+import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
@@ -58,6 +58,7 @@ function buildRecommendation(
 }
 
 export default function AIRecommendationPage() {
+  const courses = useCourseCatalogStore(s=>s.courses);
   const user = useUserStore((s) => s.user);
   const selected = useCourseStore((s) => s.selected);
   const setSelected = useCourseStore((s) => s.setSelected);
@@ -73,9 +74,9 @@ export default function AIRecommendationPage() {
   const recommendations = useMemo(
     () =>
       [0, 1, 2].map((seed) =>
-        buildRecommendation(preferences, mockCourses, seed),
+        buildRecommendation(preferences, courses, seed),
       ),
-    [preferences],
+    [preferences, courses],
   );
   const current = recommendations[active];
   const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
@@ -93,7 +94,6 @@ export default function AIRecommendationPage() {
     )
       return;
     setSelected(current);
-    toast.success(`${current.length}개 강의를 나의 시간표에 반영했습니다.`);
   };
 
   return (

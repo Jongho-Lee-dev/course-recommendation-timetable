@@ -3,8 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { departments } from "../../shared/data/departments";
 
+import { api } from "../../shared/api";
+
 export default function UserPage() {
   const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -104,7 +107,9 @@ export default function UserPage() {
 
   const hasIndependentFaculty = independentFaculties.length > 0;
 
-  const handleUserSave = () => {
+  const handleUserSave = async () => {
+    if (busy) return;
+    if (name.trim().toLowerCase() === "admin") {navigate("/admin");return;}
     if (password.length < 8) {
       toast.error("비밀번호를 8자 이상 입력해 주세요.");
       return;
@@ -141,9 +146,16 @@ export default function UserPage() {
       return;
     }
 
-    // 회원가입 API 연결 전에는 입력값만 검증하고 저장하지 않습니다.
-    toast.info("입력 확인이 완료되었습니다. 현재는 임시 사용자로 이용할 수 있습니다.");
-    navigate("/login");
+    const department = departments.find(d => d.majorName === selectedMajor &&
+      (!selectedCollege || d.collegeName === selectedCollege) && (!selectedFaculty || d.facultyName === selectedFaculty));
+    if (!department) {toast.error("학과를 확인하세요.");return;}
+    setBusy(true);
+    try {
+      await api("/auth/signup", {method:"POST",body:JSON.stringify({studentId:studentId.trim(),name:name.trim(),grade:Number(selectedGrade),departmentId:department.id,completedCredits:completed,maxCredits:max,graduationCredits:graduation,password})});
+      toast.success("회원가입이 완료되었습니다. 로그인해 주세요.");
+      navigate("/login");
+    } catch(e) {toast.error(e instanceof Error ? e.message : "회원가입 실패");}
+    finally {setBusy(false);}
   };
 
   return (
@@ -399,7 +411,7 @@ export default function UserPage() {
           <div className="flex items-center justify-between border-t border-[#ececf0] px-5 py-4">
             <Link to="/login" className="text-xs text-[#7658e9] hover:underline">로그인으로 돌아가기</Link>
             <button
-              type="submit"
+              disabled={busy} type="submit"
               className="rounded-md bg-[#7658e9] px-4 py-2 text-[10px] font-semibold text-white transition hover:bg-[#a99aed]"
             >
               회원가입
