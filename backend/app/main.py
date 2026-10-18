@@ -153,3 +153,6 @@ install_enrollments(app,enrollment_db,claims,get_catalog)
 
 from .auth import install_auth
 install_auth(app,enrollment_db,token,departments)
+
+from .recommendations import install_recommendations
+install_recommendations(app,enrollment_db,claims,get_catalog)
