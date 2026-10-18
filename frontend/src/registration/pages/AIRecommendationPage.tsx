@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { Check, Clock3, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { Check, Clock3, LoaderCircle, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
+import { api } from "../../shared/api";
 import type { CourseListItem } from "../../shared/types/database";
 
 type Preferences = {
@@ -13,49 +14,10 @@ type Preferences = {
   avoidMorning: boolean;
 };
 
-function hasConflict(a: CourseListItem, b: CourseListItem) {
-  if (a.isOnline || b.isOnline) return false;
-  return a.schedules.some((x) =>
-    b.schedules.some(
-      (y) =>
-        x.dayOfWeek === y.dayOfWeek &&
-        x.startPeriod <= y.endPeriod &&
-        x.endPeriod >= y.startPeriod,
-    ),
-  );
-}
-
-function buildRecommendation(
-  preferences: Preferences,
-  courses: CourseListItem[],
-  seed: number,
-) {
-  const pool = [...courses]
-    .filter(
-      (c) =>
-        (!preferences.majorOnly || c.category === "전공") &&
-        (preferences.online || !c.isOnline),
-    )
-    .sort(
-      (a, b) =>
-        b.credit - a.credit || ((a.id + seed) % 3) - ((b.id + seed) % 3),
-    );
-  const result: CourseListItem[] = [];
-  let credits = 0;
-  for (const course of pool) {
-    if (credits + course.credit > preferences.credits) continue;
-    if (
-      preferences.avoidMorning &&
-      course.schedules.some((s) => s.startPeriod <= 2)
-    )
-      continue;
-    if (result.some((selected) => hasConflict(selected, course))) continue;
-    result.push(course);
-    credits += course.credit;
-    if (credits >= preferences.credits - 2) break;
-  }
-  return result;
-}
+type Recommendation = {
+  courses: CourseListItem[];
+  reason: string;
+};
 
 export default function AIRecommendationPage() {
   const courses = useCourseCatalogStore(s=>s.courses);
@@ -68,32 +30,52 @@ export default function AIRecommendationPage() {
     online: false,
     avoidMorning: false,
   });
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [generated, setGenerated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [emptyMessage, setEmptyMessage] = useState("");
   const [active, setActive] = useState(0);
 
-  const recommendations = useMemo(
-    () =>
-      [0, 1, 2].map((seed) =>
-        buildRecommendation(preferences, courses, seed),
-      ),
-    [preferences, courses],
-  );
   const current = recommendations[active];
-  const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
+  const currentCredits = current?.courses.reduce((sum, c) => sum + c.credit, 0) ?? 0;
 
-  const generate = () => {
-    setGenerated(true);
-    setActive(0);
-    toast.success("현재 조건에 맞는 시간표 후보를 만들었습니다.");
+  const generate = async () => {
+    setLoading(true);
+    setEmptyMessage("");
+    try {
+      const result = await api<{
+        recommendations: { courseIds: number[]; reason: string }[];
+        message?: string | null;
+      }>("/recommendations", {
+        method: "POST",
+        body: JSON.stringify(preferences),
+      }, "student");
+      const mapped = result.recommendations.map((recommendation) => ({
+        courses: recommendation.courseIds
+          .map((id) => courses.find((course) => course.id === id))
+          .filter((course): course is CourseListItem => Boolean(course)),
+        reason: recommendation.reason,
+      })).filter((recommendation) => recommendation.courses.length > 0);
+
+      setRecommendations(mapped);
+      setEmptyMessage(result.message ?? "추천 결과가 없습니다.");
+      setActive(0);
+      setGenerated(true);
+      if (mapped.length) toast.success("AI가 조건에 맞는 시간표를 추천했습니다.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "AI 추천을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
   const apply = () => {
-    if (!current.length) return;
+    if (!current?.courses.length) return;
     if (
       selected.length &&
       !window.confirm("현재 시간표를 이 추천안으로 교체할까요?")
     )
       return;
-    setSelected(current);
+    setSelected(current.courses);
   };
 
   return (
@@ -158,15 +140,17 @@ export default function AIRecommendationPage() {
           </div>
           <button
             onClick={generate}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7658e9] py-3 text-[10px] font-bold text-white hover:bg-[#6749dc]"
+            disabled={loading}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7658e9] py-3 text-[10px] font-bold text-white hover:bg-[#6749dc] disabled:cursor-not-allowed disabled:bg-[#d8d6e3]"
           >
-            <WandSparkles size={14} /> 추천 시간표 만들기
+            {loading ? <LoaderCircle size={14} className="animate-spin" /> : <WandSparkles size={14} />}
+            {loading ? "AI 추천 중…" : "추천 시간표 만들기"}
           </button>
         </section>
 
         <section className="min-w-0 rounded-2xl border border-[#e3e4e9] bg-white p-5 shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           {!generated ? (
-            <EmptyAI onGenerate={generate} />
+            <EmptyAI onGenerate={() => void generate()} loading={loading} />
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
@@ -197,7 +181,7 @@ export default function AIRecommendationPage() {
                       추천 {i + 1}
                     </span>
                     <b className="mt-1 block text-[11px]">
-                      {rec.reduce((s, c) => s + c.credit, 0)}학점 · {rec.length}
+                      {rec.courses.reduce((s, c) => s + c.credit, 0)}학점 · {rec.courses.length}
                       과목
                     </b>
                     <span className="mt-1 block text-[8px] text-[#8d8f9c]">
@@ -206,9 +190,14 @@ export default function AIRecommendationPage() {
                   </button>
                 ))}
               </div>
+              {current?.reason && (
+                <p className="mt-4 rounded-xl bg-[#f7f5ff] px-4 py-3 text-[9px] leading-5 text-[#6555a7]">
+                  {current.reason}
+                </p>
+              )}
               <div className="mt-4 space-y-2">
-                {current.length ? (
-                  current.map((course) => (
+                {current?.courses.length ? (
+                  current.courses.map((course) => (
                     <div
                       key={course.id}
                       className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#ececf0] px-4 py-3"
@@ -241,14 +230,14 @@ export default function AIRecommendationPage() {
                   ))
                 ) : (
                   <div className="py-12 text-center text-[10px] text-[#9699a7]">
-                    조건을 조금 완화하면 추천할 수 있는 강의가 늘어납니다.
+                    {emptyMessage || "조건을 조금 완화하면 추천할 수 있는 강의가 늘어납니다."}
                   </div>
                 )}
               </div>
               <div className="mt-5 flex justify-end">
                 <button
                   onClick={apply}
-                  disabled={!current.length}
+                  disabled={!current?.courses.length}
                   className="flex items-center gap-2 rounded-xl bg-[#7658e9] px-5 py-3 text-[10px] font-bold text-white disabled:cursor-not-allowed disabled:bg-[#d8d6e3]"
                 >
                   <Check size={14} /> 이 시간표 사용하기
@@ -259,8 +248,7 @@ export default function AIRecommendationPage() {
         </section>
       </div>
       <p className="mt-3 px-1 text-[8px] text-[#aaaab4]">
-        ※ 현재는 백엔드 AI API 연결 전 단계의 추천 시뮬레이션입니다. 실제
-        서비스에서는 학생 조건과 개설 강좌 데이터를 API로 전달합니다.
+        ※ 추천 조건을 백엔드 AI API로 보내고, API 오류가 나면 안내 메시지를 표시합니다.
       </p>
     </main>
   );
@@ -292,7 +280,7 @@ function Toggle({
     </button>
   );
 }
-function EmptyAI({ onGenerate }: { onGenerate: () => void }) {
+function EmptyAI({ onGenerate, loading }: { onGenerate: () => void; loading: boolean }) {
   return (
     <div className="grid min-h-[520px] place-items-center text-center">
       <div className="max-w-[400px]">
@@ -308,9 +296,10 @@ function EmptyAI({ onGenerate }: { onGenerate: () => void }) {
         </p>
         <button
           onClick={onGenerate}
+          disabled={loading}
           className="mt-5 rounded-lg border border-[#dcd9ea] px-4 py-2 text-[9px] font-bold text-[#7658e9]"
         >
-          추천 시작하기
+          {loading ? "추천 중…" : "추천 시작하기"}
         </button>
       </div>
     </div>
