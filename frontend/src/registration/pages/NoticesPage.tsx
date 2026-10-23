@@ -1,15 +1,47 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, ChevronRight, Pin, Search, X } from "lucide-react";
 
-import { notices, type Notice } from "../../shared/data/notices";
+import type { Notice } from "../../shared/data/notices";
+import { api } from "../../shared/api";
+
+type NoticeResponse = {
+  id: number;
+  title: string;
+  content: string;
+  is_pinned: boolean | null;
+  created_at: string;
+};
 
 export default function NoticesPage() {
+  const [noticeItems, setNoticeItems] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let mounted = true;
+    api<NoticeResponse[]>("/notices")
+      .then(data => {
+        if (!mounted) return;
+        setNoticeItems(data.map(n => ({
+          id: n.id,
+          category: "일반",
+          title: n.title,
+          body: n.content,
+          important: n.is_pinned ?? false,
+          date: new Date(n.created_at).toLocaleDateString("ko-KR"),
+        })));
+      })
+      .catch(e => {
+        if (mounted) setError(e instanceof Error ? e.message : "공지 조회 실패");
+      })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, []);
   const [category, setCategory] = useState("전체");
   const [keyword, setKeyword] = useState("");
   const [active, setActive] = useState<Notice | null>(null);
   const filtered = useMemo(
     () =>
-      notices.filter(
+      noticeItems.filter(
         (n) =>
           (category === "전체" || n.category === category) &&
           (!keyword.trim() ||
@@ -17,7 +49,7 @@ export default function NoticesPage() {
               .toLowerCase()
               .includes(keyword.toLowerCase())),
       ),
-    [category, keyword],
+    [noticeItems, category, keyword],
   );
   return (
     <main className="mx-auto w-full max-w-[1500px] px-4 py-6 font-['Pretendard',sans-serif] text-[#20212b] min-[1101px]:px-7">
@@ -59,9 +91,13 @@ export default function NoticesPage() {
           </div>
         </div>
         <div>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <p role="status" className="py-20 text-center text-[10px] text-[#9699a7]">공지를 불러오는 중입니다.</p>
+          ) : error ? (
+            <p role="alert" className="py-20 text-center text-[10px] text-red-600">{error}</p>
+          ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-[10px] text-[#9699a7]">
-              검색 결과가 없습니다.
+              {noticeItems.length === 0 ? "등록된 공지가 없습니다." : "검색 결과가 없습니다."}
             </div>
           ) : (
             filtered.map((n) => (
@@ -100,8 +136,7 @@ export default function NoticesPage() {
           )}
         </div>
         <div className="px-5 py-3 text-[8px] text-[#a0a3ae]">
-          총 {filtered.length}건 · 현재는 프론트 목업 공지이며 추후 백엔드
-          게시판 API와 연결됩니다.
+          {!loading && !error && `총 ${filtered.length}건`}
         </div>
       </section>
       {active && (
