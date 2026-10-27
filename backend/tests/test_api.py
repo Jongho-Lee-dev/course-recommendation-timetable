@@ -11,6 +11,12 @@ def client(monkeypatch):
     monkeypatch.setenv('SESSION_SECRET','test-secret-'*4)
     return TestClient(main.app)
 
+def test_cors_allows_deployed_frontend(client):
+    origin='https://course-recommendation-timetable.vercel.app'
+    r=client.options('/api/courses',headers={'Origin':origin,'Access-Control-Request-Method':'GET'})
+    assert r.status_code==200
+    assert r.headers['access-control-allow-origin']==origin
+
 def test_excel_preserves_original_and_roundtrips():
     old=parse_excel((ROOT/'과목 데이터.xlsx').read_bytes())
     import json
