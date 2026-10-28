@@ -7,6 +7,8 @@ import TimetablePage from "../registration/pages/TimetablePage";
 import FavoritesPage from "../registration/pages/FavoritesPage";
 import HistoryPage from "../registration/pages/HistoryPage";
 import AIRecommendationPage from "../registration/pages/AIRecommendationPage";
+import ChatbotPage from "../registration/pages/ChatbotPage";
+import ProfileEditPage from "../registration/pages/ProfileEditPage";
 import NoticesPage from "../registration/pages/NoticesPage";
 import { useUserStore } from "../registration/store/userStore";
 import { Navigate, Routes, Route } from "react-router-dom";
@@ -43,6 +45,12 @@ export default function AppRoutes() {
 
         {/* AI 시간표 추천 */}
         <Route path="/ai" element={protectedPage(<AIRecommendationPage />)} />
+
+        {/* AI 학업 도우미 */}
+        <Route path="/chatbot" element={protectedPage(<ChatbotPage />)} />
+
+        {/* 개인정보 수정 */}
+        <Route path="/profile" element={protectedPage(<ProfileEditPage />)} />
 
         {/* 관심 강좌 */}
         <Route path="/favorites" element={protectedPage(<FavoritesPage />)} />
