@@ -23,7 +23,7 @@
 
 ## 2. 서버 환경변수
 
-`backend/.env.example`을 복사해 `backend/.env`를 만드세요.
+로컬 설정은 `backend/.env`에서 관리합니다. Redis 설정은 유지하고, 아래 DB 연결 및 세션/CORS 변수를 설정하세요. `.env`는 Git에서 제외됩니다. 배포 시에는 Render Environment에 별도로 등록하세요.
 
 ```dotenv
 SUPABASE_URL=https://프로젝트ID.supabase.co
@@ -55,7 +55,7 @@ npm ci
 npm run dev
 ```
 
-`frontend/.env.example` → `.env` 복사. API 기본 주소는 `http://localhost:8000`입니다.
+`frontend/.env`의 `VITE_API_BASE_URL`에 백엔드 주소를 설정하세요. 로컬 백엔드는 `http://localhost:8000`, 배포 백엔드는 `https://course-recommendation-timetable.onrender.com`입니다. Vercel에서는 같은 변수를 Environment에 등록하고 재배포하세요. 백엔드 `CORS_ORIGINS`에는 접속할 프론트 주소를 쉼표로 구분해 등록합니다.
 서버 문서: http://localhost:8000/docs
 DB 연결 확인: http://localhost:8000/api/health
 
