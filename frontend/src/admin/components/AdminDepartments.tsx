@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Building2, Plus, Sheet, Search } from "lucide-react";
-import { api } from "../../shared/api";
+import {
+  downloadDepartmentExcel,
+  readDepartmentExcel,
+  saveDepartmentExcel,
+} from "../utils/departmentExcel";
 import type { Department } from "../../shared/types/database";
 
 const fields = [
@@ -12,15 +16,9 @@ const fields = [
 export default function AdminDepartments({
   departments,
   onChange,
-  loading,
-  loadError,
-  onRetry,
 }: {
   departments: Department[];
   onChange: (items: Department[]) => void;
-  loading: boolean;
-  loadError: string;
-  onRetry: () => void;
 }) {
   const [mode, setMode] = useState<"list" | "add" | "edit" | "import">("list");
   const [draft, setDraft] = useState<Department | null>(null);
@@ -30,7 +28,50 @@ export default function AdminDepartments({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
-  const disabled = busy || loading || !!loadError;
+  const [excelHandle, setExcelHandle] = useState<FileSystemFileHandle | null>(
+    null,
+  );
+  const disabled = busy;
+  const selectExcel = async () => {
+    if (!("showOpenFilePicker" in window)) {
+      setError(
+        "엑셀 직접 저장은 데스크톱 Chrome 또는 Edge에서 사용하세요. 엑셀 불러오기와 다운로드는 다른 브라우저에서도 가능합니다.",
+      );
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: "학과 엑셀",
+            accept: {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                [".xlsx"],
+            },
+          },
+        ],
+      });
+      const items = await readDepartmentExcel(await handle.getFile());
+      setExcelHandle(handle);
+      onChange(items);
+      if (mode === "add")
+        setDraft({
+          id: Math.max(0, ...items.map((d) => d.id)) + 1,
+          majorName: "",
+          collegeName: "",
+          facultyName: "",
+        });
+      else setDraft(null);
+      setMessage(`${handle.name}을 불러왔습니다.`);
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) fail(e);
+    } finally {
+      setBusy(false);
+    }
+  };
   const fail = (e: unknown) =>
     setError(e instanceof Error ? e.message : "요청에 실패했습니다.");
   const changeMode = (next: typeof mode) => {
@@ -52,13 +93,7 @@ export default function AdminDepartments({
     setBusy(true);
     setError("");
     try {
-      const blob = await api<Blob>("/admin/departments.xlsx");
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "학과_최신목록.xlsx";
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      downloadDepartmentExcel(departments);
     } catch (e) {
       fail(e);
     } finally {
@@ -80,28 +115,19 @@ export default function AdminDepartments({
         setError("");
         setMessage("");
         try {
-          const saved = await api<Department>(
-            `/admin/departments${mode === "edit" ? `/${draft.id}` : ""}`,
-            {
-              method: mode === "edit" ? "PUT" : "POST",
-              body: JSON.stringify({
-                ...draft,
-                majorName: draft.majorName.trim(),
-                collegeName: draft.collegeName?.trim() || null,
-                facultyName: draft.facultyName?.trim() || null,
-              }),
-            },
+          if (!excelHandle)
+            throw new Error(
+              "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
+            );
+          const updated = await saveDepartmentExcel(
+            excelHandle,
+            draft,
+            mode === "edit",
           );
-          onChange(
-            [...departments.filter((d) => d.id !== saved.id), saved].sort(
-              (a, b) => a.id - b.id,
-            ),
-          );
+          onChange(updated);
           setDraft(null);
           setMode("list");
-          setMessage(
-            "학과를 DB에 저장했습니다. 최신 엑셀을 다운로드할 수 있습니다.",
-          );
+          setMessage("선택한 엑셀 파일에 학과 정보를 저장했습니다.");
         } catch (e) {
           fail(e);
         } finally {
@@ -230,18 +256,29 @@ export default function AdminDepartments({
           선택 화면으로
         </button>
       </div>
-      {loading && <p role="status">학과를 불러오는 중입니다.</p>}
-      {loadError && (
-        <div role="alert" className="text-red-600">
-          {loadError}{" "}
-          <button
-            className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
-            onClick={onRetry}
-          >
-            다시 불러오기
-          </button>
-        </div>
-      )}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {mode !== "import" && (
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={selectExcel}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+            >
+              저장할 엑셀 선택
+            </button>
+            <span>{excelHandle?.name ?? "선택된 파일 없음"}</span>
+          </>
+        )}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={download}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+        >
+          학과 엑셀 다운로드
+        </button>
+      </div>
       {error && (
         <p role="alert" className="text-red-600 whitespace-pre-wrap">
           {error}
@@ -257,8 +294,8 @@ export default function AdminDepartments({
       {mode === "import" && (
         <div>
           <p className="mb-3">
-            같은 코드는 수정하고 새 코드는 추가합니다. 파일에 없는 기존 학과는
-            유지합니다.
+            엑셀 파일의 학과 목록을 현재 화면에 불러옵니다. 추가·수정하려면 해당
+            화면에서 저장할 엑셀을 선택하세요.
           </p>
           <input
             aria-label="학과 엑셀 선택"
@@ -279,12 +316,8 @@ export default function AdminDepartments({
               }
               setBusy(true);
               try {
-                const form = new FormData();
-                form.append("file", selected);
-                const rows = await api<Department[]>(
-                  "/admin/departments-import?preview=true",
-                  { method: "POST", body: form },
-                );
+                const rows = await readDepartmentExcel(selected);
+                if (!rows.length) throw new Error("적용할 학과가 없습니다.");
                 setPreview(rows);
                 setFile(selected);
               } catch (err) {
@@ -325,16 +358,11 @@ export default function AdminDepartments({
                 setBusy(true);
                 setError("");
                 try {
-                  const form = new FormData();
-                  form.append("file", file);
-                  const updated = await api<Department[]>(
-                    "/admin/departments-import",
-                    { method: "POST", body: form },
-                  );
-                  onChange(updated);
+                  onChange(preview);
+                  setExcelHandle(null);
                   setPreview([]);
                   setFile(null);
-                  setMessage("엑셀의 학과 정보를 DB에 적용했습니다.");
+                  setMessage("엑셀의 학과 목록을 화면에 적용했습니다.");
                 } catch (e) {
                   fail(e);
                 } finally {
@@ -401,15 +429,12 @@ export default function AdminDepartments({
               {draft?.id === d.id && departmentForm}
             </div>
           ))}
-          {!loading &&
-            !loadError &&
-            departments.length > 0 &&
-            filtered.length === 0 && (
-              <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">
-                검색 조건에 맞는 학과가 없습니다.
-              </p>
-            )}
-          {!loading && !loadError && !departments.length && (
+          {departments.length > 0 && filtered.length === 0 && (
+            <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">
+              검색 조건에 맞는 학과가 없습니다.
+            </p>
+          )}
+          {!departments.length && (
             <p>
               등록된 학과가 없습니다. 학과 추가 또는 엑셀 적용으로 등록하세요.
             </p>

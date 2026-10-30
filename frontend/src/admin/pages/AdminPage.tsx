@@ -1,10 +1,16 @@
 import AdminNotices from "../components/AdminNotices";
 import AdminCourses from "../components/AdminCourses";
 import RegistrationSettings from "../components/RegistrationSettings";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AdminDepartments from "../components/AdminDepartments";
-import { api } from "../../shared/api";
-import { Bell, BookOpen, Building2, Settings2, ShieldCheck } from "lucide-react";
+import { departments } from "../../shared/data/departments";
+import {
+  Bell,
+  BookOpen,
+  Building2,
+  Settings2,
+  ShieldCheck,
+} from "lucide-react";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import type { Department } from "../../shared/types/database";
 
@@ -16,26 +22,8 @@ const categories = [
 ];
 
 export default function AdminPage() {
-  const [departmentList, setDepartmentList] = useState<Department[]>([]);
-  const [departmentsLoading, setDepartmentsLoading] = useState(true);
-  const [departmentsError, setDepartmentsError] = useState('');
-  const [reload, setReload] = useState(0);
-  useEffect(() => {
-    let active = true;
-    api<Department[]>('/departments').then(items => {
-      if (active) { setDepartmentList(items); setDepartmentsError(''); }
-    }).catch(e => { if (active) setDepartmentsError(e instanceof Error ? e.message : '학과 조회 실패'); })
-      .finally(() => { if (active) setDepartmentsLoading(false); });
-    return () => { active = false; };
-  }, [reload]);
-  const updateDepartments = (items: Department[]) => {
-    setDepartmentList(items);
-    const store = useCourseCatalogStore.getState();
-    store.setCourses(store.courses.map(course => {
-      const department = items.find(d => d.id === course.departmentId);
-      return department ? { ...course, majorName: department.majorName, facultyName: department.facultyName ?? undefined, collegeName: department.collegeName ?? undefined } : course;
-    }));
-  };
+  const [departmentList, setDepartmentList] =
+    useState<Department[]>(departments);
 
   const [selectCategory, setSelectCategory] = useState("학과");
   const courseList = useCourseCatalogStore((state) => state.courses);
@@ -106,9 +94,10 @@ export default function AdminPage() {
 
           <div className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white p-4 shadow-[0_3px_14px_rgba(26,28,44,0.035)] min-[701px]:p-5">
             <div hidden={selectCategory !== categories[0].label}>
-              <AdminDepartments departments={departmentList} onChange={updateDepartments}
-                loading={departmentsLoading} loadError={departmentsError}
-                onRetry={() => { setDepartmentsLoading(true); setDepartmentsError(''); setReload(n => n + 1); }} />
+              <AdminDepartments
+                departments={departmentList}
+                onChange={setDepartmentList}
+              />
             </div>
 
             {selectCategory === "과목" && (
