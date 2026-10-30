@@ -25,7 +25,7 @@ app.add_middleware(CORSMiddleware,allow_origins=os.getenv('CORS_ORIGINS','http:/
 
 app.include_router(notice_router, prefix="/api")
 
-async def db(method,path,body=None,params=None):
+async def db(method,path,body=None,params=None,prefer='return=representation'):
     url=os.getenv('SUPABASE_URL','').rstrip('/');key=os.getenv('SUPABASE_SERVICE_ROLE_KEY','')
     if not url or not key: raise HTTPException(503,'backend/.env에 Supabase 연결 정보를 설정하세요.')
     async with AsyncExitStack() as stack:
@@ -33,7 +33,7 @@ async def db(method,path,body=None,params=None):
         if client is None:
             client=await stack.enter_async_context(httpx.AsyncClient(timeout=20))
         try:
-            r=await client.request(method,f'{url}/rest/v1/{path}',json=body,params=params,headers={'apikey':key,'Authorization':f'Bearer {key}','Prefer':'return=representation'})
+            r=await client.request(method,f'{url}/rest/v1/{path}',json=body,params=params,headers={'apikey':key,'Authorization':f'Bearer {key}','Prefer':prefer})
         except httpx.RequestError: raise HTTPException(503,'DB 연결에 실패했습니다.')
     if r.is_error:
         error=r.json() if r.headers.get('content-type','').startswith('application/json') else {}
@@ -68,6 +68,9 @@ async def health():
 
 @app.get('/api/departments')
 async def departments(): return await db('GET','tt_departments',params={'order':'id'})
+
+from .departments import install_departments
+install_departments(app, db)
 
 async def get_catalog(active_only=True):
     snapshot=await db('POST','rpc/tt_enrollment_snapshot',{})
