@@ -73,16 +73,6 @@ export async function readDepartmentExcel(file: File) {
   return (await readBook(file)).items;
 }
 
-export function downloadDepartmentExcel(items: Department[]) {
-  const book = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(
-    book,
-    XLSX.utils.aoa_to_sheet(rowsFor(items)),
-    "학과 목록",
-  );
-  XLSX.writeFile(book, "학과 데이터.xlsx");
-}
-
 export async function saveDepartmentExcel(
   handle: FileSystemFileHandle,
   draft: Department,

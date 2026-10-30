@@ -11,7 +11,12 @@ export default function HistoryPage() {
     clearHistory = useCourseStore((s) => s.clearHistory);
   const [keyword, setKeyword] = useState("");
   const [tab, setTab] = useState("전체");
-  const addAll = () => { void changeEnrollments(selected.map(c=>c.id),"add"); };
+  const addAll = () => {
+    void changeEnrollments(
+      selected.map((c) => c.id),
+      "add",
+    );
+  };
   const filtered = useMemo(
     () =>
       history.filter(
@@ -145,7 +150,8 @@ export default function HistoryPage() {
           </div>
         )}
         <div className="border-t border-[#f0f0f3] px-5 py-3 text-[8px] text-[#a0a3ae]">
-          ※ DB에 저장된 실제 신청내역입니다. 삭제하면 수강신청이 취소되고 남은 자리가 복원됩니다.
+          ※ DB에 저장된 실제 신청내역입니다. 삭제하면 수강신청이 취소되고 남은
+          자리가 복원됩니다.
         </div>
       </section>
     </main>

@@ -29,7 +29,10 @@ export const useUserStore = create<UserStore>()(
           user: newUser,
         }),
 
-      reset: () => { sessionStorage.removeItem("student-token"); set({ user: null }); },
+      reset: () => {
+        sessionStorage.removeItem("student-token");
+        set({ user: null });
+      },
     }),
     {
       name: "user-storage",

@@ -1,17 +1,99 @@
 -- 원본 엑셀 18개 강좌 + 가데이터 22개 = 총 40개. 모든 추가 인물은 가상입니다.
 begin;
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(1,'컴퓨터공학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(2,'소프트웨어학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(3,'경영학과','경영학부','경영대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(4,'자유전공','자유전공학부',null) on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(5,'특수전공',null,null) on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(6,'건축학과','건축학부','공과대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(7,'법학과',null,null) on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(10,'교양학부',null,'교양대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(11,'인공지능학과','AI융합학부','AI·SW창의융합대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(12,'데이터사이언스학과','데이터사이언스학부','AI·SW창의융합대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(13,'정보보안학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(14,'기계공학과',null,'공과대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
-insert into public.tt_departments(id,"majorName","facultyName","collegeName") values(15,'토목공학과','건설환경학부','공과대학') on conflict(id) do update set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(1,'컴퓨터공학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(2,'소프트웨어학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(3,'경영학과','경영학부','경영대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(4,'자유전공','자유전공학부',null) on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(5,'특수전공',null,null) on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(6,'건축학과','건축학부','공과대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(7,'법학과',null,null) on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(10,'교양학부',null,'교양대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(11,'인공지능학과','AI융합학부','AI·SW창의융합대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(12,'데이터사이언스학과','데이터사이언스학부','AI·SW창의융합대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(13,'정보보안학과','컴퓨터소프트웨어학부','AI·SW창의융합대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(14,'기계공학과',null,'공과대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
+insert into public.tt_departments(id,
+                     "majorName", "facultyName", "collegeName")
+values(15,'토목공학과','건설환경학부','공과대학') on conflict(id) do
+update
+set "majorName"=excluded."majorName","facultyName"=excluded."facultyName","collegeName"=excluded."collegeName";
+
+
 select public.tt_save_catalog('[{"courseCode": "CS201", "sectionNo": "01", "title": "자료구조", "professorName": "김교수", "credit": 3.0, "capacity": 40, "targetGrade": 2, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [3, 4], "schedules": [{"dayOfWeek": "월", "startPeriod": 2, "endPeriod": 3, "classroom": "IT Hall 301"}, {"dayOfWeek": "수", "startPeriod": 2, "endPeriod": 3, "classroom": "IT Hall 301"}]}, {"courseCode": "SW201", "sectionNo": "01", "title": "소프트웨어공학", "professorName": "박교수", "credit": 3.0, "capacity": 40, "targetGrade": 2, "departmentId": 2, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [5], "schedules": [{"dayOfWeek": "화", "startPeriod": 4, "endPeriod": 5, "classroom": "IT Hall 202"}]}, {"courseCode": "IS301", "sectionNo": "01", "title": "정보보안개론", "professorName": "이교수", "credit": 3.0, "capacity": 40, "targetGrade": 3, "departmentId": 13, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 2, "endPeriod": 3, "classroom": "IT Hall 205"}]}, {"courseCode": "ME201", "sectionNo": "01", "title": "기계공학개론", "professorName": "최교수", "credit": 3.0, "capacity": 40, "targetGrade": 2, "departmentId": 14, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "월", "startPeriod": 5, "endPeriod": 6, "classroom": "공학관 101"}]}, {"courseCode": "CE301", "sectionNo": "01", "title": "토목공학개론", "professorName": "정교수", "credit": 3.0, "capacity": 40, "targetGrade": 3, "departmentId": 15, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 6, "endPeriod": 7, "classroom": "공학관 202"}]}, {"courseCode": "AR201", "sectionNo": "01", "title": "건축학개론", "professorName": "한교수", "credit": 3.0, "capacity": 35, "targetGrade": 2, "departmentId": 6, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 1, "endPeriod": 2, "classroom": "건축관 301"}]}, {"courseCode": "LAW301", "sectionNo": "01", "title": "민법총칙", "professorName": "김법학", "credit": 3.0, "capacity": 50, "targetGrade": 3, "departmentId": 7, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 2, "endPeriod": 4, "classroom": "법학관 101"}]}, {"courseCode": "CS305", "sectionNo": "01", "title": "컴퓨터 네트워크", "professorName": "박교수", "credit": 3.0, "capacity": 40, "targetGrade": 3, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 4, "endPeriod": 5, "classroom": "IT Hall 202"}]}, {"courseCode": "CS401", "sectionNo": "01", "title": "웹프로그래밍", "professorName": "박교수", "credit": 3.0, "capacity": 40, "targetGrade": 3, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 4, "endPeriod": 5, "classroom": "IT Hall 302"}]}, {"courseCode": "GE101", "sectionNo": "01", "title": "대학생활과 진로", "professorName": "이강사", "credit": 2.0, "capacity": 50, "targetGrade": 1, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 필수", "취·창업실무영역(비전설계영역)", "진로·취업"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 4, "endPeriod": 5, "classroom": "인문관 203"}]}, {"courseCode": "GE202", "sectionNo": "01", "title": "현대사회와 문화", "professorName": "최교수", "credit": 3.0, "capacity": 45, "targetGrade": 2, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 선택", "경제와 사회(사회와 문화)", "사회와 문화"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 5, "endPeriod": 6, "classroom": "인문관 105"}]}, {"courseCode": "GE303", "sectionNo": "01", "title": "인간과 사회", "professorName": "정교수", "credit": 3.0, "capacity": 40, "targetGrade": 2, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 선택", "균형기초학문영역(균형학문영역)", "인문과 철학"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 3, "endPeriod": 4, "classroom": "인문관 201"}]}, {"courseCode": "GE304", "sectionNo": "01", "title": "디지털 시대의 이해", "professorName": "김교수", "credit": 3.0, "capacity": 50, "targetGrade": 1, "departmentId": 10, "isOnline": true, "classificationPath": ["교양", "교양 필수", "균형기초학문영역(균형학문영역)", "디지털 리터러시"], "excludedDepartmentIds": [1, 2], "schedules": []}, {"courseCode": "GE405", "sectionNo": "01", "title": "대학 글쓰기", "professorName": "박강사", "credit": 2.0, "capacity": 45, "targetGrade": 1, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 필수 선택", "의사소통 영역", "글쓰기·표현"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 1, "endPeriod": 2, "classroom": "인문관 302"}]}, {"courseCode": "MD201", "sectionNo": "01", "title": "인공지능 기초", "professorName": "강교수", "credit": 3.0, "capacity": 30, "targetGrade": 2, "departmentId": 11, "isOnline": false, "classificationPath": ["마이크로디그리", "마이크로"], "excludedDepartmentIds": [1], "schedules": [{"dayOfWeek": "월", "startPeriod": 6, "endPeriod": 7, "classroom": "AI관 201"}]}, {"courseCode": "MD301", "sectionNo": "01", "title": "머신러닝 실습", "professorName": "이교수", "credit": 3.0, "capacity": 30, "targetGrade": 3, "departmentId": 11, "isOnline": false, "classificationPath": ["마이크로디그리", "마이크로"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 6, "endPeriod": 8, "classroom": "AI관 302"}]}, {"courseCode": "MD401", "sectionNo": "01", "title": "데이터 분석", "professorName": "박교수", "credit": 3.0, "capacity": 35, "targetGrade": 3, "departmentId": 12, "isOnline": true, "classificationPath": ["마이크로디그리", "마이크로"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "1234", "sectionNo": "01", "title": "캡스톤디자인1", "professorName": "이교수", "credit": 3.0, "capacity": 40, "targetGrade": 1, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "월", "startPeriod": 1, "endPeriod": 1, "classroom": "없음"}]}, {"courseCode": "CS101", "sectionNo": "01", "title": "컴퓨터개론", "professorName": "김가람", "credit": 3, "capacity": 30, "targetGrade": 1, "departmentId": 1, "isOnline": true, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "CS102", "sectionNo": "01", "title": "C프로그래밍", "professorName": "이서연", "credit": 3, "capacity": 40, "targetGrade": 1, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 3, "endPeriod": 4, "classroom": "IT Hall 201"}]}, {"courseCode": "CS202", "sectionNo": "01", "title": "객체지향프로그래밍", "professorName": "박민준", "credit": 3, "capacity": 50, "targetGrade": 2, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 5, "endPeriod": 6, "classroom": "IT Hall 202"}]}, {"courseCode": "CS203", "sectionNo": "01", "title": "데이터베이스", "professorName": "최지우", "credit": 3, "capacity": 60, "targetGrade": 2, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 7, "endPeriod": 8, "classroom": "IT Hall 203"}]}, {"courseCode": "CS204", "sectionNo": "01", "title": "컴퓨터구조", "professorName": "정하늘", "credit": 3, "capacity": 30, "targetGrade": 2, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 1, "endPeriod": 2, "classroom": "IT Hall 204"}]}, {"courseCode": "CS301", "sectionNo": "01", "title": "운영체제", "professorName": "김가람", "credit": 3, "capacity": 40, "targetGrade": 3, "departmentId": 1, "isOnline": true, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "CS302", "sectionNo": "01", "title": "알고리즘", "professorName": "이서연", "credit": 3, "capacity": 50, "targetGrade": 3, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 5, "endPeriod": 6, "classroom": "IT Hall 206"}]}, {"courseCode": "CS303", "sectionNo": "01", "title": "컴퓨터네트워크", "professorName": "박민준", "credit": 3, "capacity": 60, "targetGrade": 3, "departmentId": 1, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 7, "endPeriod": 8, "classroom": "IT Hall 207"}]}, {"courseCode": "SW101", "sectionNo": "01", "title": "파이썬프로그래밍", "professorName": "정하늘", "credit": 3, "capacity": 40, "targetGrade": 1, "departmentId": 2, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 3, "endPeriod": 4, "classroom": "IT Hall 209"}]}, {"courseCode": "SW202", "sectionNo": "01", "title": "웹프로그래밍", "professorName": "김가람", "credit": 3, "capacity": 50, "targetGrade": 2, "departmentId": 2, "isOnline": true, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "SW301", "sectionNo": "01", "title": "백엔드프로그래밍", "professorName": "이서연", "credit": 3, "capacity": 60, "targetGrade": 3, "departmentId": 2, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 7, "endPeriod": 8, "classroom": "IT Hall 211"}]}, {"courseCode": "SW302", "sectionNo": "01", "title": "모바일앱개발", "professorName": "박민준", "credit": 3, "capacity": 30, "targetGrade": 3, "departmentId": 2, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 1, "endPeriod": 2, "classroom": "IT Hall 212"}]}, {"courseCode": "AI101", "sectionNo": "01", "title": "인공지능입문", "professorName": "최지우", "credit": 3, "capacity": 40, "targetGrade": 1, "departmentId": 11, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 3, "endPeriod": 4, "classroom": "IT Hall 213"}]}, {"courseCode": "AI201", "sectionNo": "01", "title": "머신러닝", "professorName": "정하늘", "credit": 3, "capacity": 50, "targetGrade": 2, "departmentId": 11, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "금", "startPeriod": 5, "endPeriod": 6, "classroom": "IT Hall 214"}]}, {"courseCode": "AI301", "sectionNo": "01", "title": "딥러닝", "professorName": "김가람", "credit": 3, "capacity": 60, "targetGrade": 3, "departmentId": 11, "isOnline": true, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "DS201", "sectionNo": "01", "title": "데이터분석", "professorName": "이서연", "credit": 3, "capacity": 30, "targetGrade": 2, "departmentId": 12, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 1, "endPeriod": 2, "classroom": "IT Hall 216"}]}, {"courseCode": "DS301", "sectionNo": "01", "title": "빅데이터처리", "professorName": "박민준", "credit": 3, "capacity": 40, "targetGrade": 3, "departmentId": 12, "isOnline": false, "classificationPath": ["전공", "전공 선택"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 3, "endPeriod": 4, "classroom": "IT Hall 217"}]}, {"courseCode": "IS201", "sectionNo": "01", "title": "암호학기초", "professorName": "최지우", "credit": 3, "capacity": 50, "targetGrade": 2, "departmentId": 13, "isOnline": false, "classificationPath": ["전공", "전공 필수"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 5, "endPeriod": 6, "classroom": "IT Hall 218"}]}, {"courseCode": "GE102", "sectionNo": "01", "title": "글쓰기와소통", "professorName": "김가람", "credit": 3, "capacity": 30, "targetGrade": 1, "departmentId": 10, "isOnline": true, "classificationPath": ["교양", "교양 선택", "일반 교양"], "excludedDepartmentIds": [], "schedules": []}, {"courseCode": "GE103", "sectionNo": "01", "title": "음악의이해", "professorName": "이서연", "credit": 3, "capacity": 40, "targetGrade": 1, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 선택", "일반 교양"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "화", "startPeriod": 3, "endPeriod": 4, "classroom": "IT Hall 221"}]}, {"courseCode": "GE104", "sectionNo": "01", "title": "환경과사회", "professorName": "박민준", "credit": 3, "capacity": 50, "targetGrade": 1, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 선택", "일반 교양"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "수", "startPeriod": 5, "endPeriod": 6, "classroom": "IT Hall 222"}]}, {"courseCode": "GE105", "sectionNo": "01", "title": "생활속통계", "professorName": "최지우", "credit": 3, "capacity": 60, "targetGrade": 1, "departmentId": 10, "isOnline": false, "classificationPath": ["교양", "교양 선택", "일반 교양"], "excludedDepartmentIds": [], "schedules": [{"dayOfWeek": "목", "startPeriod": 7, "endPeriod": 8, "classroom": "IT Hall 223"}]}]'::jsonb, false, null);
+
+
 commit;

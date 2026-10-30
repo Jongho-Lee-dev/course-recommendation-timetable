@@ -19,22 +19,29 @@ export default function NoticesPage() {
   useEffect(() => {
     let mounted = true;
     api<NoticeResponse[]>("/notices")
-      .then(data => {
+      .then((data) => {
         if (!mounted) return;
-        setNoticeItems(data.map(n => ({
-          id: n.id,
-          category: "일반",
-          title: n.title,
-          body: n.content,
-          important: n.is_pinned ?? false,
-          date: new Date(n.created_at).toLocaleDateString("ko-KR"),
-        })));
+        setNoticeItems(
+          data.map((n) => ({
+            id: n.id,
+            category: "일반",
+            title: n.title,
+            body: n.content,
+            important: n.is_pinned ?? false,
+            date: new Date(n.created_at).toLocaleDateString("ko-KR"),
+          })),
+        );
       })
-      .catch(e => {
-        if (mounted) setError(e instanceof Error ? e.message : "공지 조회 실패");
+      .catch((e) => {
+        if (mounted)
+          setError(e instanceof Error ? e.message : "공지 조회 실패");
       })
-      .finally(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, []);
   const [category, setCategory] = useState("전체");
   const [keyword, setKeyword] = useState("");
@@ -92,12 +99,24 @@ export default function NoticesPage() {
         </div>
         <div>
           {loading ? (
-            <p role="status" className="py-20 text-center text-[10px] text-[#9699a7]">공지를 불러오는 중입니다.</p>
+            <p
+              role="status"
+              className="py-20 text-center text-[10px] text-[#9699a7]"
+            >
+              공지를 불러오는 중입니다.
+            </p>
           ) : error ? (
-            <p role="alert" className="py-20 text-center text-[10px] text-red-600">{error}</p>
+            <p
+              role="alert"
+              className="py-20 text-center text-[10px] text-red-600"
+            >
+              {error}
+            </p>
           ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-[10px] text-[#9699a7]">
-              {noticeItems.length === 0 ? "등록된 공지가 없습니다." : "검색 결과가 없습니다."}
+              {noticeItems.length === 0
+                ? "등록된 공지가 없습니다."
+                : "검색 결과가 없습니다."}
             </div>
           ) : (
             filtered.map((n) => (

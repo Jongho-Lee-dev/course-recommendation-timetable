@@ -109,7 +109,10 @@ export default function UserPage() {
 
   const handleUserSave = async () => {
     if (busy) return;
-    if (name.trim().toLowerCase() === "admin") {navigate("/admin");return;}
+    if (name.trim().toLowerCase() === "admin") {
+      navigate("/admin");
+      return;
+    }
     if (password.length < 8) {
       toast.error("비밀번호를 8자 이상 입력해 주세요.");
       return;
@@ -146,16 +149,38 @@ export default function UserPage() {
       return;
     }
 
-    const department = departments.find(d => d.majorName === selectedMajor &&
-      (!selectedCollege || d.collegeName === selectedCollege) && (!selectedFaculty || d.facultyName === selectedFaculty));
-    if (!department) {toast.error("학과를 확인하세요.");return;}
+    const department = departments.find(
+      (d) =>
+        d.majorName === selectedMajor &&
+        (!selectedCollege || d.collegeName === selectedCollege) &&
+        (!selectedFaculty || d.facultyName === selectedFaculty),
+    );
+    if (!department) {
+      toast.error("학과를 확인하세요.");
+      return;
+    }
     setBusy(true);
     try {
-      await api("/auth/signup", {method:"POST",body:JSON.stringify({studentId:studentId.trim(),name:name.trim(),grade:Number(selectedGrade),departmentId:department.id,completedCredits:completed,maxCredits:max,graduationCredits:graduation,password})});
+      await api("/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          studentId: studentId.trim(),
+          name: name.trim(),
+          grade: Number(selectedGrade),
+          departmentId: department.id,
+          completedCredits: completed,
+          maxCredits: max,
+          graduationCredits: graduation,
+          password,
+        }),
+      });
       toast.success("회원가입이 완료되었습니다. 로그인해 주세요.");
       navigate("/login");
-    } catch(e) {toast.error(e instanceof Error ? e.message : "회원가입 실패");}
-    finally {setBusy(false);}
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "회원가입 실패");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -169,7 +194,13 @@ export default function UserPage() {
           </p>
         </div>
 
-        <form className="rounded-xl border border-[#dddfe6] bg-white" onSubmit={(event) => { event.preventDefault(); void handleUserSave(); }}>
+        <form
+          className="rounded-xl border border-[#dddfe6] bg-white"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleUserSave();
+          }}
+        >
           {/* 제목 */}
           <div className="border-b border-[#ececf0] px-5 py-4">
             <h2 className="text-sm font-bold text-[#5d6070]">회원가입</h2>
@@ -350,12 +381,42 @@ export default function UserPage() {
             </div>
 
             <div>
-              <label htmlFor="signup-password" className="mb-1.5 block text-[11px] font-semibold text-[#5d6070]">비밀번호</label>
-              <input id="signup-password" type="password" autoComplete="new-password" required minLength={8} placeholder="8자 이상 입력하세요" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-md border border-[#dddfe6] px-3 py-2 text-[10px] text-[#5d6070] outline-none focus:border-[#a99aed]" />
+              <label
+                htmlFor="signup-password"
+                className="mb-1.5 block text-[11px] font-semibold text-[#5d6070]"
+              >
+                비밀번호
+              </label>
+              <input
+                id="signup-password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                placeholder="8자 이상 입력하세요"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full rounded-md border border-[#dddfe6] px-3 py-2 text-[10px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+              />
             </div>
             <div>
-              <label htmlFor="signup-confirm-password" className="mb-1.5 block text-[11px] font-semibold text-[#5d6070]">비밀번호 확인</label>
-              <input id="signup-confirm-password" type="password" autoComplete="new-password" required minLength={8} placeholder="비밀번호를 다시 입력하세요" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="w-full rounded-md border border-[#dddfe6] px-3 py-2 text-[10px] text-[#5d6070] outline-none focus:border-[#a99aed]" />
+              <label
+                htmlFor="signup-confirm-password"
+                className="mb-1.5 block text-[11px] font-semibold text-[#5d6070]"
+              >
+                비밀번호 확인
+              </label>
+              <input
+                id="signup-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                placeholder="비밀번호를 다시 입력하세요"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="w-full rounded-md border border-[#dddfe6] px-3 py-2 text-[10px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+              />
             </div>
 
             {/* 이수 학점 */}
@@ -409,9 +470,15 @@ export default function UserPage() {
 
           {/* 저장 */}
           <div className="flex items-center justify-between border-t border-[#ececf0] px-5 py-4">
-            <Link to="/login" className="text-xs text-[#7658e9] hover:underline">로그인으로 돌아가기</Link>
+            <Link
+              to="/login"
+              className="text-xs text-[#7658e9] hover:underline"
+            >
+              로그인으로 돌아가기
+            </Link>
             <button
-              disabled={busy} type="submit"
+              disabled={busy}
+              type="submit"
               className="rounded-md bg-[#7658e9] px-4 py-2 text-[10px] font-semibold text-white transition hover:bg-[#a99aed]"
             >
               회원가입

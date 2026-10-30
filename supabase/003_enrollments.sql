@@ -1,39 +1,63 @@
 -- 기존 001/002 설치 후 이 파일만 한 번 실행하세요. 기존 학생/과목은 삭제하지 않습니다.
 begin;
-create table if not exists public.tt_enrollments (
- id bigint generated always as identity primary key,
- "studentOwner" uuid not null references public.tt_students(owner),
- "openCourseId" bigint not null references public.tt_open_courses(id),
- status text not null default 'enrolled' check(status in ('enrolled','cancelled')),
- "createdAt" timestamptz not null default now(),
- "updatedAt" timestamptz not null default now(),
- unique("studentOwner","openCourseId")
-);
-create index if not exists tt_enrollments_course_status on public.tt_enrollments("openCourseId",status);
+
+
+create table if not exists public.tt_enrollments (id bigint generated always as identity primary key,
+                                                                                         "studentOwner" uuid not null references public.tt_students(owner),
+                                                                                                                                 "openCourseId" bigint not null references public.tt_open_courses(id),
+                                                                                                                                                                           status text not null default 'enrolled' check(status in ('enrolled',
+
+                                                                                                                                                                                                                                'cancelled')),
+                                                                                                                                                                                                                   "createdAt" timestamptz not null default now(),
+                                                                                                                                                                                                                                                            "updatedAt" timestamptz not null default now(),
+                                                                                                                                                                                                                                                                                                     unique("studentOwner",
+
+                                                                                                                                                                                                                                                                                                       "openCourseId"));
+
+
+create index if not exists tt_enrollments_course_status on public.tt_enrollments("openCourseId",
+                                                                    status);
+
+
 alter table public.tt_enrollments enable row level security;
-revoke all on public.tt_enrollments from anon,authenticated;
+
+revoke all on public.tt_enrollments
+from anon,authenticated;
+
 grant all on public.tt_enrollments to service_role;
-grant usage,select on sequence public.tt_enrollments_id_seq to service_role;
+
+grant usage,
+select on sequence public.tt_enrollments_id_seq to service_role;
 
 -- SQL Editor에서 신청 인원과 잔여석을 확인할 수 있는 읽기 전용 뷰
-create or replace view public.tt_course_seats with (security_invoker=true) as
- select o.id as "openCourseId",o."courseCode",o."sectionNo",o.capacity,
- count(e.id)::int as "enrolledCount",greatest(0,o.capacity-count(e.id))::int as "remainingSeats"
- from public.tt_open_courses o left join public.tt_enrollments e on e."openCourseId"=o.id and e.status='enrolled'
- group by o.id;
-revoke all on public.tt_course_seats from anon,authenticated;
-grant select on public.tt_course_seats to service_role;
 
-create or replace function public.tt_enrollment_snapshot(p_owner uuid default null)
-returns jsonb language sql stable set search_path=public as $$
+create or replace view public.tt_course_seats with (security_invoker=true) as
+select o.id as "openCourseId",o."courseCode",o."sectionNo",o.capacity, count(e.id)::int as "enrolledCount",
+       greatest(0, o.capacity-count(e.id))::int as "remainingSeats"
+from public.tt_open_courses o
+left join public.tt_enrollments e on e."openCourseId"=o.id
+and e.status='enrolled'
+group by o.id;
+
+revoke all on public.tt_course_seats
+from anon,authenticated;
+
+grant
+select on public.tt_course_seats to service_role;
+
+
+create or replace function public.tt_enrollment_snapshot(p_owner uuid default null) returns jsonb language sql stable
+set search_path=public as $$
  select jsonb_build_object(
   'counts',coalesce((select jsonb_agg(jsonb_build_object('id',o.id,'enrolledCount',(select count(*) from tt_enrollments e where e."openCourseId"=o.id and e.status='enrolled'))) from tt_open_courses o),'[]'::jsonb),
   'courseIds',coalesce((select jsonb_agg(e."openCourseId" order by e.id) from tt_enrollments e where e."studentOwner"=p_owner and e.status='enrolled'),'[]'::jsonb)
  )
 $$;
 
-create or replace function public.tt_change_enrollments(p_owner uuid,p_course_ids bigint[],p_action text)
-returns void language plpgsql set search_path=public as $$
+
+create or replace function public.tt_change_enrollments(p_owner uuid,
+                                    p_course_ids bigint[],p_action text) returns void language plpgsql
+set search_path=public as $$
 declare student tt_students%rowtype; course tt_open_courses%rowtype; cid bigint;
 begin
  -- 과목 관리 RPC와 같은 잠금: 정원 수정/신청/취소가 서로 엇갈리지 않습니다.
@@ -70,13 +94,22 @@ begin
   and sa."dayOfWeek"=sb."dayOfWeek" and sa."startPeriod"<=sb."endPeriod" and sa."endPeriod">=sb."startPeriod"
  ) then raise exception '이미 신청한 강좌와 시간이 겹칩니다.'; end if;
 end $$;
-revoke all on function public.tt_enrollment_snapshot(uuid) from public,anon,authenticated;
-revoke all on function public.tt_change_enrollments(uuid,bigint[],text) from public,anon,authenticated;
+
+revoke all on function public.tt_enrollment_snapshot(uuid)
+from public,anon,authenticated;
+
+revoke all on function public.tt_change_enrollments(uuid,bigint[],text)
+from public,anon,authenticated;
+
 grant execute on function public.tt_enrollment_snapshot(uuid) to service_role;
+
 grant execute on function public.tt_change_enrollments(uuid,bigint[],text) to service_role;
 
-create or replace function public.tt_save_catalog(items jsonb, replace_all boolean default false, edit_id bigint default null)
-returns void language plpgsql set search_path=public as $$
+
+create or replace function public.tt_save_catalog(items jsonb,
+                                    replace_all boolean default false,
+                                    edit_id bigint default null) returns void language plpgsql
+set search_path=public as $$
 declare c jsonb; s jsonb; course_id bigint; seen bigint[] := '{}';
 begin
  perform pg_advisory_xact_lock(20261014);
@@ -119,4 +152,6 @@ begin
 end $$;
 
 notify pgrst, 'reload schema';
+
+
 commit;

@@ -1,4 +1,3 @@
-
 export type DateTime = string;
 
 export type CourseType = string;

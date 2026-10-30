@@ -22,8 +22,10 @@ export default function CourseDetailModal({
   onToggleFavorite,
   onToggleSelected,
 }: Props) {
-  const latest = useCourseCatalogStore(s=>s.courses.find(c=>c.id===initialCourse?.id));
-  const busy = useCourseStore(s=>s.enrollmentBusy);
+  const latest = useCourseCatalogStore((s) =>
+    s.courses.find((c) => c.id === initialCourse?.id),
+  );
+  const busy = useCourseStore((s) => s.enrollmentBusy);
   const course = latest ?? initialCourse;
   if (!course) return null;
 
@@ -135,7 +137,9 @@ export default function CourseDetailModal({
               )}
               {onToggleSelected && (
                 <button
-                  disabled={busy || (!isSelected && course.remainingSeats === 0)}
+                  disabled={
+                    busy || (!isSelected && course.remainingSeats === 0)
+                  }
                   onClick={onToggleSelected}
                   className={`rounded-lg px-4 py-2 text-[9px] font-bold ${isSelected ? "bg-[#ececf1] text-[#666976]" : "bg-[#7658e9] text-white"}`}
                 >

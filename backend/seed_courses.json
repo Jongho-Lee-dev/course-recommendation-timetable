@@ -9,14 +9,8 @@
     "targetGrade": 2,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
-    "excludedDepartmentIds": [
-      3,
-      4
-    ],
+    "classificationPath": ["전공", "전공 필수"],
+    "excludedDepartmentIds": [3, 4],
     "schedules": [
       {
         "dayOfWeek": "월",
@@ -42,13 +36,8 @@
     "targetGrade": 2,
     "departmentId": 2,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
-    "excludedDepartmentIds": [
-      5
-    ],
+    "classificationPath": ["전공", "전공 선택"],
+    "excludedDepartmentIds": [5],
     "schedules": [
       {
         "dayOfWeek": "화",
@@ -68,10 +57,7 @@
     "targetGrade": 3,
     "departmentId": 13,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -92,10 +78,7 @@
     "targetGrade": 2,
     "departmentId": 14,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -116,10 +99,7 @@
     "targetGrade": 3,
     "departmentId": 15,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -140,10 +120,7 @@
     "targetGrade": 2,
     "departmentId": 6,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -164,10 +141,7 @@
     "targetGrade": 3,
     "departmentId": 7,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -188,10 +162,7 @@
     "targetGrade": 3,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -212,10 +183,7 @@
     "targetGrade": 3,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -320,10 +288,7 @@
       "균형기초학문영역(균형학문영역)",
       "디지털 리터러시"
     ],
-    "excludedDepartmentIds": [
-      1,
-      2
-    ],
+    "excludedDepartmentIds": [1, 2],
     "schedules": []
   },
   {
@@ -362,13 +327,8 @@
     "targetGrade": 2,
     "departmentId": 11,
     "isOnline": false,
-    "classificationPath": [
-      "마이크로디그리",
-      "마이크로"
-    ],
-    "excludedDepartmentIds": [
-      1
-    ],
+    "classificationPath": ["마이크로디그리", "마이크로"],
+    "excludedDepartmentIds": [1],
     "schedules": [
       {
         "dayOfWeek": "월",
@@ -388,10 +348,7 @@
     "targetGrade": 3,
     "departmentId": 11,
     "isOnline": false,
-    "classificationPath": [
-      "마이크로디그리",
-      "마이크로"
-    ],
+    "classificationPath": ["마이크로디그리", "마이크로"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -412,10 +369,7 @@
     "targetGrade": 3,
     "departmentId": 12,
     "isOnline": true,
-    "classificationPath": [
-      "마이크로디그리",
-      "마이크로"
-    ],
+    "classificationPath": ["마이크로디그리", "마이크로"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -429,10 +383,7 @@
     "targetGrade": 1,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -453,10 +404,7 @@
     "targetGrade": 1,
     "departmentId": 1,
     "isOnline": true,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -470,10 +418,7 @@
     "targetGrade": 1,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -494,10 +439,7 @@
     "targetGrade": 2,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -518,10 +460,7 @@
     "targetGrade": 2,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -542,10 +481,7 @@
     "targetGrade": 2,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -566,10 +502,7 @@
     "targetGrade": 3,
     "departmentId": 1,
     "isOnline": true,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -583,10 +516,7 @@
     "targetGrade": 3,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -607,10 +537,7 @@
     "targetGrade": 3,
     "departmentId": 1,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -631,10 +558,7 @@
     "targetGrade": 1,
     "departmentId": 2,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -655,10 +579,7 @@
     "targetGrade": 2,
     "departmentId": 2,
     "isOnline": true,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -672,10 +593,7 @@
     "targetGrade": 3,
     "departmentId": 2,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -696,10 +614,7 @@
     "targetGrade": 3,
     "departmentId": 2,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -720,10 +635,7 @@
     "targetGrade": 1,
     "departmentId": 11,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -744,10 +656,7 @@
     "targetGrade": 2,
     "departmentId": 11,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -768,10 +677,7 @@
     "targetGrade": 3,
     "departmentId": 11,
     "isOnline": true,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -785,10 +691,7 @@
     "targetGrade": 2,
     "departmentId": 12,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -809,10 +712,7 @@
     "targetGrade": 3,
     "departmentId": 12,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 선택"
-    ],
+    "classificationPath": ["전공", "전공 선택"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -833,10 +733,7 @@
     "targetGrade": 2,
     "departmentId": 13,
     "isOnline": false,
-    "classificationPath": [
-      "전공",
-      "전공 필수"
-    ],
+    "classificationPath": ["전공", "전공 필수"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -857,11 +754,7 @@
     "targetGrade": 1,
     "departmentId": 10,
     "isOnline": true,
-    "classificationPath": [
-      "교양",
-      "교양 선택",
-      "일반 교양"
-    ],
+    "classificationPath": ["교양", "교양 선택", "일반 교양"],
     "excludedDepartmentIds": [],
     "schedules": []
   },
@@ -875,11 +768,7 @@
     "targetGrade": 1,
     "departmentId": 10,
     "isOnline": false,
-    "classificationPath": [
-      "교양",
-      "교양 선택",
-      "일반 교양"
-    ],
+    "classificationPath": ["교양", "교양 선택", "일반 교양"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -900,11 +789,7 @@
     "targetGrade": 1,
     "departmentId": 10,
     "isOnline": false,
-    "classificationPath": [
-      "교양",
-      "교양 선택",
-      "일반 교양"
-    ],
+    "classificationPath": ["교양", "교양 선택", "일반 교양"],
     "excludedDepartmentIds": [],
     "schedules": [
       {
@@ -925,11 +810,7 @@
     "targetGrade": 1,
     "departmentId": 10,
     "isOnline": false,
-    "classificationPath": [
-      "교양",
-      "교양 선택",
-      "일반 교양"
-    ],
+    "classificationPath": ["교양", "교양 선택", "일반 교양"],
     "excludedDepartmentIds": [],
     "schedules": [
       {

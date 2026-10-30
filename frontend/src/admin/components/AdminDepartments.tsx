@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Building2, Plus, Sheet, Search } from "lucide-react";
 import {
-  downloadDepartmentExcel,
   readDepartmentExcel,
   saveDepartmentExcel,
 } from "../utils/departmentExcel";
@@ -35,7 +34,7 @@ export default function AdminDepartments({
   const selectExcel = async () => {
     if (!("showOpenFilePicker" in window)) {
       setError(
-        "엑셀 직접 저장은 데스크톱 Chrome 또는 Edge에서 사용하세요. 엑셀 불러오기와 다운로드는 다른 브라우저에서도 가능합니다.",
+        "엑셀 직접 저장은 데스크톱 Chrome 또는 Edge에서 사용하세요. 엑셀 불러오기는 다른 브라우저에서도 가능합니다.",
       );
       return;
     }
@@ -88,17 +87,6 @@ export default function AdminDepartments({
         collegeName: "",
         facultyName: "",
       });
-  };
-  const download = async () => {
-    setBusy(true);
-    setError("");
-    try {
-      downloadDepartmentExcel(departments);
-    } catch (e) {
-      fail(e);
-    } finally {
-      setBusy(false);
-    }
   };
   const filtered = departments.filter((d) =>
     [d.id, d.majorName, d.facultyName, d.collegeName]
@@ -270,14 +258,6 @@ export default function AdminDepartments({
             <span>{excelHandle?.name ?? "선택된 파일 없음"}</span>
           </>
         )}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={download}
-          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
-        >
-          학과 엑셀 다운로드
-        </button>
       </div>
       {error && (
         <p role="alert" className="text-red-600 whitespace-pre-wrap">

@@ -20,23 +20,31 @@ export default function AdminNotices() {
   useEffect(() => {
     let active = true;
     api<NoticeResponse[]>("/notices")
-      .then(data => {
+      .then((data) => {
         if (!active) return;
-        setItems(data.map(n => ({
-          id: n.id,
-          category: "일반",
-          title: n.title,
-          body: n.content,
-          important: n.is_pinned ?? false,
-          date: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" })
-            .format(new Date(n.created_at)).replaceAll("-", "."),
-        })));
+        setItems(
+          data.map((n) => ({
+            id: n.id,
+            category: "일반",
+            title: n.title,
+            body: n.content,
+            important: n.is_pinned ?? false,
+            date: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" })
+              .format(new Date(n.created_at))
+              .replaceAll("-", "."),
+          })),
+        );
       })
-      .catch(e => {
-        if (active) setLoadError(e instanceof Error ? e.message : "공지 조회 실패");
+      .catch((e) => {
+        if (active)
+          setLoadError(e instanceof Error ? e.message : "공지 조회 실패");
       })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
   const [draft, setDraft] = useState<Notice | null>(null);
   const [adding, setAdding] = useState(false);
@@ -86,12 +94,21 @@ export default function AdminNotices() {
             });
           }}
         >
-          <Plus size={14} />공지 추가
+          <Plus size={14} />
+          공지 추가
         </button>
       </div>
       {loading && <p role="status">공지를 불러오는 중입니다.</p>}
-      {loadError && <p role="alert" className="mb-3 text-red-600">{loadError}</p>}
-      {!draft && error && <p role="alert" className="mb-3 text-red-600">{error}</p>}
+      {loadError && (
+        <p role="alert" className="mb-3 text-red-600">
+          {loadError}
+        </p>
+      )}
+      {!draft && error && (
+        <p role="alert" className="mb-3 text-red-600">
+          {error}
+        </p>
+      )}
       {message && (
         <p role="status" className="mb-3 text-green-700">
           {message}
@@ -129,31 +146,42 @@ export default function AdminNotices() {
                   title: result.title,
                   body: result.content,
                   important: result.is_pinned ?? false,
-                  date: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date(result.created_at)).replaceAll("-", "."),
+                  date: new Intl.DateTimeFormat("sv-SE", {
+                    timeZone: "Asia/Seoul",
+                  })
+                    .format(new Date(result.created_at))
+                    .replaceAll("-", "."),
                 };
 
-                setItems(prev => [saved, ...prev]);
+                setItems((prev) => [saved, ...prev]);
                 setMessage("공지사항을 추가했습니다.");
               } else {
-                const result = await api<NoticeResponse>(`/notices/${draft.id}`, {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    title: draft.title.trim(),
-                    content: draft.body.trim(),
-                    is_pinned: draft.important ?? false,
-                  }),
-                });
+                const result = await api<NoticeResponse>(
+                  `/notices/${draft.id}`,
+                  {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                      title: draft.title.trim(),
+                      content: draft.body.trim(),
+                      is_pinned: draft.important ?? false,
+                    }),
+                  },
+                );
                 const saved: Notice = {
                   id: result.id,
                   category: "일반",
                   title: result.title,
                   body: result.content,
                   important: result.is_pinned ?? false,
-                  date: new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date(result.created_at)).replaceAll("-", "."),
+                  date: new Intl.DateTimeFormat("sv-SE", {
+                    timeZone: "Asia/Seoul",
+                  })
+                    .format(new Date(result.created_at))
+                    .replaceAll("-", "."),
                 };
 
-                setItems(prev =>
-                  prev.map(n => n.id === saved.id ? saved : n)
+                setItems((prev) =>
+                  prev.map((n) => (n.id === saved.id ? saved : n)),
                 );
                 setMessage("공지사항을 수정했습니다.");
               }
@@ -221,7 +249,8 @@ export default function AdminNotices() {
               onChange={(e) =>
                 setDraft({ ...draft, important: e.target.checked })
               }
-            />중요 공지
+            />
+            중요 공지
           </label>
           <label className="block space-y-2">
             <span className="block font-semibold">내용</span>
@@ -251,7 +280,11 @@ export default function AdminNotices() {
             >
               취소
             </button>
-            <button type="submit" className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50 !border-[#7658e9] !bg-[#7658e9] text-white" disabled={busy}>
+            <button
+              type="submit"
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50 !border-[#7658e9] !bg-[#7658e9] text-white"
+              disabled={busy}
+            >
               {busy ? "저장 중..." : "저장"}
             </button>
           </div>
@@ -276,7 +309,11 @@ export default function AdminNotices() {
             key={c}
             type="button"
             aria-pressed={category === c}
-            className={category === c ? "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50 !border-[#7658e9] !bg-[#7658e9] text-white" : "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50"}
+            className={
+              category === c
+                ? "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50 !border-[#7658e9] !bg-[#7658e9] text-white"
+                : "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50"
+            }
             onClick={() => setCategory(c)}
           >
             {c}
@@ -328,7 +365,11 @@ export default function AdminNotices() {
                   disabled={draft !== null || busy}
                   aria-label={n.title + " 삭제"}
                   className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] disabled:cursor-not-allowed disabled:opacity-50 text-red-600"
-                  onClick={() => { setDeletingId(n.id); setError(""); setMessage(""); }}
+                  onClick={() => {
+                    setDeletingId(n.id);
+                    setError("");
+                    setMessage("");
+                  }}
                 >
                   삭제
                 </button>
@@ -365,11 +406,15 @@ export default function AdminNotices() {
                     setMessage("");
                     try {
                       await api(`/notices/${n.id}`, { method: "DELETE" });
-                      setItems((prev) => prev.filter((item) => item.id !== n.id));
+                      setItems((prev) =>
+                        prev.filter((item) => item.id !== n.id),
+                      );
                       setDeletingId(null);
                       setMessage("공지사항을 삭제했습니다.");
                     } catch (e) {
-                      setError(e instanceof Error ? e.message : "공지 삭제 실패");
+                      setError(
+                        e instanceof Error ? e.message : "공지 삭제 실패",
+                      );
                     } finally {
                       setBusy(false);
                     }
@@ -389,9 +434,7 @@ export default function AdminNotices() {
           </p>
         )}
       </div>
-      <p className="mt-3 text-[10px] text-[#858796]">
-        총 {filtered.length}건
-      </p>
+      <p className="mt-3 text-[10px] text-[#858796]">총 {filtered.length}건</p>
     </section>
   );
 }

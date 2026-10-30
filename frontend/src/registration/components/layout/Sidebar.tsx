@@ -100,7 +100,11 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm("로그아웃하시겠습니까? 저장된 학생 정보와 신청내역은 유지됩니다.")) {
+                    if (
+                      window.confirm(
+                        "로그아웃하시겠습니까? 저장된 학생 정보와 신청내역은 유지됩니다.",
+                      )
+                    ) {
                       resetUser();
                       navigate("/");
                     }
