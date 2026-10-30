@@ -21,11 +21,6 @@ import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import CourseExcelImport from "./CourseExcelImport";
 import { appendCourseExcel, updateCourseExcel } from "../utils/saveCourseExcel";
 
-const inputClass =
-  "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
-const buttonClass =
-  "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]";
-const primaryClass = `${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6]`;
 const textFields = [
   ["courseCode", "학수번호"],
   ["title", "과목명"],
@@ -155,7 +150,7 @@ function CourseForm({
           <label key={key} className="space-y-1.5 text-[#5d6070]">
             <span className="block font-semibold">{label}</span>
             <input
-              className={inputClass}
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
               value={draft[key] ?? ""}
               required={[
                 "courseCode",
@@ -174,7 +169,7 @@ function CourseForm({
           <label key={key} className="space-y-1.5 text-[#5d6070]">
             <span className="block font-semibold">{label}</span>
             <input
-              className={inputClass}
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
               type="number"
               min={min}
               step={1}
@@ -189,7 +184,7 @@ function CourseForm({
         <label className="space-y-1.5 text-[#5d6070]">
           <span className="block font-semibold">소속 학과</span>
           <select
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             required
             value={draft.departmentId || ""}
             onChange={(event) => {
@@ -227,7 +222,7 @@ function CourseForm({
         <label className="space-y-1.5 text-[#5d6070]">
           <span className="block font-semibold">수업형태</span>
           <select
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             value={draft.isOnline ? "online" : "offline"}
             onChange={(event) => {
               const isOnline = event.target.value === "online";
@@ -254,7 +249,7 @@ function CourseForm({
             type="file"
             accept=".pdf,application/pdf"
             disabled={readingPdf}
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             onChange={async (event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
@@ -295,7 +290,7 @@ function CourseForm({
             {fileError}{" "}
             <button
               type="button"
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() => setFileError("")}
             >
               선택 취소
@@ -308,7 +303,7 @@ function CourseForm({
             <button
               type="button"
               disabled={readingPdf}
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() => {
                 setSyllabus(null);
                 setFileError("");
@@ -343,7 +338,7 @@ function CourseForm({
             <strong>강의 시간</strong>
             <button
               type="button"
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() =>
                 setDraft({
                   ...draft,
@@ -372,7 +367,7 @@ function CourseForm({
               <label>
                 요일
                 <select
-                  className={inputClass}
+                  className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
                   value={schedule.dayOfWeek}
                   onChange={(event) =>
                     setDraft({
@@ -399,7 +394,7 @@ function CourseForm({
                         ? "종료 교시"
                         : "강의실"}
                     <input
-                      className={inputClass}
+                      className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
                       required
                       type={key === "classroom" ? "text" : "number"}
                       min={key === "endPeriod" ? schedule.startPeriod : 1}
@@ -427,7 +422,7 @@ function CourseForm({
               )}
               <button
                 type="button"
-                className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-40`}
+                className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={draft.schedules.length <= 1}
                 onClick={() =>
                   setDraft({
@@ -453,13 +448,13 @@ function CourseForm({
         </p>
       )}
       <div className="flex justify-end gap-2">
-        <button type="button" className={buttonClass} onClick={onCancel} disabled={saving}>
+        <button type="button" className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]" onClick={onCancel} disabled={saving}>
           취소
         </button>
         <button
           type="submit"
           disabled={saving || readingPdf || !!fileError}
-          className={`${primaryClass} disabled:opacity-50`}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6] disabled:opacity-50"
         >
           {saving ? "저장 중..." : "저장하기"}
         </button>
@@ -561,20 +556,6 @@ export default function AdminCourses({
       <div>
         <h2 className="!mb-4 !text-sm !font-bold">과목 관리</h2>
 
-        <div className="mb-4 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={selectExcelFile}
-            className={buttonClass}
-          >
-            저장할 엑셀 선택
-          </button>
-
-          <span>
-            {excelHandle ? excelHandle.name : "선택된 파일 없음"}
-          </span>
-        </div>
-
         <div className="grid grid-cols-2 gap-3 min-[701px]:gap-4">
           {(
             [
@@ -629,7 +610,7 @@ export default function AdminCourses({
         </h2>
         <button
           type="button"
-          className={buttonClass}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
           disabled={savingExcel}
           onClick={() => {
             setMode("choose");
@@ -641,7 +622,7 @@ export default function AdminCourses({
       </div>
       {mode !== "excel" && (
         <div className="mb-4 flex items-center gap-3">
-          <button type="button" className={buttonClass} onClick={selectExcelFile} disabled={savingExcel}>
+          <button type="button" className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]" onClick={selectExcelFile} disabled={savingExcel}>
             저장할 엑셀 선택
           </button>
           <span>{excelHandle ? excelHandle.name : "선택된 파일 없음"}</span>
@@ -710,7 +691,7 @@ export default function AdminCourses({
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className={buttonClass}
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
                     disabled={savingExcel}
                     onClick={() =>
                       setEditingId(editingId === course.id ? null : course.id)
@@ -720,7 +701,7 @@ export default function AdminCourses({
                   </button>
                   <button
                     type="button"
-                    className={`${buttonClass} text-red-600`}
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] text-red-600"
                     disabled={savingExcel}
                     onClick={async () => {
                       setSavingExcel(true);
