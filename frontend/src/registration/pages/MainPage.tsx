@@ -209,13 +209,29 @@ export default function MainPage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            className="w-full rounded-md bg-white px-3 py-2 text-[10px] font-bold text-[#272532] transition hover:bg-[#f1efff]"
-            onClick={() => navigate("/ai")}
-          >
-            AI 시간표 추천 페이지로 이동
-          </button>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <button
+              type="button"
+              className="rounded-md bg-white px-3 py-2 text-[10px] font-bold text-[#272532] transition hover:bg-[#f1efff]"
+              onClick={() => navigate("/ai")}
+            >
+              AI 시간표 추천
+            </button>
+            <button
+              type="button"
+              className="rounded-md bg-[#eeeaff] px-3 py-2 text-[10px] font-bold text-[#6652d7] transition hover:bg-[#e3ddff]"
+              onClick={() => navigate("/chatbot")}
+            >
+              AI 학업 도우미
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-[#e0dafa] bg-white px-3 py-2 text-[10px] font-bold text-[#6652d7] transition hover:bg-[#f8f6ff]"
+              onClick={() => navigate("/profile")}
+            >
+              내 정보 수정
+            </button>
+          </div>
         </div>
       </section>
     </main>
