@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Building2, Plus, Sheet, Search } from "lucide-react";
 import {
+  departmentExcelErrorMessage,
   readDepartmentExcel,
+  readDepartmentExcelHandle,
   saveDepartmentExcel,
 } from "../utils/departmentExcel";
 import type { Department } from "../../shared/types/database";
@@ -53,10 +55,13 @@ export default function AdminDepartments({
           },
         ],
       });
-      const items = await readDepartmentExcel(await handle.getFile());
+      const sameFile = excelHandle && (await excelHandle.isSameEntry(handle));
+      const items = await readDepartmentExcelHandle(handle);
       setExcelHandle(handle);
       onChange(items);
-      if (mode === "add")
+      if (sameFile && draft) {
+        setDraft(draft);
+      } else if (mode === "add")
         setDraft({
           id: Math.max(0, ...items.map((d) => d.id)) + 1,
           majorName: "",
@@ -72,7 +77,7 @@ export default function AdminDepartments({
     }
   };
   const fail = (e: unknown) =>
-    setError(e instanceof Error ? e.message : "요청에 실패했습니다.");
+    setError(departmentExcelErrorMessage(e));
   const changeMode = (next: typeof mode) => {
     setMode(next);
     setError("");
@@ -114,7 +119,7 @@ export default function AdminDepartments({
           );
           onChange(updated);
           setDraft(null);
-          setMode("list");
+          if (mode !== "edit") setMode("list");
           setMessage("선택한 엑셀 파일에 학과 정보를 저장했습니다.");
         } catch (e) {
           fail(e);

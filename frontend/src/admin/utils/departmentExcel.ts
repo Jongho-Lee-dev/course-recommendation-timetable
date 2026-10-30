@@ -73,6 +73,41 @@ export async function readDepartmentExcel(file: File) {
   return (await readBook(file)).items;
 }
 
+function isStaleFileError(error: unknown) {
+  return (
+    error instanceof DOMException &&
+    ["InvalidStateError", "NotReadableError"].includes(error.name)
+  );
+}
+
+export function departmentExcelErrorMessage(error: unknown) {
+  if (
+    isStaleFileError(error) ||
+    (error instanceof DOMException &&
+      error.name === "NoModificationAllowedError")
+  ) {
+    return "엑셀 파일이 변경되었거나 다른 프로그램에서 사용 중입니다. Excel에서 파일을 저장하고 닫은 뒤 다시 시도하세요. 계속 실패하면 ‘저장할 엑셀 선택’에서 같은 파일을 다시 선택하세요. 입력한 수정 내용은 유지됩니다.";
+  }
+  if (error instanceof DOMException && error.name === "NotFoundError") {
+    return "선택한 엑셀 파일을 찾을 수 없습니다. 파일 위치를 확인하고 ‘저장할 엑셀 선택’에서 다시 선택하세요.";
+  }
+  return error instanceof Error ? error.message : "요청에 실패했습니다.";
+}
+
+async function readHandleBook(handle: FileSystemFileHandle) {
+  try {
+    return await readBook(await handle.getFile());
+  } catch (error) {
+    if (!isStaleFileError(error)) throw error;
+    // Retry only the read, with a fresh snapshot. Never replay a failed write.
+    return readBook(await handle.getFile());
+  }
+}
+
+export async function readDepartmentExcelHandle(handle: FileSystemFileHandle) {
+  return (await readHandleBook(handle)).items;
+}
+
 export async function saveDepartmentExcel(
   handle: FileSystemFileHandle,
   draft: Department,
@@ -80,7 +115,7 @@ export async function saveDepartmentExcel(
 ) {
   if ((await handle.requestPermission({ mode: "readwrite" })) !== "granted")
     throw new Error("엑셀 파일의 쓰기 권한을 허용하세요.");
-  const { book, items } = await readBook(await handle.getFile());
+  const { book, items } = await readHandleBook(handle);
   const exists = items.some((d) => d.id === draft.id);
   if (editing && !exists)
     throw new Error("선택한 엑셀에 수정할 학과코드가 없습니다.");
