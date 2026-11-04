@@ -1,4 +1,6 @@
 import base64, hashlib, hmac, json, os, time, uuid
+import logging
+from collections import Counter
 from contextlib import asynccontextmanager, AsyncExitStack
 from pathlib import Path
 from typing import Annotated
@@ -13,10 +15,16 @@ from .excel import parse_excel, export_excel
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 from .notice import router as notice_router
 
+_db_timing_counts = Counter()
+_timing_logger = logging.getLogger("uvicorn.error")
+
 
 @asynccontextmanager
 async def lifespan(application):
-    async with httpx.AsyncClient(timeout=20) as client:
+    async with httpx.AsyncClient(
+        timeout=20,
+        limits=httpx.Limits(max_connections=200, max_keepalive_connections=20),
+    ) as client:
         application.state.http = client
         yield
     application.state.http = None
@@ -25,7 +33,15 @@ async def lifespan(application):
 app = FastAPI(title="수강신청 API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://course-recommendation-timetable.vercel.app", *[origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if origin.strip()]],
+    allow_origins=[
+        "https://course-recommendation-timetable.vercel.app",
+        "https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app",
+        *[
+            origin.strip().rstrip("/")
+            for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+            if origin.strip()
+        ],
+    ],
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
@@ -42,6 +58,14 @@ async def db(method, path, body=None, params=None, prefer="return=representation
         client = getattr(app.state, "http", None)
         if client is None:
             client = await stack.enter_async_context(httpx.AsyncClient(timeout=20))
+        # Sample each endpoint independently; never log credentials or payloads.
+        timing_sample = False
+        if os.getenv("DB_TIMING") == "1":
+            timing_key = (method, path)
+            _db_timing_counts[timing_key] += 1
+            timing_sample = _db_timing_counts[timing_key] % 100 == 1
+        started = time.perf_counter() if timing_sample else None
+        outcome = "unknown"
         try:
             r = await client.request(
                 method,
@@ -54,8 +78,16 @@ async def db(method, path, body=None, params=None, prefer="return=representation
                     "Prefer": prefer,
                 },
             )
-        except httpx.RequestError:
+            outcome = str(r.status_code)
+        except httpx.RequestError as exc:
+            outcome = type(exc).__name__
             raise HTTPException(503, "DB 연결에 실패했습니다.")
+        finally:
+            if timing_sample:
+                _timing_logger.info(
+                    "DB_TIMING method=%s path=%s elapsed_ms=%.1f outcome=%s",
+                    method, path, (time.perf_counter() - started) * 1000, outcome,
+                )
     if r.is_error:
         error = (
             r.json()

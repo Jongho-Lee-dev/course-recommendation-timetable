@@ -58,6 +58,7 @@ npm run dev
 
 `frontend/.env`의 `VITE_API_BASE_URL`에 백엔드 주소를 설정하세요. 로컬 백엔드는 `http://localhost:8000`, 배포 백엔드는 `https://course-recommendation-timetable.onrender.com`입니다. Vercel에서는 같은 변수를 Environment에 등록하고 재배포하세요. 백엔드 `CORS_ORIGINS`에는 접속할 프론트 주소를 쉼표로 구분해 등록합니다.
 서버 문서: http://localhost:8000/docs
+현재 Vercel 배포 주소 `https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app`는 코드에서 기본 허용합니다. 추가 주소는 Render의 `CORS_ORIGINS`에 등록하세요. 공백과 마지막 `/`는 자동으로 제거합니다. 코드 수정은 Render 백엔드를 재배포해야 적용되며, Vercel 주소가 바뀌면 새 주소도 등록해야 합니다.
 DB 연결 확인: http://localhost:8000/api/health
 
 Docker로 서버 실행할 수도 있습니다:
