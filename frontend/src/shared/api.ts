@@ -3,7 +3,7 @@ import type { CourseListItem } from "./types/database";
 const base =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD
-    ? "https://course-recommendation-timetable.onrender.com"
+    ? "https://course-recommendation-timetable-anmr.onrender.com"
     : "http://localhost:8000");
 export async function api<T>(path: string, options: RequestInit = {}, role: "admin" | "student" = "admin"): Promise<T> {
   const token = role === "student" ? sessionStorage.getItem("student-token") : null;
