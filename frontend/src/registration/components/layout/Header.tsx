@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Bell, CalendarDays, Home, Search, Sparkles } from "lucide-react";
+import { Bell, CalendarDays, Home, Search, Sparkles, MessageCircle, UserRound } from "lucide-react";
 import { useUserStore } from "../../store/userStore";
 
 const links = [
@@ -7,6 +7,8 @@ const links = [
   { to: "/courses", label: "강의검색", icon: Search },
   { to: "/timetable", label: "나의 시간표", icon: CalendarDays },
   { to: "/ai", label: "AI 추천", icon: Sparkles },
+  { to: "/chatbot", label: "AI 도우미", icon: MessageCircle },
+  { to: "/profile", label: "내 정보", icon: UserRound },
   { to: "/notices", label: "공지사항", icon: Bell },
 ];
 

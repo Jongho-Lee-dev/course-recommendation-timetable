@@ -29,11 +29,12 @@
 SUPABASE_URL=https://프로젝트ID.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=서버에서만_사용하는_service_role_키
 SESSION_SECRET=32자이상의임의문자열
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://course-recommendation-timetable.vercel.app
 ```
 
 `service_role` 키는 서버 전용입니다. 프론트 `VITE_` 변수에 넣거나 Git에 올리지 마세요.
 프론트 팀은 백엔드 API 주소만 받아 작업할 수 있습니다. 팀원 전체에게 DB 비밀키를 공유할 필요가 없습니다.
+Render의 `CORS_ORIGINS` 환경변수를 별도로 설정했다면 위 세 주소를 모두 포함하세요. Vercel 프론트엔드 주소를 허용하지 않으면 브라우저에서 API 요청이 차단됩니다.
 
 ## 3. 실행 (Windows PowerShell)
 

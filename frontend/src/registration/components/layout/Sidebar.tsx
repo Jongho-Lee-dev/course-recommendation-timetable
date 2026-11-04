@@ -6,6 +6,8 @@ const menu = [
   ["⌕", "강의검색", "/courses"],
   ["◫", "나의 시간표", "/timetable"],
   ["✦", "AI 시간표 추천", "/ai"],
+  ["✧", "AI 학업 도우미", "/chatbot"],
+  ["♙", "내 정보 수정", "/profile"],
   ["♡", "관심강좌", "/favorites"],
   ["✓", "신청내역", "/history"],
   ["i", "공지사항", "/notices"],

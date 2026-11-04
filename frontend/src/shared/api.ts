@@ -1,8 +1,7 @@
 import { useUserStore } from "../registration/store/userStore";
 import type { CourseListItem } from "./types/database";
 
-const base = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "");
-if (!base) throw new Error("VITE_API_BASE_URL 환경변수를 설정하세요.");
+const base = (import.meta.env.VITE_API_BASE_URL?.trim() || (import.meta.env.PROD ? "https://course-recommendation-timetable.onrender.com" : "http://localhost:8000")).replace(/\/+$/, "");
 
 export async function api<T>(
   path: string,
