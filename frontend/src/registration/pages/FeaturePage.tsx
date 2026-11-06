@@ -25,12 +25,12 @@ const config = {
       "시간표 데이터는 현재 선택된 강좌와 연결할 수 있도록 구성되어 있습니다.",
   },
   ai: {
-    title: "AI 시간표 추천",
+    title: "필터 기반 시간표 추천",
     description:
-      "AI가 강의 선택 조건을 분석해 최적의 시간표를 추천하는 공간입니다.",
+      "선택한 필터로 강의를 추리고 시간표가 겹치지 않는 후보를 구성합니다.",
     icon: Sparkles,
     accent:
-      "AI 추천 로직은 보류 상태이며, 화면과 이동 경로만 먼저 구성했습니다.",
+      "목표 학점, 전공 여부, 온라인 강의와 오전 수업 조건을 설정할 수 있습니다.",
   },
   favorites: {
     title: "관심강좌",
@@ -70,8 +70,8 @@ const cards: Record<FeatureKey, { title: string; text: string; href: string }> =
       href: "/timetable",
     },
     ai: {
-      title: "AI 추천 준비",
-      text: "추천 화면은 구현을 보류하고 이동만 연결했습니다.",
+      title: "시간표 필터 열기",
+      text: "조건을 선택하고 시간표 후보를 비교합니다.",
       href: "/ai",
     },
     favorites: {

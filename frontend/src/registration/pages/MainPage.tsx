@@ -39,8 +39,8 @@ export default function MainPage() {
 
   const maxCredits = user?.maxCredits ?? 18;
 
-  const aiMessage =
-    "현재 시간표를 분석하고 있습니다. AI 추천 페이지에서 원하는 조건을 설정할 수 있습니다.";
+  const plannerMessage =
+    "시간표 필터에서 목표 학점, 전공 여부, 온라인 강의와 오전 수업 조건을 선택해 후보를 만들 수 있습니다.";
 
   const courseFilters = useMemo(() => createCourseFilters(courses), [courses]);
 
@@ -159,7 +159,7 @@ export default function MainPage() {
         <WeeklyTimetable selected={selected} />
       </div>
 
-      {/* 신청 강좌 + AI 추천 */}
+      {/* 신청 강좌 + 시간표 필터 */}
       <section className="mt-4 grid gap-4 min-[1101px]:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)]">
         <CourseRegistrationList
           selected={selected}
@@ -168,15 +168,15 @@ export default function MainPage() {
 
         <div className="rounded-xl border border-[#282633] bg-[#282633] p-[18px] text-white">
           <div className="text-[8px] font-extrabold tracking-[0.8px] text-[#aa9cf3]">
-            AI COURSE PLANNER
+            TIMETABLE FILTER
           </div>
 
           <h2 className="mt-2 text-sm font-bold">
-            AI가 시간표를 분석하고 있습니다.
+            조건에 맞는 시간표를 구성해 보세요.
           </h2>
 
           <p className="mt-1 text-[9px] leading-relaxed text-[#b5b3c0]">
-            {aiMessage}
+            {plannerMessage}
           </p>
 
           <div className="my-3 grid grid-cols-3 gap-1.5">
@@ -215,7 +215,7 @@ export default function MainPage() {
               className="rounded-md bg-white px-3 py-2 text-[10px] font-bold text-[#272532] transition hover:bg-[#f1efff]"
               onClick={() => navigate("/ai")}
             >
-              AI 시간표 추천
+              필터 기반 시간표 추천
             </button>
             <button
               type="button"

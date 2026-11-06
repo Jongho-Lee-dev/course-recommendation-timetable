@@ -43,7 +43,7 @@ export default function AppRoutes() {
         {/* 나의 시간표 */}
         <Route path="/timetable" element={protectedPage(<TimetablePage />)} />
 
-        {/* AI 시간표 추천 */}
+        {/* 필터 기반 시간표 추천 */}
         <Route path="/ai" element={protectedPage(<AIRecommendationPage />)} />
 
         {/* AI 학업 도우미 */}

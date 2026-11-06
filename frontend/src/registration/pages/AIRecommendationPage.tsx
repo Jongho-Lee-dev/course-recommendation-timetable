@@ -103,9 +103,9 @@ export default function AIRecommendationPage() {
               <Sparkles size={19} />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold">AI 시간표 추천</h1>
+              <h1 className="text-sm font-extrabold">필터 기반 시간표 추천</h1>
               <p className="mt-1 text-[9px] text-[#9699a7]">
-                원하는 조건을 설정하면 후보 시간표를 구성합니다.
+                강의를 조건으로 필터링해 겹치지 않는 시간표 후보를 구성합니다.
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export default function AIRecommendationPage() {
               />
             </label>
             <Toggle
-              label="전공 과목 중심"
+              label="전공 과목만"
               checked={preferences.majorOnly}
               onChange={(v) => setPreferences((p) => ({ ...p, majorOnly: v }))}
             />
@@ -164,7 +164,7 @@ export default function AIRecommendationPage() {
 
         <section className="min-w-0 rounded-2xl border border-[#e3e4e9] bg-white p-5 shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           {!generated ? (
-            <EmptyAI onGenerate={generate} />
+            <EmptyRecommendations onGenerate={generate} />
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
@@ -257,8 +257,7 @@ export default function AIRecommendationPage() {
         </section>
       </div>
       <p className="mt-3 px-1 text-[8px] text-[#aaaab4]">
-        ※ 현재는 백엔드 AI API 연결 전 단계의 추천 시뮬레이션입니다. 실제
-        서비스에서는 학생 조건과 개설 강좌 데이터를 API로 전달합니다.
+        선택한 필터와 학점 한도에 따라 개설 강좌를 조합합니다. 과목과 시간표를 확인한 뒤 적용해 주세요.
       </p>
     </main>
   );
@@ -290,7 +289,7 @@ function Toggle({
     </button>
   );
 }
-function EmptyAI({ onGenerate }: { onGenerate: () => void }) {
+function EmptyRecommendations({ onGenerate }: { onGenerate: () => void }) {
   return (
     <div className="grid min-h-[520px] place-items-center text-center">
       <div className="max-w-[400px]">
