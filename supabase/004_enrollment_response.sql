@@ -1,7 +1,9 @@
 -- 003 적용 후 추가 실행. 테이블과 기존 신청 기록을 변경하지 않습니다.
 begin;
-create or replace function public.tt_enrollment_state(p_owner uuid)
-returns jsonb language sql volatile set search_path=public as $$
+
+
+create or replace function public.tt_enrollment_state(p_owner uuid) returns jsonb language sql volatile
+set search_path=public as $$
  with counts as (
   select "openCourseId",count(*)::int n from tt_enrollments where status='enrolled' group by "openCourseId"
  ), schedules as (
@@ -26,15 +28,27 @@ returns jsonb language sql volatile set search_path=public as $$
   'enrolled',coalesce((select jsonb_agg(c.item order by c.id) from catalog c join tt_enrollments e on e."openCourseId"=c.id where e."studentOwner"=p_owner and e.status='enrolled'),'[]'::jsonb)
  )
 $$;
-create or replace function public.tt_apply_enrollments(p_owner uuid,p_course_ids bigint[],p_action text)
-returns jsonb language plpgsql set search_path=public as $$
+
+
+create or replace function public.tt_apply_enrollments(p_owner uuid,
+                                    p_course_ids bigint[],p_action text) returns jsonb language plpgsql
+set search_path=public as $$
 begin
  perform public.tt_change_enrollments(p_owner,p_course_ids,p_action);
  return public.tt_enrollment_state(p_owner);
 end $$;
-revoke all on function public.tt_enrollment_state(uuid) from public,anon,authenticated;
-revoke all on function public.tt_apply_enrollments(uuid,bigint[],text) from public,anon,authenticated;
+
+revoke all on function public.tt_enrollment_state(uuid)
+from public,anon,authenticated;
+
+revoke all on function public.tt_apply_enrollments(uuid,bigint[],text)
+from public,anon,authenticated;
+
 grant execute on function public.tt_enrollment_state(uuid) to service_role;
+
 grant execute on function public.tt_apply_enrollments(uuid,bigint[],text) to service_role;
+
 notify pgrst,'reload schema';
+
+
 commit;

@@ -1,13 +1,26 @@
-import * as XLSX from "xlsx"
+import * as XLSX from "xlsx";
 import { departments } from "../../shared/data/departments";
 import type { CourseListItem } from "../../shared/types/database";
 
 const EXPECTED_HEADERS = [
-  "구분", "이수 구분", "영역", "하위 영역 1", "하위 영역 2",
-  "학수번호", "과목명", "분반", "담당교수",
-  "학점", "정원", "대상학년", "학과코드",
+  "구분",
+  "이수 구분",
+  "영역",
+  "하위 영역 1",
+  "하위 영역 2",
+  "학수번호",
+  "과목명",
+  "분반",
+  "담당교수",
+  "학점",
+  "정원",
+  "대상학년",
+  "학과코드",
   "온라인/오프라인",
-  "요일", "시작교시", "종료교시", "강의실",
+  "요일",
+  "시작교시",
+  "종료교시",
+  "강의실",
   "제외 학과코드",
 ];
 
@@ -20,7 +33,7 @@ export async function readCourseExcel(file: File) {
     header: 1,
     defval: "",
     raw: false,
-  })
+  });
 }
 
 export type ExcelValidationError = {
@@ -28,9 +41,7 @@ export type ExcelValidationError = {
   message: string;
 };
 
-export function validateCourseExcel(
-  rows: unknown[][],
-): ExcelValidationError[] {
+export function validateCourseExcel(rows: unknown[][]): ExcelValidationError[] {
   const errors: ExcelValidationError[] = [];
   const text = (value: unknown) => String(value ?? "").trim();
   const departmentIds = new Set(departments.map((dept) => dept.id));
@@ -80,11 +91,7 @@ export function validateCourseExcel(
       }
     }
 
-    const checkNumber = (
-      column: number,
-      min: number,
-      integer: boolean,
-    ) => {
+    const checkNumber = (column: number, min: number, integer: boolean) => {
       if (!get(column)) return;
 
       const value = Number(get(column));
@@ -134,11 +141,7 @@ export function validateCourseExcel(
       checkNumber(15, 1, true);
       checkNumber(16, 1, true);
 
-      if (
-        get(15) &&
-        get(16) &&
-        Number(get(16)) < Number(get(15))
-      ) {
+      if (get(15) && get(16) && Number(get(16)) < Number(get(15))) {
         addError(rowNumber, "종료교시가 시작교시보다 빠릅니다.");
       }
     }
@@ -151,13 +154,11 @@ export function validateCourseExcel(
     }
 
     if (get(18)) {
-      const codes = get(18).split(",").map((code) => code.trim());
+      const codes = get(18)
+        .split(",")
+        .map((code) => code.trim());
 
-      if (
-        codes.some(
-          (code) => !code || !departmentIds.has(Number(code)),
-        )
-      ) {
+      if (codes.some((code) => !code || !departmentIds.has(Number(code)))) {
         addError(
           rowNumber,
           "제외 학과코드는 존재하는 번호를 쉼표로 구분해서 입력하세요.",
@@ -228,9 +229,7 @@ export function convertCourseExcel(
     const sectionNo = get(7);
     const key = makeKey(courseCode, sectionNo);
 
-    const department = departments.find(
-      (item) => item.id === Number(get(12)),
-    );
+    const department = departments.find((item) => item.id === Number(get(12)));
 
     if (!department) {
       errors.push({
@@ -240,13 +239,10 @@ export function convertCourseExcel(
       return;
     }
 
-    const classificationPath = [0, 1, 2, 3, 4]
-      .map(get)
-      .filter(Boolean);
+    const classificationPath = [0, 1, 2, 3, 4].map(get).filter(Boolean);
 
     const excludedDepartmentIds = get(18)
-      ? [...new Set(get(18).split(",").map(Number))]
-          .sort((a, b) => a - b)
+      ? [...new Set(get(18).split(",").map(Number))].sort((a, b) => a - b)
       : [];
 
     const basicInfo = {

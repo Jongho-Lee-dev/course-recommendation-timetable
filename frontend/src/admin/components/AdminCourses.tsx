@@ -21,11 +21,6 @@ import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import CourseExcelImport from "./CourseExcelImport";
 import { appendCourseExcel, updateCourseExcel } from "../utils/saveCourseExcel";
 
-const inputClass =
-  "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]";
-const buttonClass =
-  "cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]";
-const primaryClass = `${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6]`;
 const textFields = [
   ["courseCode", "학수번호"],
   ["title", "과목명"],
@@ -37,7 +32,6 @@ const numberFields = [
   ["capacity", "정원", 1],
   ["targetGrade", "대상학년", 1],
 ] as const;
-
 
 function createSchedule(openCourseId: number, id = 1): CourseSchedule {
   return {
@@ -60,7 +54,10 @@ function CourseForm({
   course: CourseListItem;
   courses: CourseListItem[];
   departments: Department[];
-  onSave: (course: CourseListItem, syllabus: File | null) => void | Promise<void>;
+  onSave: (
+    course: CourseListItem,
+    syllabus: File | null,
+  ) => void | Promise<void>;
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<CourseListItem>(() => {
@@ -119,24 +116,28 @@ function CourseForm({
         setError("");
         setSaving(true);
         try {
-        await onSave(
-          {
-            ...withClassificationPath(
-              draft,
-              getClassificationPath(draft).map((value) => value.trim()),
-            ),
-            courseType: draft.courseType?.trim() ?? "",
-            courseCode: draft.courseCode.trim(),
-            title: draft.title.trim(),
-            professorName: draft.professorName.trim(),
-            category: draft.category.trim(),
-            sectionNo: draft.sectionNo.trim(),
-            schedules: draft.isOnline ? [] : draft.schedules,
-          },
-          syllabus,
-        );
+          await onSave(
+            {
+              ...withClassificationPath(
+                draft,
+                getClassificationPath(draft).map((value) => value.trim()),
+              ),
+              courseType: draft.courseType?.trim() ?? "",
+              courseCode: draft.courseCode.trim(),
+              title: draft.title.trim(),
+              professorName: draft.professorName.trim(),
+              category: draft.category.trim(),
+              sectionNo: draft.sectionNo.trim(),
+              schedules: draft.isOnline ? [] : draft.schedules,
+            },
+            syllabus,
+          );
         } catch (error) {
-          setError(error instanceof Error ? error.message : "엑셀 저장에 실패했습니다. 다시 시도하세요.");
+          setError(
+            error instanceof Error
+              ? error.message
+              : "엑셀 저장에 실패했습니다. 다시 시도하세요.",
+          );
         } finally {
           setSaving(false);
         }
@@ -155,7 +156,7 @@ function CourseForm({
           <label key={key} className="space-y-1.5 text-[#5d6070]">
             <span className="block font-semibold">{label}</span>
             <input
-              className={inputClass}
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
               value={draft[key] ?? ""}
               required={[
                 "courseCode",
@@ -174,7 +175,7 @@ function CourseForm({
           <label key={key} className="space-y-1.5 text-[#5d6070]">
             <span className="block font-semibold">{label}</span>
             <input
-              className={inputClass}
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
               type="number"
               min={min}
               step={1}
@@ -189,7 +190,7 @@ function CourseForm({
         <label className="space-y-1.5 text-[#5d6070]">
           <span className="block font-semibold">소속 학과</span>
           <select
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             required
             value={draft.departmentId || ""}
             onChange={(event) => {
@@ -227,7 +228,7 @@ function CourseForm({
         <label className="space-y-1.5 text-[#5d6070]">
           <span className="block font-semibold">수업형태</span>
           <select
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             value={draft.isOnline ? "online" : "offline"}
             onChange={(event) => {
               const isOnline = event.target.value === "online";
@@ -254,7 +255,7 @@ function CourseForm({
             type="file"
             accept=".pdf,application/pdf"
             disabled={readingPdf}
-            className={inputClass}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
             onChange={async (event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
@@ -295,7 +296,7 @@ function CourseForm({
             {fileError}{" "}
             <button
               type="button"
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() => setFileError("")}
             >
               선택 취소
@@ -308,7 +309,7 @@ function CourseForm({
             <button
               type="button"
               disabled={readingPdf}
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() => {
                 setSyllabus(null);
                 setFileError("");
@@ -343,7 +344,7 @@ function CourseForm({
             <strong>강의 시간</strong>
             <button
               type="button"
-              className={buttonClass}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
               onClick={() =>
                 setDraft({
                   ...draft,
@@ -352,7 +353,7 @@ function CourseForm({
                     createSchedule(
                       draft.id,
                       Math.max(0, ...draft.schedules.map((item) => item.id)) +
-                      1,
+                        1,
                     ),
                   ],
                 })
@@ -372,7 +373,7 @@ function CourseForm({
               <label>
                 요일
                 <select
-                  className={inputClass}
+                  className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
                   value={schedule.dayOfWeek}
                   onChange={(event) =>
                     setDraft({
@@ -399,7 +400,7 @@ function CourseForm({
                         ? "종료 교시"
                         : "강의실"}
                     <input
-                      className={inputClass}
+                      className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
                       required
                       type={key === "classroom" ? "text" : "number"}
                       min={key === "endPeriod" ? schedule.startPeriod : 1}
@@ -411,12 +412,12 @@ function CourseForm({
                           schedules: draft.schedules.map((item) =>
                             item.id === schedule.id
                               ? {
-                                ...item,
-                                [key]:
-                                  key === "classroom"
-                                    ? event.target.value
-                                    : Number(event.target.value),
-                              }
+                                  ...item,
+                                  [key]:
+                                    key === "classroom"
+                                      ? event.target.value
+                                      : Number(event.target.value),
+                                }
                               : item,
                           ),
                         })
@@ -427,7 +428,7 @@ function CourseForm({
               )}
               <button
                 type="button"
-                className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-40`}
+                className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={draft.schedules.length <= 1}
                 onClick={() =>
                   setDraft({
@@ -435,8 +436,8 @@ function CourseForm({
                     schedules:
                       draft.schedules.length > 1
                         ? draft.schedules.filter(
-                          (item) => item.id !== schedule.id,
-                        )
+                            (item) => item.id !== schedule.id,
+                          )
                         : draft.schedules,
                   })
                 }
@@ -453,13 +454,18 @@ function CourseForm({
         </p>
       )}
       <div className="flex justify-end gap-2">
-        <button type="button" className={buttonClass} onClick={onCancel} disabled={saving}>
+        <button
+          type="button"
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+          onClick={onCancel}
+          disabled={saving}
+        >
           취소
         </button>
         <button
           type="submit"
           disabled={saving || readingPdf || !!fileError}
-          className={`${primaryClass} disabled:opacity-50`}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6] disabled:opacity-50"
         >
           {saving ? "저장 중..." : "저장하기"}
         </button>
@@ -477,7 +483,9 @@ export default function AdminCourses({
   departments: Department[];
   onChange: (courses: CourseListItem[]) => void;
 }) {
-  const [mode, setMode] = useState<"choose" | "add" | "edit" | "excel">("choose");
+  const [mode, setMode] = useState<"choose" | "add" | "edit" | "excel">(
+    "choose",
+  );
   const setSyllabus = useCourseCatalogStore((state) => state.setSyllabus);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
@@ -486,8 +494,9 @@ export default function AdminCourses({
   const [selectedFilters, setSelectedFilters] = useState<
     Record<number, number[]>
   >({});
-  const [excelHandle, setExcelHandle] =
-    useState<FileSystemFileHandle | null>(null);
+  const [excelHandle, setExcelHandle] = useState<FileSystemFileHandle | null>(
+    null,
+  );
   const [savingExcel, setSavingExcel] = useState(false);
 
   async function selectExcelFile() {
@@ -561,20 +570,6 @@ export default function AdminCourses({
       <div>
         <h2 className="!mb-4 !text-sm !font-bold">과목 관리</h2>
 
-        <div className="mb-4 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={selectExcelFile}
-            className={buttonClass}
-          >
-            저장할 엑셀 선택
-          </button>
-
-          <span>
-            {excelHandle ? excelHandle.name : "선택된 파일 없음"}
-          </span>
-        </div>
-
         <div className="grid grid-cols-2 gap-3 min-[701px]:gap-4">
           {(
             [
@@ -595,7 +590,7 @@ export default function AdminCourses({
                 title: "엑셀 데이터 적용",
                 description: "엑셀 파일에 작성한 내용을 저장합니다.",
                 icon: Sheet,
-              }
+              },
             ] as const
           ).map(({ mode: next, title, description, icon: Icon }) => (
             <button
@@ -629,7 +624,7 @@ export default function AdminCourses({
         </h2>
         <button
           type="button"
-          className={buttonClass}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
           disabled={savingExcel}
           onClick={() => {
             setMode("choose");
@@ -641,7 +636,12 @@ export default function AdminCourses({
       </div>
       {mode !== "excel" && (
         <div className="mb-4 flex items-center gap-3">
-          <button type="button" className={buttonClass} onClick={selectExcelFile} disabled={savingExcel}>
+          <button
+            type="button"
+            className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+            onClick={selectExcelFile}
+            disabled={savingExcel}
+          >
             저장할 엑셀 선택
           </button>
           <span>{excelHandle ? excelHandle.name : "선택된 파일 없음"}</span>
@@ -656,16 +656,30 @@ export default function AdminCourses({
           onCancel={() => setMode("choose")}
           onSave={async (course, syllabus) => {
             if (!excelHandle) {
-              throw new Error("위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.");
+              throw new Error(
+                "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
+              );
             }
-            if (courses.some((item) => item.courseCode === course.courseCode && item.sectionNo === course.sectionNo)) {
+            if (
+              courses.some(
+                (item) =>
+                  item.courseCode === course.courseCode &&
+                  item.sectionNo === course.sectionNo,
+              )
+            ) {
               throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
             }
             setSavingExcel(true);
             try {
               await appendCourseExcel(excelHandle, course);
-              try { onChange(await saveCourse(course)); }
-              catch (e) { throw new Error(`엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`, {cause:e}); }
+              try {
+                onChange(await saveCourse(course));
+              } catch (e) {
+                throw new Error(
+                  `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
+                  { cause: e },
+                );
+              }
             } finally {
               setSavingExcel(false);
             }
@@ -710,7 +724,7 @@ export default function AdminCourses({
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className={buttonClass}
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
                     disabled={savingExcel}
                     onClick={() =>
                       setEditingId(editingId === course.id ? null : course.id)
@@ -720,16 +734,24 @@ export default function AdminCourses({
                   </button>
                   <button
                     type="button"
-                    className={`${buttonClass} text-red-600`}
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] text-red-600"
                     disabled={savingExcel}
                     onClick={async () => {
                       setSavingExcel(true);
                       try {
-                        onChange(await api<CourseListItem[]>(`/admin/courses/${course.id}`, {method: "DELETE"}));
+                        onChange(
+                          await api<CourseListItem[]>(
+                            `/admin/courses/${course.id}`,
+                            { method: "DELETE" },
+                          ),
+                        );
                         setSelectedFilters({});
                         if (editingId === course.id) setEditingId(null);
-                      } catch(e) {alert(e instanceof Error ? e.message : "DB 삭제 실패");}
-                      finally {setSavingExcel(false);}
+                      } catch (e) {
+                        alert(e instanceof Error ? e.message : "DB 삭제 실패");
+                      } finally {
+                        setSavingExcel(false);
+                      }
                     }}
                   >
                     삭제하기
@@ -745,16 +767,33 @@ export default function AdminCourses({
                   onCancel={() => setEditingId(null)}
                   onSave={async (saved, syllabus) => {
                     if (!excelHandle) {
-                      throw new Error("위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.");
+                      throw new Error(
+                        "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
+                      );
                     }
-                    if (courses.some((item) => item.id !== course.id && item.courseCode === saved.courseCode && item.sectionNo === saved.sectionNo)) {
-                      throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
+                    if (
+                      courses.some(
+                        (item) =>
+                          item.id !== course.id &&
+                          item.courseCode === saved.courseCode &&
+                          item.sectionNo === saved.sectionNo,
+                      )
+                    ) {
+                      throw new Error(
+                        "같은 학수번호와 분반의 과목이 이미 있습니다.",
+                      );
                     }
                     setSavingExcel(true);
                     try {
                       await updateCourseExcel(excelHandle, course, saved);
-                      try { onChange(await saveCourse(saved, course.id)); }
-                      catch (e) { throw new Error(`엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`, {cause:e}); }
+                      try {
+                        onChange(await saveCourse(saved, course.id));
+                      } catch (e) {
+                        throw new Error(
+                          `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
+                          { cause: e },
+                        );
+                      }
                     } finally {
                       setSavingExcel(false);
                     }

@@ -23,7 +23,7 @@ async function saveCourseExcel(
   course: CourseListItem,
   original?: CourseListItem,
 ) {
-  if (await handle.requestPermission({ mode: "readwrite" }) !== "granted") {
+  if ((await handle.requestPermission({ mode: "readwrite" })) !== "granted") {
     throw new Error("엑셀 파일에 저장하려면 쓰기 권한을 허용하세요.");
   }
 
@@ -33,7 +33,9 @@ async function saveCourseExcel(
 
   if (!sheet) throw new Error("엑셀 파일에 시트가 없습니다.");
   const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
-    header: 1, defval: "", raw: false,
+    header: 1,
+    defval: "",
+    raw: false,
   });
 
   const matches = (row: unknown[], target: CourseListItem) =>
@@ -45,29 +47,46 @@ async function saveCourseExcel(
       if (index > 0 && matches(row, original)) originalIndexes.add(index);
     });
     if (!originalIndexes.size) {
-      throw new Error("선택한 엑셀에서 수정할 과목을 찾지 못했습니다. 수정 전 학수번호와 분반을 확인하세요.");
+      throw new Error(
+        "선택한 엑셀에서 수정할 과목을 찾지 못했습니다. 수정 전 학수번호와 분반을 확인하세요.",
+      );
     }
   }
-  if (rows.some((row, index) =>
-    index > 0 && !originalIndexes.has(index) && matches(row, course),
-  )) {
+  if (
+    rows.some(
+      (row, index) =>
+        index > 0 && !originalIndexes.has(index) && matches(row, course),
+    )
+  ) {
     throw new Error("엑셀에 같은 학수번호와 분반이 이미 있습니다.");
   }
 
   const path = getClassificationPath(course);
-  if (path.length > 5) throw new Error("엑셀에는 분류를 5단계까지 저장할 수 있습니다.");
+  if (path.length > 5)
+    throw new Error("엑셀에는 분류를 5단계까지 저장할 수 있습니다.");
 
   const schedules = course.isOnline ? [null] : course.schedules;
   if (!schedules.length) throw new Error("강의 시간을 입력하세요.");
 
   const newRows = schedules.map((schedule) => [
-    course.category, course.courseType ?? "", path[2] ?? "",
-    path[3] ?? "", path[4] ?? "", course.courseCode, course.title,
-    course.sectionNo, course.professorName, course.credit, course.capacity,
-    course.targetGrade, course.departmentId,
+    course.category,
+    course.courseType ?? "",
+    path[2] ?? "",
+    path[3] ?? "",
+    path[4] ?? "",
+    course.courseCode,
+    course.title,
+    course.sectionNo,
+    course.professorName,
+    course.credit,
+    course.capacity,
+    course.targetGrade,
+    course.departmentId,
     course.isOnline ? "온라인" : "오프라인",
-    schedule?.dayOfWeek ?? "", schedule?.startPeriod ?? "",
-    schedule?.endPeriod ?? "", schedule?.classroom ?? "",
+    schedule?.dayOfWeek ?? "",
+    schedule?.startPeriod ?? "",
+    schedule?.endPeriod ?? "",
+    schedule?.classroom ?? "",
     (course.excludedDepartmentIds ?? []).join(","),
   ]);
 
@@ -86,7 +105,7 @@ async function saveCourseExcel(
   if (errors.length) {
     throw new Error(`${errors[0].row}행: ${errors[0].message}`);
   }
-  
+
   if (original) {
     const updatedSheet = XLSX.utils.aoa_to_sheet(updatedRows);
     updatedSheet["!cols"] = sheet["!cols"];

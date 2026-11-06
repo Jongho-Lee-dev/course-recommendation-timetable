@@ -1,17 +1,51 @@
-import {PGlite} from '@electric-sql/pglite';
-import fs from 'node:fs/promises';
-import {fileURLToPath} from 'node:url';
-import assert from 'node:assert/strict';
-const root=fileURLToPath(new URL('../../',import.meta.url));const db=new PGlite();
-await db.exec('create role anon;create role authenticated;create role service_role bypassrls;');
-for(const f of ['001_schema.sql','002_seed.sql','003_enrollments.sql','004_enrollment_response.sql'])await db.exec(await fs.readFile(root+'supabase/'+f,'utf8'));
-const owner='00000000-0000-4000-8000-000000000001';
-await db.query('insert into tt_students(owner,"studentId",name,grade,"departmentId","completedCredits","graduationCredits","maxCredits") values($1,\'TEST\',\'학생\',2,1,0,130,18)',[owner]);
-const id=(await db.query('select id from tt_open_courses where "courseCode"=\'CS201\'')).rows[0].id;
-const change=async action=>(await db.query('select tt_apply_enrollments($1::uuid,$2::bigint[],$3) s',[owner,[id],action])).rows[0].s;
-let s=await change('add');assert.equal(s.studentId,'TEST');assert.equal(s.courses.length,40);assert.equal(s.enrolled.length,1);
-assert.equal(s.enrolled[0].enrolledCount,1);assert.equal(s.enrolled[0].remainingSeats,39);assert.equal(s.enrolled[0].schedules.length,2);assert.equal(s.enrolled[0].majorName,'컴퓨터공학과');
-s=await change('add');assert.equal(s.enrolled[0].enrolledCount,1);
-s=await change('cancel');assert.equal(s.enrolled.length,0);assert.equal(s.courses.find(c=>c.id===id).enrolledCount,0);
-await db.exec('set role anon;');await assert.rejects(db.query('select tt_enrollment_state($1::uuid)',[owner]));
-console.log('PASS: 저장+최신 인원+본인 내역을 DB 단일 응답으로 반환, 취소/중복/권한');await db.close();
+import { PGlite } from "@electric-sql/pglite";
+import fs from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import assert from "node:assert/strict";
+const root = fileURLToPath(new URL("../../", import.meta.url));
+const db = new PGlite();
+await db.exec(
+  "create role anon;create role authenticated;create role service_role bypassrls;",
+);
+for (const f of [
+  "001_schema.sql",
+  "002_seed.sql",
+  "003_enrollments.sql",
+  "004_enrollment_response.sql",
+])
+  await db.exec(await fs.readFile(root + "supabase/" + f, "utf8"));
+const owner = "00000000-0000-4000-8000-000000000001";
+await db.query(
+  'insert into tt_students(owner,"studentId",name,grade,"departmentId","completedCredits","graduationCredits","maxCredits") values($1,\'TEST\',\'학생\',2,1,0,130,18)',
+  [owner],
+);
+const id = (
+  await db.query("select id from tt_open_courses where \"courseCode\"='CS201'")
+).rows[0].id;
+const change = async (action) =>
+  (
+    await db.query("select tt_apply_enrollments($1::uuid,$2::bigint[],$3) s", [
+      owner,
+      [id],
+      action,
+    ])
+  ).rows[0].s;
+let s = await change("add");
+assert.equal(s.studentId, "TEST");
+assert.equal(s.courses.length, 40);
+assert.equal(s.enrolled.length, 1);
+assert.equal(s.enrolled[0].enrolledCount, 1);
+assert.equal(s.enrolled[0].remainingSeats, 39);
+assert.equal(s.enrolled[0].schedules.length, 2);
+assert.equal(s.enrolled[0].majorName, "컴퓨터공학과");
+s = await change("add");
+assert.equal(s.enrolled[0].enrolledCount, 1);
+s = await change("cancel");
+assert.equal(s.enrolled.length, 0);
+assert.equal(s.courses.find((c) => c.id === id).enrolledCount, 0);
+await db.exec("set role anon;");
+await assert.rejects(db.query("select tt_enrollment_state($1::uuid)", [owner]));
+console.log(
+  "PASS: 저장+최신 인원+본인 내역을 DB 단일 응답으로 반환, 취소/중복/권한",
+);
+await db.close();

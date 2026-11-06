@@ -11,7 +11,10 @@ import {
 import { sortCourses } from "../../shared/data/sortCourses";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import { useCourseStore } from "../store/courseStore";
-import type { CourseFilterOption, CourseListItem } from "../../shared/types/database";
+import type {
+  CourseFilterOption,
+  CourseListItem,
+} from "../../shared/types/database";
 
 export default function CourseSearchPage() {
   const courses = useCourseCatalogStore((state) => state.courses);

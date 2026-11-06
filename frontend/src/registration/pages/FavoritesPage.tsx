@@ -50,7 +50,10 @@ export default function FavoritesPage() {
     }
 
     if (count)
-      void changeEnrollments(working.slice(selected.length).map(c=>c.id),"add");
+      void changeEnrollments(
+        working.slice(selected.length).map((c) => c.id),
+        "add",
+      );
     else
       toast.info(
         "추가할 수 있는 강의가 없습니다. 충돌 또는 학점 제한을 확인하세요.",
