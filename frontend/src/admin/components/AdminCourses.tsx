@@ -1,4 +1,4 @@
-import { api, saveCourse } from "../../shared/api";
+import { api, saveCourse, saveSyllabus } from "../../shared/api";
 import { useMemo, useState } from "react";
 import { BookOpen, Plus, Sheet } from "lucide-react";
 import type {
@@ -17,7 +17,6 @@ import ClassificationEditor from "./ClassificationEditor";
 import DepartmentTreeSelect from "./DepartmentTreeSelect";
 import CourseFilters from "../../shared/components/CourseFilters";
 import SyllabusLink, { PdfLink } from "../../shared/components/SyllabusLink";
-import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import CourseExcelImport from "./CourseExcelImport";
 import { appendCourseExcel, updateCourseExcel } from "../utils/saveCourseExcel";
 
@@ -56,7 +55,7 @@ function CourseForm({
   departments: Department[];
   onSave: (
     course: CourseListItem,
-    syllabus: File | null,
+    syllabus: File | null | undefined,
   ) => void | Promise<void>;
   onCancel: () => void;
 }) {
@@ -68,10 +67,7 @@ function CourseForm({
   });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const savedSyllabus = useCourseCatalogStore(
-    (state) => state.syllabi[course.id],
-  );
-  const [syllabus, setSyllabus] = useState<File | null>(savedSyllabus ?? null);
+  const [syllabus, setSyllabus] = useState<File | null | undefined>(undefined);
   const [readingPdf, setReadingPdf] = useState(false);
   const [fileError, setFileError] = useState("");
 
@@ -265,8 +261,8 @@ function CourseForm({
                 setFileError("PDF 파일만 첨부할 수 있습니다.");
                 return;
               }
-              if (file.size > 20 * 1024 * 1024) {
-                setFileError("20MB 이하의 PDF 파일을 선택하세요.");
+              if (file.size > 10 * 1024 * 1024) {
+                setFileError("10MB 이하의 PDF 파일을 선택하세요.");
                 return;
               }
               setReadingPdf(true);
@@ -288,7 +284,7 @@ function CourseForm({
           />
         </label>
         <p className="text-[10px] text-[#858796]">
-          최대 20MB · 다른 파일을 선택하면 저장 시 교체됩니다.
+          최대 10MB · 다른 파일을 선택하면 저장 시 교체됩니다.
         </p>
         {readingPdf && <p role="status">PDF 확인 중…</p>}
         {fileError && (
@@ -303,9 +299,13 @@ function CourseForm({
             </button>
           </p>
         )}
-        {syllabus ? (
+        {syllabus || (syllabus === undefined && course.syllabusPath) ? (
           <div className="flex flex-wrap items-center gap-3">
-            <PdfLink file={syllabus} />
+            {syllabus ? (
+              <PdfLink file={syllabus} />
+            ) : (
+              <SyllabusLink courseId={course.id} />
+            )}
             <button
               type="button"
               disabled={readingPdf}
@@ -486,7 +486,6 @@ export default function AdminCourses({
   const [mode, setMode] = useState<"choose" | "add" | "edit" | "excel">(
     "choose",
   );
-  const setSyllabus = useCourseCatalogStore((state) => state.setSyllabus);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("default");
@@ -673,7 +672,31 @@ export default function AdminCourses({
             try {
               await appendCourseExcel(excelHandle, course);
               try {
-                onChange(await saveCourse(course));
+                const updated = await saveCourse(course);
+                onChange(updated);
+                const created = updated.find(
+                  (item) =>
+                    item.courseCode === course.courseCode &&
+                    item.sectionNo === course.sectionNo,
+                );
+                if (syllabus && created) {
+                  try {
+                    const attachment = await saveSyllabus(created.id, syllabus);
+                    onChange(
+                      updated.map((item) =>
+                        item.id === created.id ? { ...item, ...attachment } : item,
+                      ),
+                    );
+                  } catch (error) {
+                    resetFilters();
+                    setMode("edit");
+                    setEditingId(created.id);
+                    alert(
+                      `과목은 저장됐지만 강의계획서 업로드에 실패했습니다. 수정 화면에서 PDF를 다시 첨부하세요. ${error instanceof Error ? error.message : ""}`,
+                    );
+                    return;
+                  }
+                }
               } catch (e) {
                 throw new Error(
                   `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
@@ -684,7 +707,6 @@ export default function AdminCourses({
               setSavingExcel(false);
             }
 
-            setSyllabus(course.id, syllabus);
             resetFilters();
             setMode("edit");
           }}
@@ -787,7 +809,28 @@ export default function AdminCourses({
                     try {
                       await updateCourseExcel(excelHandle, course, saved);
                       try {
-                        onChange(await saveCourse(saved, course.id));
+                        const updated = await saveCourse(saved, course.id);
+                        onChange(updated);
+                        if (syllabus !== undefined) {
+                          try {
+                            const attachment = await saveSyllabus(
+                              course.id,
+                              syllabus,
+                            );
+                            onChange(
+                              updated.map((item) =>
+                                item.id === course.id
+                                  ? { ...item, ...attachment }
+                                  : item,
+                              ),
+                            );
+                          } catch (error) {
+                            alert(
+                              `과목은 저장됐지만 강의계획서 변경에 실패했습니다. 다시 저장해 주세요. ${error instanceof Error ? error.message : ""}`,
+                            );
+                            return;
+                          }
+                        }
                       } catch (e) {
                         throw new Error(
                           `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
@@ -798,7 +841,6 @@ export default function AdminCourses({
                       setSavingExcel(false);
                     }
 
-                    setSyllabus(saved.id, syllabus);
                     setSelectedFilters({});
                     setEditingId(null);
                   }}
@@ -814,8 +856,8 @@ export default function AdminCourses({
         </>
       )}
       <p className="mt-3 text-[10px] text-[#858796]">
-        추가·수정한 과목은 선택한 엑셀 파일에 저장됩니다. 화면 목록과
-        강의계획서는 새로고침하면 초기화됩니다.
+        추가·수정한 과목은 선택한 엑셀 파일과 DB에 저장됩니다.
+        강의계획서는 서버에 저장되며 수강생도 강좌 상세에서 볼 수 있습니다.
       </p>
     </div>
   );

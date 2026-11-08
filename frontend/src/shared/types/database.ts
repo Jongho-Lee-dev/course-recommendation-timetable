@@ -95,6 +95,8 @@ export interface CourseFilterOption {
 }
 
 export interface CourseListItem {
+  syllabusPath?: string | null;
+  syllabusName?: string | null;
   enrolledCount?: number;
   remainingSeats?: number;
   active?: boolean;

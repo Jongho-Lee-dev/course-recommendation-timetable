@@ -52,3 +52,16 @@ export async function downloadExcel() {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+export function syllabusUrl(courseId: number) {
+  return `${base}/api/courses/${courseId}/syllabus`;
+}
+
+export async function saveSyllabus(courseId: number, file: File | null) {
+  const body = new FormData();
+  if (file) body.append("file", file);
+  return api<Pick<CourseListItem, "syllabusPath" | "syllabusName">>(
+    `/admin/courses/${courseId}/syllabus`,
+    { method: file ? "PUT" : "DELETE", ...(file ? { body } : {}) },
+  );
+}

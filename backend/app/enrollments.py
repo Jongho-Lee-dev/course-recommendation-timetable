@@ -11,6 +11,25 @@ class EnrollmentChange(BaseModel):
 
 
 def install_enrollments(app, db, claims, get_catalog):
+    async def with_syllabi(result):
+        items = [*result.get("courses", []), *result.get("enrolled", [])]
+        if not items:
+            return result
+        rows = await db(
+            "GET",
+            "tt_open_courses",
+            params={
+                "select": "id,syllabusPath,syllabusName",
+                "limit": "10000",
+            },
+        )
+        attachments = {row["id"]: row for row in rows}
+        for item in items:
+            attachment = attachments.get(item["id"], {})
+            item["syllabusPath"] = attachment.get("syllabusPath")
+            item["syllabusName"] = attachment.get("syllabusName")
+        return result
+
     def student_session(c=Depends(claims)):
         if c.get("role") != "student":
             raise HTTPException(403, "학생 세션이 필요합니다.")
@@ -21,13 +40,13 @@ def install_enrollments(app, db, claims, get_catalog):
         result = await db("POST", "rpc/tt_enrollment_state", {"p_owner": c["sub"]})
         if not result.get("studentId"):
             raise HTTPException(404, "학생 정보가 없습니다.")
-        return result
+        return await with_syllabi(result)
 
     @app.post("/api/enrollments")
     async def change_enrollments(body: EnrollmentChange, c=Depends(student_session)):
         if any(isinstance(x, bool) or x < 1 for x in body.courseIds):
             raise HTTPException(422, "강좌 ID가 올바르지 않습니다.")
-        return await db(
+        result = await db(
             "POST",
             "rpc/tt_apply_enrollments",
             {
@@ -36,3 +55,4 @@ def install_enrollments(app, db, claims, get_catalog):
                 "p_action": body.action,
             },
         )
+        return await with_syllabi(result)

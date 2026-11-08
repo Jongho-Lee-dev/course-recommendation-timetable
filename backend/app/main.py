@@ -152,6 +152,10 @@ from .departments import install_departments
 
 install_departments(app, db)
 
+from .syllabi import install_syllabi
+
+install_syllabi(app, db)
+
 
 async def get_catalog(active_only=True):
     snapshot = await db("POST", "rpc/tt_enrollment_snapshot", {})
