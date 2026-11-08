@@ -9,6 +9,7 @@ import type { CourseListItem } from "../../shared/types/database";
 type Preferences = {
   credits: number;
   majorOnly: boolean;
+  myDepartmentOnly: boolean;
   online: boolean;
   avoidMorning: boolean;
 };
@@ -29,11 +30,14 @@ function buildRecommendation(
   preferences: Preferences,
   courses: CourseListItem[],
   seed: number,
+  departmentId: number | undefined,
 ) {
   const pool = [...courses]
     .filter(
       (c) =>
         (!preferences.majorOnly || c.category === "전공") &&
+        (!preferences.myDepartmentOnly ||
+          (departmentId != null && c.departmentId === departmentId)) &&
         (preferences.online || !c.isOnline),
     )
     .sort(
@@ -65,6 +69,7 @@ export default function AIRecommendationPage() {
   const [preferences, setPreferences] = useState<Preferences>({
     credits: Math.min(user?.maxCredits ?? 18, 15),
     majorOnly: false,
+    myDepartmentOnly: false,
     online: false,
     avoidMorning: false,
   });
@@ -73,8 +78,10 @@ export default function AIRecommendationPage() {
 
   const recommendations = useMemo(
     () =>
-      [0, 1, 2].map((seed) => buildRecommendation(preferences, courses, seed)),
-    [preferences, courses],
+      [0, 1, 2].map((seed) =>
+        buildRecommendation(preferences, courses, seed, user?.departmentId),
+      ),
+    [preferences, courses, user?.departmentId],
   );
   const current = recommendations[active];
   const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
@@ -136,6 +143,16 @@ export default function AIRecommendationPage() {
               onChange={(v) => setPreferences((p) => ({ ...p, majorOnly: v }))}
             />
             <Toggle
+              label="본인 학과만"
+              checked={preferences.myDepartmentOnly}
+              onChange={(v) => setPreferences((p) => ({ ...p, myDepartmentOnly: v }))}
+            />
+            <p className="text-[9px] leading-4 text-[#777985]">
+              {user?.departmentId
+                ? `내 학과(${user.major})에서 개설한 강의만 추천합니다.`
+                : "프로필에서 학과를 등록해야 본인 학과 강의를 추천받을 수 있습니다."}
+            </p>
+            <Toggle
               label="온라인 강의 허용"
               checked={preferences.online}
               onChange={(v) => setPreferences((p) => ({ ...p, online: v }))}
@@ -151,7 +168,7 @@ export default function AIRecommendationPage() {
           <div className="mt-6 rounded-xl bg-[#fafafd] p-4 text-[9px] leading-5 text-[#777985]">
             <b className="text-[#454652]">현재 반영 기준</b>
             <br />
-            학점 한도 · 시간표 충돌 · 수업 방식 · 전공 여부를 기준으로 후보를
+            학점 한도 · 시간표 충돌 · 수업 방식 · 전공 여부 · 본인 학과 조건을 기준으로 후보를
             구성합니다.
           </div>
           <button
@@ -275,6 +292,8 @@ function Toggle({
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="flex w-full items-center justify-between text-left"
     >
