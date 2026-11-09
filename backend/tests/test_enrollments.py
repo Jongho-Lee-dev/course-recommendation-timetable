@@ -84,7 +84,7 @@ def test_reuses_server_http_connection_pool(monkeypatch):
         return client
     monkeypatch.setattr(main.httpx,'AsyncClient',factory)
     with TestClient(main.app) as running:
-        assert running.get('/api/health').status_code==200
-        assert running.get('/api/health').status_code==200
+        assert running.get('/api/departments').status_code==200
+        assert running.get('/api/departments').status_code==200
         assert len(clients)==1
     assert clients[0].is_closed

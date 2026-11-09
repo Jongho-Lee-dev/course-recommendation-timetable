@@ -1,4 +1,4 @@
-import base64, hashlib, hmac, json, os, time, uuid
+import asyncio, base64, hashlib, hmac, json, os, time, uuid
 from contextlib import asynccontextmanager, AsyncExitStack
 from pathlib import Path
 from typing import Annotated
@@ -63,9 +63,9 @@ def claims(authorization: Annotated[str|None,Header()]=None):
         return c
     except (AttributeError,ValueError,KeyError,TypeError): raise HTTPException(401,'로그인이 필요하거나 세션이 만료되었습니다.')
 
+# 서버가 살아 있는지만 확인합니다. 부하 테스트·모니터링이 DB 용량을 쓰지 않도록 DB는 조회하지 않습니다.
 @app.get('/api/health')
 async def health():
-    await db('GET','tt_departments',params={'select':'id','limit':'1'})
     return {'status':'ok'}
 
 @app.get('/api/departments')
@@ -82,9 +82,30 @@ async def get_catalog(active_only=True):
         result.append({**r,'enrolledCount':counts.get(r['id'],0),'remainingSeats':max(0,r['capacity']-counts.get(r['id'],0)),**base,**{k:v for k,v in dept.items() if k!='id' and v is not None},'category':path[0],'courseType':path[1],'generalEducationArea':path[2] if len(path)>2 else '', 'generalEducationElectiveArea':path[3] if len(path)>3 else '', 'schedules':sorted(schedules,key=lambda s:s['id'])})
     return result
 
+# 과목 목록은 모든 학생에게 같으므로 잠깐 저장해 두고 함께 씁니다.
+# 동시에 여러 요청이 와도 DB 조회는 한 번만 합니다. 정원 초과는 신청 시 DB가 다시 검사합니다.
+CATALOG_CACHE_SECONDS=float(os.getenv('CATALOG_CACHE_SECONDS','2'))
+_catalog_cache={'data':None,'at':0.0}
+_catalog_lock=asyncio.Lock()
+
+def _catalog_fresh():
+    return _catalog_cache['data'] is not None and time.monotonic()-_catalog_cache['at']<CATALOG_CACHE_SECONDS
+
 @app.get('/api/courses')
 async def courses():
-    return await get_catalog()
+    if _catalog_fresh(): return _catalog_cache['data']
+    async with _catalog_lock:
+        if not _catalog_fresh(): await fresh_courses()
+        return _catalog_cache['data']
+
+async def fresh_courses():
+    """관리자 변경 후처럼 최신 목록이 꼭 필요할 때 사용합니다."""
+    data=await get_catalog()
+    _catalog_cache.update(data=data,at=time.monotonic())
+    return data
+
+def clear_catalog_cache():
+    _catalog_cache.update(data=None,at=0.0)
 
 async def validate_departments(items):
     ids={d['id'] for d in await departments()}
@@ -98,20 +119,20 @@ async def validate_departments(items):
 @app.post('/api/admin/courses')
 async def create_course(body:Course):
     items=[body.model_dump()];await validate_departments(items)
-    existing=await courses()
+    existing=await fresh_courses()
     if any(c['courseCode']==body.courseCode and c['sectionNo']==body.sectionNo for c in existing): raise HTTPException(409,'학수번호·분반 중복')
     await db('POST','rpc/tt_save_catalog',{'items':items,'replace_all':False,'edit_id':0})
-    return await courses()
+    return await fresh_courses()
 
 @app.put('/api/admin/courses/{course_id}')
 async def update_course(course_id:int,body:Course):
     items=[body.model_dump()];await validate_departments(items)
     await db('POST','rpc/tt_save_catalog',{'items':items,'replace_all':False,'edit_id':course_id})
-    return await courses()
+    return await fresh_courses()
 
 @app.delete('/api/admin/courses/{course_id}')
 async def delete_course(course_id:int):
-    await db('POST','rpc/tt_delete_course',{'course_id':course_id});return await courses()
+    await db('POST','rpc/tt_delete_course',{'course_id':course_id});return await fresh_courses()
 
 @app.post('/api/admin/courses-import')
 async def import_courses(file:UploadFile=File(...)):
@@ -121,11 +142,11 @@ async def import_courses(file:UploadFile=File(...)):
     except Exception as e: raise HTTPException(422,f'엑셀 검증 실패: {e}')
     await validate_departments(items)
     await db('POST','rpc/tt_save_catalog',{'items':items,'replace_all':True})
-    return await courses()
+    return await fresh_courses()
 
 @app.get('/api/admin/courses.xlsx')
 async def excel_download():
-    return Response(export_excel(await courses()),media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',headers={'Content-Disposition':'attachment; filename="courses.xlsx"'})
+    return Response(export_excel(await fresh_courses()),media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',headers={'Content-Disposition':'attachment; filename="courses.xlsx"'})
 
 @app.post('/api/students')
 async def save_student(body:Student, c=Depends(claims)):
