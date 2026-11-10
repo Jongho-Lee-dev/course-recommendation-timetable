@@ -85,7 +85,7 @@ async def get_catalog(active_only=True):
 # 과목 목록은 모든 학생에게 같으므로 잠깐 저장해 두고 함께 씁니다.
 # 동시에 여러 요청이 와도 DB 조회는 한 번만 합니다. 정원 초과는 신청 시 DB가 다시 검사합니다.
 CATALOG_CACHE_SECONDS=float(os.getenv('CATALOG_CACHE_SECONDS','2'))
-_catalog_cache={'data':None,'at':0.0}
+_catalog_cache={'data':None,'body':None,'at':0.0}
 _catalog_lock=asyncio.Lock()
 
 def _catalog_fresh():
@@ -93,19 +93,23 @@ def _catalog_fresh():
 
 @app.get('/api/courses')
 async def courses():
-    if _catalog_fresh(): return _catalog_cache['data']
-    async with _catalog_lock:
-        if not _catalog_fresh(): await fresh_courses()
-        return _catalog_cache['data']
+    # 캐시를 끄면(0초) 잠금 없이 바로 조회합니다. 잠금을 쓰면 요청이 한 줄로 서게 됩니다.
+    if CATALOG_CACHE_SECONDS<=0: return await get_catalog()
+    if not _catalog_fresh():
+        async with _catalog_lock:
+            if not _catalog_fresh(): await fresh_courses()
+    # JSON 변환도 한 번만 해 두고 그대로 보냅니다. 요청마다 변환하면 CPU를 많이 씁니다.
+    return Response(_catalog_cache['body'],media_type='application/json')
 
 async def fresh_courses():
     """관리자 변경 후처럼 최신 목록이 꼭 필요할 때 사용합니다."""
     data=await get_catalog()
-    _catalog_cache.update(data=data,at=time.monotonic())
+    body=json.dumps(data,ensure_ascii=False,separators=(',',':')).encode()
+    _catalog_cache.update(data=data,body=body,at=time.monotonic())
     return data
 
 def clear_catalog_cache():
-    _catalog_cache.update(data=None,at=0.0)
+    _catalog_cache.update(data=None,body=None,at=0.0)
 
 async def validate_departments(items):
     ids={d['id'] for d in await departments()}

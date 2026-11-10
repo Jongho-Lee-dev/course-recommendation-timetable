@@ -43,7 +43,18 @@ def test_simultaneous_requests_load_once(fake_db):
     async def many():
         return await asyncio.gather(*[main.courses() for _ in range(50)])
     results = asyncio.run(many())
-    assert fake_db['loads'] == 1 and all(r == results[0] for r in results)
+    assert fake_db['loads'] == 1 and all(r.body == results[0].body for r in results)
+
+
+def test_cache_off_runs_requests_in_parallel(fake_db, monkeypatch):
+    monkeypatch.setattr(main, 'CATALOG_CACHE_SECONDS', 0)
+    async def many():
+        start = asyncio.get_running_loop().time()
+        await asyncio.gather(*[main.courses() for _ in range(10)])
+        return asyncio.get_running_loop().time() - start
+    elapsed = asyncio.run(many())
+    # 각 조회가 0.01초 걸리므로 줄을 서면 0.1초 이상 걸립니다.
+    assert fake_db['loads'] == 10 and elapsed < 0.08
 
 
 def test_admin_change_refreshes_cache(fake_db):
