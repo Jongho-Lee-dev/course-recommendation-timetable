@@ -21,12 +21,12 @@ const coursesTrend = new Trend('courses_duration', true);
 
 export const options = {
   stages: [
-    { duration: '30s', target: Math.round(PEAK * 0.1) },  // 200명
-    { duration: '30s', target: Math.round(PEAK * 0.25) }, // 500명
-    { duration: '1m', target: Math.round(PEAK * 0.5) },   // 1000명
-    { duration: '1m', target: PEAK },                     // 2000명
-    { duration: '1m', target: PEAK },                     // 2000명 유지
-    { duration: '30s', target: 0 },
+    { duration: '10s', target: Math.round(PEAK * 0.1) },  // 200명
+    { duration: '10s', target: Math.round(PEAK * 0.25) }, // 500명
+    { duration: '20s', target: Math.round(PEAK * 0.5) },  // 1000명
+    { duration: '20s', target: PEAK },                  // 2000명
+    { duration: '20s', target: PEAK },                  // 2000명 유지
+    { duration: '10s', target: 0 },
   ],
   thresholds: {
     http_req_duration: [{ threshold: 'p(95)<2000', abortOnFail: true, delayAbortEval: '20s' }],
@@ -35,7 +35,6 @@ export const options = {
 };
 
 export default function () {
-  // 학생마다 접속 시점이 달라 요청이 한 순간에 몰리지 않도록 처음에 무작위로 기다립니다.
   if (__ITER === 0) sleep(Math.random() * POLL_SECONDS);
 
   const res = http.get(`${BASE_URL}/api/courses`, { timeout: '30s', tags: { name: 'courses' } });
@@ -47,5 +46,5 @@ export default function () {
     },
   });
 
-  sleep(POLL_SECONDS * (0.8 + Math.random() * 0.4)); // 4~6초 뒤 다시 새로고침
+  sleep(POLL_SECONDS * (0.8 + Math.random() * 0.4));
 }
