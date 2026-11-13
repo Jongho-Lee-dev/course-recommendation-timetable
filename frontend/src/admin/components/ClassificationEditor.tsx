@@ -1,7 +1,7 @@
 import { useId } from "react";
 import type { CourseListItem } from "../../shared/types/database";
 import { getClassificationPath } from "../../shared/data/courseClassification";
-import { mockFilterCategories } from "../../shared/data/mockFilterCategories";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 
 const MAX_CLASSIFICATION_DEPTH = 5;
 
@@ -15,12 +15,13 @@ export default function ClassificationEditor({
   onChange: (path: string[]) => void;
 }) {
   const id = useId();
+  const { categories } = useCatalog().data!;
   const paths = courses.map(getClassificationPath);
-  mockFilterCategories
+  categories
     .filter((item) => item.field === "category")
     .forEach((root) => {
       paths.push([String(root.value)]);
-      mockFilterCategories
+      categories
         .filter(
           (item) => item.parentId === root.id && item.field === "courseType",
         )

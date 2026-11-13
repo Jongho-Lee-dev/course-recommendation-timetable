@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Check, Clock3, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
+import { getSelectionError } from "../utils/courseRules";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
@@ -9,7 +10,6 @@ import type { CourseListItem } from "../../shared/types/database";
 type Preferences = {
   credits: number;
   majorOnly: boolean;
-  myDepartmentOnly: boolean;
   online: boolean;
   avoidMorning: boolean;
 };
@@ -30,14 +30,12 @@ function buildRecommendation(
   preferences: Preferences,
   courses: CourseListItem[],
   seed: number,
-  departmentId: number | undefined,
+  user: ReturnType<typeof useUserStore.getState>["user"],
 ) {
   const pool = [...courses]
     .filter(
       (c) =>
         (!preferences.majorOnly || c.category === "전공") &&
-        (!preferences.myDepartmentOnly ||
-          (departmentId != null && c.departmentId === departmentId)) &&
         (preferences.online || !c.isOnline),
     )
     .sort(
@@ -47,6 +45,7 @@ function buildRecommendation(
   const result: CourseListItem[] = [];
   let credits = 0;
   for (const course of pool) {
+    if (getSelectionError(course, result, user)) continue;
     if (credits + course.credit > preferences.credits) continue;
     if (
       preferences.avoidMorning &&
@@ -62,14 +61,13 @@ function buildRecommendation(
 }
 
 export default function AIRecommendationPage() {
-  const courses = useCourseCatalogStore((s) => s.courses);
+  const courses = useCourseCatalogStore(state => state.courses);
   const user = useUserStore((s) => s.user);
   const selected = useCourseStore((s) => s.selected);
   const setSelected = useCourseStore((s) => s.setSelected);
   const [preferences, setPreferences] = useState<Preferences>({
     credits: Math.min(user?.maxCredits ?? 18, 15),
     majorOnly: false,
-    myDepartmentOnly: false,
     online: false,
     avoidMorning: false,
   });
@@ -79,9 +77,9 @@ export default function AIRecommendationPage() {
   const recommendations = useMemo(
     () =>
       [0, 1, 2].map((seed) =>
-        buildRecommendation(preferences, courses, seed, user?.departmentId),
+        buildRecommendation(preferences, courses, seed, user),
       ),
-    [preferences, courses, user?.departmentId],
+    [preferences, courses, user],
   );
   const current = recommendations[active];
   const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
@@ -98,7 +96,8 @@ export default function AIRecommendationPage() {
       !window.confirm("현재 시간표를 이 추천안으로 교체할까요?")
     )
       return;
-    setSelected(current);
+    if (!setSelected(current)) return;
+    toast.success(`${current.length}개 강의를 나의 시간표에 반영했습니다.`);
   };
 
   return (
@@ -110,9 +109,9 @@ export default function AIRecommendationPage() {
               <Sparkles size={19} />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold">필터 기반 시간표 추천</h1>
+              <h1 className="text-sm font-extrabold">AI 시간표 추천</h1>
               <p className="mt-1 text-[9px] text-[#9699a7]">
-                강의를 조건으로 필터링해 겹치지 않는 시간표 후보를 구성합니다.
+                원하는 조건을 설정하면 후보 시간표를 구성합니다.
               </p>
             </div>
           </div>
@@ -138,20 +137,10 @@ export default function AIRecommendationPage() {
               />
             </label>
             <Toggle
-              label="전공 과목만"
+              label="전공 과목 중심"
               checked={preferences.majorOnly}
               onChange={(v) => setPreferences((p) => ({ ...p, majorOnly: v }))}
             />
-            <Toggle
-              label="본인 학과만"
-              checked={preferences.myDepartmentOnly}
-              onChange={(v) => setPreferences((p) => ({ ...p, myDepartmentOnly: v }))}
-            />
-            <p className="text-[9px] leading-4 text-[#777985]">
-              {user?.departmentId
-                ? `내 학과(${user.major})에서 개설한 강의만 추천합니다.`
-                : "프로필에서 학과를 등록해야 본인 학과 강의를 추천받을 수 있습니다."}
-            </p>
             <Toggle
               label="온라인 강의 허용"
               checked={preferences.online}
@@ -168,7 +157,7 @@ export default function AIRecommendationPage() {
           <div className="mt-6 rounded-xl bg-[#fafafd] p-4 text-[9px] leading-5 text-[#777985]">
             <b className="text-[#454652]">현재 반영 기준</b>
             <br />
-            학점 한도 · 시간표 충돌 · 수업 방식 · 전공 여부 · 본인 학과 조건을 기준으로 후보를
+            학점 한도 · 시간표 충돌 · 수업 방식 · 전공 여부를 기준으로 후보를
             구성합니다.
           </div>
           <button
@@ -181,7 +170,7 @@ export default function AIRecommendationPage() {
 
         <section className="min-w-0 rounded-2xl border border-[#e3e4e9] bg-white p-5 shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           {!generated ? (
-            <EmptyRecommendations onGenerate={generate} />
+            <EmptyAI onGenerate={generate} />
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
@@ -274,7 +263,8 @@ export default function AIRecommendationPage() {
         </section>
       </div>
       <p className="mt-3 px-1 text-[8px] text-[#aaaab4]">
-        선택한 필터와 학점 한도에 따라 개설 강좌를 조합합니다. 과목과 시간표를 확인한 뒤 적용해 주세요.
+        ※ 현재는 백엔드 AI API 연결 전 단계의 추천 시뮬레이션입니다. 실제
+        서비스에서는 학생 조건과 개설 강좌 데이터를 API로 전달합니다.
       </p>
     </main>
   );
@@ -292,8 +282,6 @@ function Toggle({
   return (
     <button
       type="button"
-      role="switch"
-      aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="flex w-full items-center justify-between text-left"
     >
@@ -308,7 +296,7 @@ function Toggle({
     </button>
   );
 }
-function EmptyRecommendations({ onGenerate }: { onGenerate: () => void }) {
+function EmptyAI({ onGenerate }: { onGenerate: () => void }) {
   return (
     <div className="grid min-h-[520px] place-items-center text-center">
       <div className="max-w-[400px]">

@@ -1,4 +1,16 @@
 import type { CourseListItem } from "../../shared/types/database";
+import { isExcludedFromCourse } from "../data/courseEligibility";
+
+export function getSelectionError(course: CourseListItem, selected: CourseListItem[], user: {
+  departmentId?: number; major: string; maxCredits: number;
+} | null): string | null {
+  if (course.isFull || (course.remainingSeats !== undefined && course.remainingSeats <= 0)) return "정원이 마감된 강의입니다.";
+  if (isExcludedFromCourse(course, user)) return "소속 전공이 수강 제외 대상입니다.";
+  if (selected.some(item => item.courseCode === course.courseCode)) return "같은 과목의 다른 분반을 이미 선택했습니다.";
+  if (selected.some(item => findConflict(item, course))) return "선택한 강의와 수업 시간이 겹칩니다.";
+  if (selected.length >= 6 || getTotalCredits(selected) + course.credit > (user?.maxCredits ?? 18)) return "선택 가능한 과목 수 또는 학점을 초과합니다.";
+  return null;
+}
 
 export function getTotalCredits(courses: CourseListItem[]) {
   return courses.reduce((sum, course) => sum + course.credit, 0);

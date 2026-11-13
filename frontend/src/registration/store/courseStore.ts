@@ -1,31 +1,18 @@
-import { useUserStore } from "./userStore";
-import { api } from "../../shared/api";
-import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
-import { toast } from "sonner";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CourseListItem } from "../../shared/types/database";
+import { getSelectionError } from "../utils/courseRules";
+import { useUserStore } from "./userStore";
+import { toast } from "sonner";
 
-let enrollmentRevision = 0;
-
-type EnrollmentState = {
-  studentId: string;
-  courses: CourseListItem[];
-  enrolled: CourseListItem[];
-};
 interface CourseStore {
-  enrollmentBusy: boolean;
-  loadEnrollments: () => Promise<void>;
-  changeEnrollments: (
-    ids: number[],
-    action: "add" | "cancel" | "replace",
-  ) => Promise<boolean>;
-
+  catalog: CourseListItem[];
+  syncCatalog: (courses: CourseListItem[]) => void;
   selected: CourseListItem[];
   favorites: CourseListItem[];
   history: CourseListItem[];
   toggleSelected: (course: CourseListItem) => void;
-  setSelected: (courses: CourseListItem[]) => void;
+  setSelected: (courses: CourseListItem[]) => boolean;
   removeSelected: (courseId: number) => void;
   toggleFavorite: (course: CourseListItem) => void;
   addHistory: (course: CourseListItem) => void;
@@ -35,110 +22,42 @@ interface CourseStore {
   clearHistory: () => void;
 }
 
-export const useCourseStore = create<CourseStore>()(
-  persist(
-    (set, get) => ({
-      enrollmentBusy: false,
-      loadEnrollments: async () => {
-        if (get().enrollmentBusy) return;
-        const revision = enrollmentRevision;
-        const token = sessionStorage.getItem("student-token");
-        if (!token) {
-          set({ selected: [], history: [] });
-          return;
-        }
-        const result = await api<EnrollmentState>(
-          "/enrollments",
-          {},
-          "student",
-        );
-        if (
-          revision !== enrollmentRevision ||
-          token !== sessionStorage.getItem("student-token") ||
-          get().enrollmentBusy ||
-          useUserStore.getState().user?.studentId !== result.studentId
-        )
-          return;
-        useCourseCatalogStore.getState().setCourses(result.courses);
-        set({ selected: result.enrolled, history: result.enrolled });
-      },
-      changeEnrollments: async (ids, action) => {
-        if (get().enrollmentBusy) return false;
-        if (!sessionStorage.getItem("student-token")) {
-          toast.error("학생 정보 등록 후 신청하세요. 학생 세션이 없습니다.");
-          return false;
-        }
-        enrollmentRevision += 1;
-        set({ enrollmentBusy: true });
-        try {
-          const result = await api<EnrollmentState>(
-            "/enrollments",
-            {
-              method: "POST",
-              body: JSON.stringify({ courseIds: ids, action }),
-            },
-            "student",
-          );
-          useCourseCatalogStore.getState().setCourses(result.courses);
-          set({ selected: result.enrolled, history: result.enrolled });
-          toast.success(
-            action === "cancel"
-              ? "수강신청을 취소했습니다."
-              : "수강신청을 DB에 반영했습니다.",
-          );
-          return true;
-        } catch (e) {
-          toast.error(e instanceof Error ? e.message : "수강신청 처리 실패");
-          return false;
-        } finally {
-          set({ enrollmentBusy: false });
-        }
-      },
-      selected: [],
-      favorites: [],
-      history: [],
-      setSelected: (courses) => {
-        void get().changeEnrollments(
-          courses.map((c) => c.id),
-          "replace",
-        );
-      },
-      toggleSelected: (course) => {
-        void get().changeEnrollments(
-          [course.id],
-          get().selected.some((c) => c.id === course.id) ? "cancel" : "add",
-        );
-      },
-      removeSelected: (courseId) => {
-        void get().changeEnrollments([courseId], "cancel");
-      },
-      toggleFavorite: (course) =>
-        set((state) =>
-          state.favorites.some((item) => item.id === course.id)
-            ? {
-                favorites: state.favorites.filter(
-                  (item) => item.id !== course.id,
-                ),
-              }
-            : { favorites: [...state.favorites, course] },
-        ),
-      addHistory: (course) => {
-        void get().changeEnrollments([course.id], "add");
-      },
-      removeHistory: (courseId) => {
-        void get().changeEnrollments([courseId], "cancel");
-      },
-      clearSelected: () => {
-        void get().changeEnrollments([], "replace");
-      },
-      clearFavorites: () => set({ favorites: [] }),
-      clearHistory: () => {
-        void get().changeEnrollments([], "replace");
-      },
-    }),
-    {
-      name: "course-storage",
-      partialize: (state) => ({ favorites: state.favorites }),
-    },
-  ),
-);
+export const useCourseStore = create<CourseStore>()(persist((set, get) => ({
+  catalog: [],
+  syncCatalog: (courses) => set(state => {
+    const byId = new Map(courses.map(course => [course.id, course]));
+    const refresh = (items: CourseListItem[]) => items.flatMap(item => byId.has(item.id) ? [byId.get(item.id)!] : []);
+    return { catalog: courses, selected: refresh(state.selected), favorites: refresh(state.favorites), history: refresh(state.history) };
+  }),
+  selected: [], favorites: [], history: [],
+  setSelected: (courses) => {
+    const working: CourseListItem[] = [];
+    for (const draft of courses) {
+      const course = get().catalog.find(item => item.id === draft.id);
+      if (!course) { toast.error("개설되지 않은 강의가 포함되어 있습니다."); return false; }
+      const error = getSelectionError(course, working, useUserStore.getState().user);
+      if (error) { toast.error(error); return false; }
+      working.push(course);
+    }
+    set({ selected: working });
+    return true;
+  },
+  toggleSelected: (draft) => {
+    const { selected, catalog } = get();
+    if (selected.some(item => item.id === draft.id)) {
+      set({ selected: selected.filter(item => item.id !== draft.id) }); return;
+    }
+    const course = catalog.find(item => item.id === draft.id);
+    if (!course) { toast.error("개설되지 않은 강의입니다. 강의 정보를 새로고침하세요."); return; }
+    const error = getSelectionError(course, selected, useUserStore.getState().user);
+    if (error) { toast.error(error); return; }
+    set({ selected: [...selected, course] });
+  },
+  removeSelected: (courseId) => set(state => ({ selected: state.selected.filter(item => item.id !== courseId) })),
+  toggleFavorite: (course) => set(state => state.favorites.some(item => item.id === course.id) ? { favorites: state.favorites.filter(item => item.id !== course.id) } : { favorites: [...state.favorites, course] }),
+  addHistory: (course) => set(state => ({ history: state.history.some(item => item.id === course.id) ? state.history : [...state.history, course] })),
+  removeHistory: (courseId) => set(state => ({ history: state.history.filter(item => item.id !== courseId) })),
+  clearSelected: () => set({ selected: [] }),
+  clearFavorites: () => set({ favorites: [] }),
+  clearHistory: () => set({ history: [] }),
+}), { name: "course-storage", partialize: ({ selected, favorites, history }) => ({ selected, favorites, history }) }));

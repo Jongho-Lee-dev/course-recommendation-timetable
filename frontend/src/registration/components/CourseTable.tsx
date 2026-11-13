@@ -1,16 +1,13 @@
-import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { findConflict, getTotalCredits } from "../utils/courseRules";
-import { departments } from "../../shared/data/departments";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 import { isExcludedFromCourse } from "../data/courseEligibility";
 import SyllabusLink from "../../shared/components/SyllabusLink";
 
-const departmentNames = new Map(
-  departments.map((department) => [department.id, department.majorName]),
-);
+
 
 interface CourseTableProps {
   courses: CourseListItem[];
@@ -29,7 +26,8 @@ export default function CourseTable({
   toggleFavorite,
   onCourseClick,
 }: CourseTableProps) {
-  const enrollmentBusy = useCourseStore((s) => s.enrollmentBusy);
+  const { departments } = useCatalog().data!;
+  const departmentNames = new Map(departments.map(d => [d.id, d.majorName]));
   const user = useUserStore((state) => state.user);
 
   const handleToggleCourse = (course: CourseListItem) => {
@@ -79,7 +77,7 @@ export default function CourseTable({
         <span>요일/시간/강의실</span>
         <span>학점</span>
         <span>정원</span>
-        <span>신청</span>
+        <span>시간표</span>
         <span>관심</span>
       </div>
 
@@ -89,6 +87,7 @@ export default function CourseTable({
           const excludedDepartments = [
             ...new Set(course.excludedDepartmentIds ?? []),
           ].map((id) => departmentNames.get(id) ?? `학과 ID ${id}`);
+          const isFull = course.isFull ?? (course.enrolledCount ?? 0) >= course.capacity;
           const isExcluded = isExcludedFromCourse(course, user);
 
           const scheduleText = course.isOnline
@@ -131,16 +130,11 @@ export default function CourseTable({
               <span>{scheduleText}</span>
               <span>{course.credit} cr</span>
               <span className="text-[#8b8e9c]">
-                {isSelected
-                  ? "신청완료"
-                  : `${course.enrolledCount ?? 0}/${course.capacity}`}
+                {`${course.enrolledCount ?? 0}/${course.capacity}`}
               </span>
 
               <button
-                disabled={
-                  enrollmentBusy ||
-                  (!isSelected && (isExcluded || course.remainingSeats === 0))
-                }
+                disabled={(isExcluded || isFull) && !isSelected}
                 title={
                   isExcluded ? "소속 전공이 수강 제외 대상입니다." : undefined
                 }
@@ -151,7 +145,7 @@ export default function CourseTable({
                 }`}
                 onClick={() => handleToggleCourse(course)}
               >
-                {isSelected ? "취소" : isExcluded ? "제외" : "신청"}
+                {isSelected ? "제거" : isExcluded ? "제외" : course.isFull ? "마감" : "추가"}
               </button>
 
               {toggleFavorite ? (

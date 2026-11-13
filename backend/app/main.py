@@ -1,301 +1,23 @@
-import base64, hashlib, hmac, json, os, time, uuid
+"""강의·학과·필터 조회 API. 학생/수강신청 쓰기 API는 후속 구현 대상입니다."""
 import logging
-from collections import Counter
-from contextlib import asynccontextmanager, AsyncExitStack
-from pathlib import Path
-from typing import Annotated
-import httpx
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File
+from contextlib import closing
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
-from .models import Course, Student
-from .excel import parse_excel, export_excel
+from psycopg2.extras import RealDictCursor
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-from .notice import router as notice_router
+from app.database import get_connection
 
-_db_timing_counts = Counter()
-_timing_logger = logging.getLogger("uvicorn.error")
+app = FastAPI()
+logger = logging.getLogger(__name__)
 
-
-@asynccontextmanager
-async def lifespan(application):
-    async with httpx.AsyncClient(
-        timeout=20,
-        limits=httpx.Limits(max_connections=200, max_keepalive_connections=20),
-    ) as client:
-        application.state.http = client
-        yield
-    application.state.http = None
-
-
-app = FastAPI(title="수강신청 API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://course-recommendation-timetable.vercel.app",
-        "https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app",
-        *[
-            origin.strip().rstrip("/")
-            for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
-            if origin.strip()
-        ],
-    ],
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
-
-app.include_router(notice_router, prefix="/api")
-
-
-async def db(method, path, body=None, params=None, prefer="return=representation"):
-    url = os.getenv("SUPABASE_URL", "").rstrip("/")
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
-    if not url or not key:
-        raise HTTPException(503, "backend/.env에 Supabase 연결 정보를 설정하세요.")
-    async with AsyncExitStack() as stack:
-        client = getattr(app.state, "http", None)
-        if client is None:
-            client = await stack.enter_async_context(httpx.AsyncClient(timeout=20))
-        # Sample each endpoint independently; never log credentials or payloads.
-        timing_sample = False
-        if os.getenv("DB_TIMING") == "1":
-            timing_key = (method, path)
-            _db_timing_counts[timing_key] += 1
-            timing_sample = _db_timing_counts[timing_key] % 100 == 1
-        started = time.perf_counter() if timing_sample else None
-        outcome = "unknown"
-        try:
-            r = await client.request(
-                method,
-                f"{url}/rest/v1/{path}",
-                json=body,
-                params=params,
-                headers={
-                    "apikey": key,
-                    "Authorization": f"Bearer {key}",
-                    "Prefer": prefer,
-                },
-            )
-            outcome = str(r.status_code)
-        except httpx.RequestError as exc:
-            outcome = type(exc).__name__
-            raise HTTPException(503, "DB 연결에 실패했습니다.")
-        finally:
-            if timing_sample:
-                _timing_logger.info(
-                    "DB_TIMING method=%s path=%s elapsed_ms=%.1f outcome=%s",
-                    method, path, (time.perf_counter() - started) * 1000, outcome,
-                )
-    if r.is_error:
-        error = (
-            r.json()
-            if r.headers.get("content-type", "").startswith("application/json")
-            else {}
-        )
-        if error.get("code") == "P0001":
-            raise HTTPException(409, error.get("message", "신청 처리에 실패했습니다."))
-        if r.status_code == 409:
-            raise HTTPException(
-                409, "학번 또는 학수번호·분반이 이미 등록되어 있습니다."
-            )
-        raise HTTPException(502, "DB 요청 실패: SQL 설치 여부 및 입력값을 확인하세요.")
-    return r.json() if r.content else None
-
-
-def secret():
-    s = os.getenv("SESSION_SECRET", "")
-    if len(s) < 32 or s.startswith("CHANGE-"):
-        raise HTTPException(503, "32자 이상의 SESSION_SECRET을 설정하세요.")
-    return s.encode()
-
-
-def token(role, subject):
-    data = base64.urlsafe_b64encode(
-        json.dumps(
-            {"role": role, "sub": subject, "exp": int(time.time()) + 28800}
-        ).encode()
-    ).decode()
-    sig = hmac.new(secret(), data.encode(), hashlib.sha256).hexdigest()
-    return f"{data}.{sig}"
-
-
-def claims(authorization: Annotated[str | None, Header()] = None):
-    try:
-        raw = authorization.removeprefix("Bearer ")
-        data, sig = raw.split(".")
-        if not hmac.compare_digest(
-            hmac.new(secret(), data.encode(), hashlib.sha256).hexdigest(), sig
-        ):
-            raise ValueError()
-        c = json.loads(base64.urlsafe_b64decode(data))
-        if c["exp"] <= time.time():
-            raise ValueError()
-        return c
-    except (AttributeError, ValueError, KeyError, TypeError):
-        raise HTTPException(401, "로그인이 필요하거나 세션이 만료되었습니다.")
-
-
-@app.get("/api/health")
-async def health():
-    await db("GET", "tt_departments", params={"select": "id", "limit": "1"})
-    return {"status": "ok"}
-
-
-@app.get("/api/departments")
-async def departments():
-    return await db("GET", "tt_departments", params={"order": "id"})
-
-
-from .departments import install_departments
-
-install_departments(app, db)
-
-from .syllabi import install_syllabi
-
-install_syllabi(app, db)
-
-
-async def get_catalog(active_only=True):
-    snapshot = await db("POST", "rpc/tt_enrollment_snapshot", {})
-    counts = {c["id"]: c["enrolledCount"] for c in snapshot["counts"]}
-    rows = await db(
-        "GET",
-        "tt_open_courses",
-        params={
-            **({"active": "eq.true"} if active_only else {}),
-            "select": "*,tt_courses(*),tt_departments(*),tt_schedules(*)",
-            "order": "id",
-            "limit": "10000",
-        },
-    )
-    result = []
-    for r in rows:
-        base = r.pop("tt_courses")
-        dept = r.pop("tt_departments")
-        schedules = r.pop("tt_schedules")
-        path = r["classificationPath"]
-        result.append(
-            {
-                **r,
-                "enrolledCount": counts.get(r["id"], 0),
-                "remainingSeats": max(0, r["capacity"] - counts.get(r["id"], 0)),
-                **base,
-                **{k: v for k, v in dept.items() if k != "id" and v is not None},
-                "category": path[0],
-                "courseType": path[1],
-                "generalEducationArea": path[2] if len(path) > 2 else "",
-                "generalEducationElectiveArea": path[3] if len(path) > 3 else "",
-                "schedules": sorted(schedules, key=lambda s: s["id"]),
-            }
-        )
-    return result
-
-
-@app.get("/api/courses")
-async def courses():
-    return await get_catalog()
-
-
-async def validate_departments(items):
-    ids = {d["id"] for d in await departments()}
-    if any(
-        c["departmentId"] not in ids or not set(c["excludedDepartmentIds"]) <= ids
-        for c in items
-    ):
-        raise HTTPException(422, "존재하지 않는 학과코드입니다.")
-    basics = {}
-    for c in items:
-        key = c["courseCode"]
-        sig = (c["title"], c["credit"])
-        if key in basics and basics[key] != sig:
-            raise HTTPException(422, "같은 학수번호의 과목명·학점이 다릅니다.")
-        basics[key] = sig
-
-
-@app.post("/api/admin/courses")
-async def create_course(body: Course):
-    items = [body.model_dump()]
-    await validate_departments(items)
-    existing = await courses()
-    if any(
-        c["courseCode"] == body.courseCode and c["sectionNo"] == body.sectionNo
-        for c in existing
-    ):
-        raise HTTPException(409, "학수번호·분반 중복")
-    await db(
-        "POST",
-        "rpc/tt_save_catalog",
-        {"items": items, "replace_all": False, "edit_id": 0},
-    )
-    return await courses()
-
-
-@app.put("/api/admin/courses/{course_id}")
-async def update_course(course_id: int, body: Course):
-    items = [body.model_dump()]
-    await validate_departments(items)
-    await db(
-        "POST",
-        "rpc/tt_save_catalog",
-        {"items": items, "replace_all": False, "edit_id": course_id},
-    )
-    return await courses()
-
-
-@app.delete("/api/admin/courses/{course_id}")
-async def delete_course(course_id: int):
-    await db("POST", "rpc/tt_delete_course", {"course_id": course_id})
-    return await courses()
-
-
-@app.post("/api/admin/courses-import")
-async def import_courses(file: UploadFile = File(...)):
-    data = await file.read(5 * 1024 * 1024 + 1)
-    if len(data) > 5 * 1024 * 1024:
-        raise HTTPException(413, "5MB 이하의 엑셀만 업로드하세요.")
-    try:
-        items = parse_excel(data)
-    except Exception as e:
-        raise HTTPException(422, f"엑셀 검증 실패: {e}")
-    await validate_departments(items)
-    await db("POST", "rpc/tt_save_catalog", {"items": items, "replace_all": True})
-    return await courses()
-
-
-@app.get("/api/admin/courses.xlsx")
-async def excel_download():
-    return Response(
-        export_excel(await courses()),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": 'attachment; filename="courses.xlsx"'},
-    )
-
-
-@app.post("/api/students")
-async def save_student(body: Student, c=Depends(claims)):
-    if c["role"] != "student":
-        raise HTTPException(403, "학생 세션이 필요합니다.")
-    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
-    if not rows:
-        raise HTTPException(404, "학생 정보가 없습니다.")
-    if rows[0]["studentId"] != body.studentId:
-        raise HTTPException(403, "학번은 변경할 수 없습니다.")
-    if body.departmentId not in {d["id"] for d in await departments()}:
-        raise HTTPException(422, "학과코드 오류")
-    await db("PATCH", "tt_students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
-    return {"token": token("student", c["sub"]), "student": body.model_dump()}
-
-
-@app.get("/api/students/me")
-async def me(c=Depends(claims)):
-    if c["role"] != "student":
-        raise HTTPException(403, "학생 세션이 필요합니다.")
-    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
-    if not rows:
-        raise HTTPException(404, "학생 정보가 없습니다.")
-    return Student.model_validate(rows[0]).model_dump()
 
 
 @app.get("/")
@@ -303,15 +25,68 @@ def root():
     return {"message": "Hello World"}
 
 
-from .enrollments import install_enrollments
+def read_catalog_queries(queries):
+    try:
+        with closing(get_connection()) as conn:
+            with conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                    results = []
+                    for query in queries:
+                        cursor.execute(query)
+                        results.append([dict(row) for row in cursor.fetchall()])
+                    return results
+    except Exception as error:
+        logger.error("Catalog query failed (%s)", type(error).__name__)
+        raise HTTPException(status_code=503, detail="DB 조회에 실패했습니다. 백엔드 DB 설정을 확인하세요.") from None
 
 
-async def enrollment_db(*args, **kwargs):
-    return await db(*args, **kwargs)
+@app.get("/courses")
+def get_courses():
+    courses, schedules, exclusions = read_catalog_queries([
+        '''SELECT oc.id, c.course_code AS "courseCode", c.title, c.category,
+           c.course_type AS "courseType", c.credit, oc.section_no AS "sectionNo",
+           oc.professor_name AS "professorName", oc.department_id AS "departmentId",
+           d.college_name AS "collegeName", d.faculty_name AS "facultyName",
+           d.major_name AS "majorName", c.general_education_area AS "generalEducationArea",
+           c.general_education_elective_area AS "generalEducationElectiveArea",
+           c.classification_path AS "classificationPath", oc.target_grade AS "targetGrade",
+           oc.is_online AS "isOnline", ss.capacity,
+           ss.enrolled_count AS "enrolledCount", ss.remaining_seats AS "remainingSeats"
+           FROM demo_course_registration.open_courses oc
+           JOIN demo_course_registration.courses c ON c.course_code=oc.course_code
+           JOIN demo_course_registration.departments d ON d.id=oc.department_id
+           JOIN demo_course_registration.course_seat_status ss ON ss.open_course_id=oc.id
+           ORDER BY oc.id''',
+        '''SELECT id, day_of_week AS "dayOfWeek", start_period AS "startPeriod",
+           end_period AS "endPeriod", classroom, open_course_id AS "openCourseId"
+           FROM demo_course_registration.course_schedules ORDER BY id''',
+        '''SELECT open_course_id AS "openCourseId", department_id AS "departmentId"
+           FROM demo_course_registration.course_excluded_departments ORDER BY open_course_id, department_id''',
+    ])
+    schedules_by_course = {}
+    exclusions_by_course = {}
+    for schedule in schedules:
+        schedules_by_course.setdefault(schedule["openCourseId"], []).append(schedule)
+    for restriction in exclusions:
+        exclusions_by_course.setdefault(restriction["openCourseId"], []).append(restriction["departmentId"])
+    for course in courses:
+        course["schedules"] = schedules_by_course.get(course["id"], [])
+        course["excludedDepartmentIds"] = exclusions_by_course.get(course["id"], [])
+        course["isFull"] = course["remainingSeats"] <= 0
+    return courses
 
 
-install_enrollments(app, enrollment_db, claims, get_catalog)
+@app.get("/departments")
+def get_departments():
+    return read_catalog_queries([
+        '''SELECT id, college_name AS "collegeName", faculty_name AS "facultyName", major_name AS "majorName"
+           FROM demo_course_registration.departments ORDER BY id'''
+    ])[0]
 
-from .auth import install_auth
 
-install_auth(app, enrollment_db, token, departments)
+@app.get("/filter-categories")
+def get_filter_categories():
+    return read_catalog_queries([
+        '''SELECT id, name, parent_id AS "parentId", is_fixed AS "isFixed", field, value, child_fields AS "childFields"
+           FROM demo_course_registration.filter_categories ORDER BY id'''
+    ])[0]

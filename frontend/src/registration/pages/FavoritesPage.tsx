@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import CourseDetailModal from "../components/CourseDetailModal";
 import { useCourseStore } from "../store/courseStore";
 import type { CourseListItem } from "../../shared/types/database";
-import { findConflict, getTotalCredits } from "../utils/courseRules";
+import { getSelectionError, getTotalCredits } from "../utils/courseRules";
 import { useUserStore } from "../store/userStore";
 
 export default function FavoritesPage() {
@@ -36,7 +36,7 @@ export default function FavoritesPage() {
     const working = [...selected];
     for (const course of filtered) {
       if (working.some((s) => s.id === course.id)) continue;
-      const conflict = working.find((s) => findConflict(s, course));
+      const conflict = getSelectionError(course, working, user);
       if (
         conflict ||
         workingCredits + course.credit > (user?.maxCredits ?? 18) ||
