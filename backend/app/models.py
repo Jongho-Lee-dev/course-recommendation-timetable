@@ -44,6 +44,24 @@ class Course(BaseModel):
         return self
 
 
+class Department(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    id: int = Field(ge=1, le=9007199254740991)
+    collegeName: str | None = Field(default=None, max_length=120)
+    facultyName: str | None = Field(default=None, max_length=120)
+    majorName: str = Field(min_length=1, max_length=120)
+
+
+class DepartmentImport(BaseModel):
+    items: list[Department] = Field(min_length=1, max_length=10000)
+
+    @model_validator(mode="after")
+    def unique_ids(self):
+        if len({item.id for item in self.items}) != len(self.items):
+            raise ValueError("학과코드가 중복됩니다.")
+        return self
+
+
 class Student(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
     studentId: str = Field(min_length=1, max_length=30)

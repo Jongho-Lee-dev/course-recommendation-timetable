@@ -7,6 +7,8 @@ import {
   saveDepartmentExcel,
 } from "../utils/departmentExcel";
 import type { Department } from "../../shared/types/database";
+import { api } from "../../shared/api";
+import { useCatalog } from "../../shared/hooks/useCatalog";
 
 const fields = [
   { key: "collegeName", label: "단과대학" },
@@ -21,6 +23,7 @@ export default function AdminDepartments({
   departments: Department[];
   onChange: (items: Department[]) => void;
 }) {
+  const catalog = useCatalog();
   const [mode, setMode] = useState<"list" | "add" | "edit" | "import">("list");
   const [draft, setDraft] = useState<Department | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -279,8 +282,8 @@ export default function AdminDepartments({
       {mode === "import" && (
         <div>
           <p className="mb-3">
-            엑셀 파일의 학과 목록을 현재 화면에 불러옵니다. 추가·수정하려면 해당
-            화면에서 저장할 엑셀을 선택하세요.
+            엑셀 파일을 선택하고 시트를 적용하면 학과가 DB에 등록됩니다.
+            같은 학과코드는 수정하고, 시트에 없는 기존 학과는 유지합니다.
           </p>
           <input
             aria-label="학과 엑셀 선택"
@@ -343,11 +346,16 @@ export default function AdminDepartments({
                 setBusy(true);
                 setError("");
                 try {
-                  onChange(preview);
+                  const result = await api<{ savedCount: number }>("/admin/departments-import", {
+                    method: "POST", body: JSON.stringify({ items: preview }),
+                  });
                   setExcelHandle(null);
                   setPreview([]);
                   setFile(null);
-                  setMessage("엑셀의 학과 목록을 화면에 적용했습니다.");
+                  setMessage(`${result.savedCount}개 학과를 DB에 저장했습니다.`);
+                  const refreshed = await catalog.refetch();
+                  if (refreshed.data && !refreshed.isError) onChange(refreshed.data.departments);
+                  else setError("DB 저장은 완료됐지만 목록을 다시 불러오지 못했습니다. 페이지를 새로고침하세요.");
                 } catch (e) {
                   fail(e);
                 } finally {

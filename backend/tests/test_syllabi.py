@@ -94,3 +94,39 @@ def test_db_failure_keeps_previous_pdf_and_cleans_new_object(setup):
     assert upload(client, "replacement.pdf").status_code == 502
     assert row["syllabusPath"] == first
     assert list(objects) == [first]
+
+
+def test_main_app_serves_stored_pdf(monkeypatch):
+    from app import main
+    from unittest.mock import MagicMock
+    conn = MagicMock()
+    cursor = conn.cursor.return_value.__enter__.return_value
+    cursor.fetchall.return_value = [{"id": 42, "syllabusPath": "42/plan.pdf", "syllabusName": "plan.pdf"}]
+    monkeypatch.setattr(main, 'get_connection', lambda: conn)
+
+    async def storage(method, path, **kwargs):
+        assert method == 'GET'
+        assert path.endswith('/42/plan.pdf')
+        return httpx.Response(200, content=b'%PDF-1.7\nexample')
+
+    monkeypatch.setattr(syllabi, 'storage_request', storage)
+    response = TestClient(main.app).get('/api/courses/42/syllabus')
+    assert response.status_code == 200
+    assert response.content.startswith(b'%PDF-')
+    assert cursor.execute.call_args.args[1] == (42,)
+    conn.close.assert_called_once()
+
+
+def test_syllabus_metadata_update_commits_and_invalidates_catalog(monkeypatch):
+    from app import main
+    from unittest.mock import MagicMock
+    conn = MagicMock()
+    cursor = conn.cursor.return_value.__enter__.return_value
+    row = {"id": 42, "syllabusPath": "42/new.pdf", "syllabusName": "new.pdf"}
+    cursor.fetchall.return_value = [row]
+    monkeypatch.setattr(main, 'get_connection', lambda: conn)
+    main._catalog_cache.update(data=[], body=b'[]', at=1)
+    assert main.syllabus_query('PATCH', 42, row) == [row]
+    assert cursor.execute.call_args.args[1] == ('42/new.pdf', 'new.pdf', 42)
+    assert conn.__exit__.call_args.args == (None, None, None)
+    assert main._catalog_cache['body'] is None

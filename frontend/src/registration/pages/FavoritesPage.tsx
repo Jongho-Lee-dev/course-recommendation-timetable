@@ -13,7 +13,7 @@ export default function FavoritesPage() {
     selected = useCourseStore((s) => s.selected);
   const toggleFavorite = useCourseStore((s) => s.toggleFavorite),
     toggleSelected = useCourseStore((s) => s.toggleSelected),
-    changeEnrollments = useCourseStore((s) => s.changeEnrollments),
+    setSelected = useCourseStore((s) => s.setSelected),
     clearFavorites = useCourseStore((s) => s.clearFavorites);
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("전체");
@@ -50,10 +50,7 @@ export default function FavoritesPage() {
     }
 
     if (count)
-      void changeEnrollments(
-        working.slice(selected.length).map((c) => c.id),
-        "add",
-      );
+      setSelected(working);
     else
       toast.info(
         "추가할 수 있는 강의가 없습니다. 충돌 또는 학점 제한을 확인하세요.",

@@ -1,4 +1,3 @@
-// npm install 후 프로젝트 루트에서 node frontend/tests/enrollment-store.mjs
 import { createServer } from "vite";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";

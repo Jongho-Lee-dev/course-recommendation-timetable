@@ -1,26 +1,29 @@
 import * as XLSX from "xlsx";
-import type { CourseListItem } from "../../shared/types/database";
+import type { CourseListItem, Department } from "../../shared/types/database";
 import { getClassificationPath } from "../../shared/data/courseClassification";
 import { convertCourseExcel } from "./importCourses";
 
 export async function appendCourseExcel(
   handle: FileSystemFileHandle,
   course: CourseListItem,
+  departments: Department[],
 ) {
-  return saveCourseExcel(handle, course);
+  return saveCourseExcel(handle, course, departments);
 }
 
 export async function updateCourseExcel(
   handle: FileSystemFileHandle,
   original: CourseListItem,
   course: CourseListItem,
+  departments: Department[],
 ) {
-  return saveCourseExcel(handle, course, original);
+  return saveCourseExcel(handle, course, departments, original);
 }
 
 async function saveCourseExcel(
   handle: FileSystemFileHandle,
   course: CourseListItem,
+  departments: Department[],
   original?: CourseListItem,
 ) {
   if ((await handle.requestPermission({ mode: "readwrite" })) !== "granted") {
@@ -101,7 +104,7 @@ async function saveCourseExcel(
     }
   });
   if (!original) updatedRows.push(...newRows);
-  const { errors } = convertCourseExcel(updatedRows, []);
+  const { errors } = convertCourseExcel(updatedRows, [], departments);
   if (errors.length) {
     throw new Error(`${errors[0].row}행: ${errors[0].message}`);
   }

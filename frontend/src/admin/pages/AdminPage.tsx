@@ -1,3 +1,4 @@
+import AdminDepartments from "../components/AdminDepartments";
 import AdminNotices from "../components/AdminNotices";
 import AdminCourses from "../components/AdminCourses";
 import RegistrationSettings from "../components/RegistrationSettings";
@@ -7,12 +8,6 @@ import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import type { Department } from "../../shared/types/database";
 
-const departmentFields = [
-  { key: "collegeName", label: "단과대학" },
-  { key: "facultyName", label: "학부" },
-  { key: "majorName", label: "학과" },
-] as const;
-
 const categories = [
   { label: "학과", icon: Building2 },
   { label: "과목", icon: BookOpen },
@@ -20,49 +15,10 @@ const categories = [
   { label: "수강신청 설정", icon: Settings2 },
 ];
 
-const inputClass =
-  "w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none transition placeholder:text-[#a0a3b0] focus:border-[#a99aed] focus:ring-2 focus:ring-[#f0edff]";
-const buttonClass =
-  "cursor-pointer rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] font-semibold text-[#5d6070] transition hover:border-[#a99aed] hover:bg-[#f0edff] hover:text-[#7658e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9]";
-
 export default function AdminPage() {
   const { departments } = useCatalog().data!;
   const [departmentList, setDepartmentList] =
     useState<Department[]>(departments);
-  const [departmentDraft, setDepartmentDraft] = useState<Department | null>(
-    null,
-  );
-  const [isAddingDepartment, setIsAddingDepartment] = useState(false);
-
-  const cancelDepartmentEdit = () => {
-    setDepartmentDraft(null);
-    setIsAddingDepartment(false);
-  };
-
-  const saveDepartment = () => {
-    if (!departmentDraft || !departmentDraft.majorName.trim()) return;
-
-    const saved = {
-      ...departmentDraft,
-      collegeName: departmentDraft.collegeName?.trim() || undefined,
-      facultyName: departmentDraft.facultyName?.trim() || undefined,
-      majorName: departmentDraft.majorName.trim(),
-    };
-    setDepartmentList((prev) =>
-      isAddingDepartment
-        ? [...prev, saved]
-        : prev.map((department) =>
-            department.id === saved.id ? saved : department,
-          ),
-    );
-    cancelDepartmentEdit();
-  };
-
-  const visibleDepartments =
-    isAddingDepartment && departmentDraft
-      ? [...departmentList, departmentDraft]
-      : departmentList;
-
   const [selectCategory, setSelectCategory] = useState("학과");
   const courseList = useCourseCatalogStore((state) => state.courses);
   const setCourseList = useCourseCatalogStore((state) => state.setCourses);
@@ -70,7 +26,6 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f5f6f9] px-4 py-6 font-['Pretendard',sans-serif] text-[11px] text-[#20212b] min-[1101px]:px-7">
       <div className="mx-auto w-full max-w-[1500px]">
-        <p className="mb-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">학과와 강의는 DB에서 조회합니다. 이 화면의 편집과 수강신청 설정은 미리보기이며 DB에 저장되지 않습니다.</p>
         <header className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#e3e4e9] bg-white p-5 shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#f0edff] text-[#7658e9]">
@@ -79,7 +34,7 @@ export default function AdminPage() {
             <div>
               <h2 className="!mb-1 !text-lg !font-bold">관리자 페이지</h2>
               <p className="text-[11px] leading-5 text-[#858796]">
-                DB에서 조회한 목록을 사용합니다. 관리자 수정·엑셀 가져오기·공지·강의계획서 파일은 현재 브라우저의 미리보기이며 서버에 저장되지 않습니다.
+                학과와 과목을 관리하고 엑셀 시트를 DB에 적용합니다.
               </p>
             </div>
           </div>
@@ -132,155 +87,9 @@ export default function AdminPage() {
           </aside>
 
           <div className="min-w-0 overflow-hidden rounded-xl border border-[#e3e4e9] bg-white p-4 shadow-[0_3px_14px_rgba(26,28,44,0.035)] min-[701px]:p-5">
-            {selectCategory === "학과" && (
-              <div>
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
-                  <div>
-                    <h2 className="!mb-1 !text-sm !font-bold">학과 수정하기</h2>
-                    <p className="text-[11px] text-[#858796]">
-                      수정 버튼을 눌러 학과 정보를 변경하세요. 학과명은
-                      필수입니다.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={departmentDraft !== null}
-                    onClick={() => {
-                      setDepartmentDraft({
-                        id:
-                          Math.max(
-                            0,
-                            ...departmentList.map((dept) => dept.id),
-                          ) + 1,
-                        collegeName: "",
-                        facultyName: "",
-                        majorName: "",
-                      });
-                      setIsAddingDepartment(true);
-                    }}
-                    className="cursor-pointer rounded-md bg-[#7658e9] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#6546d6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    + 학과 추가
-                  </button>
-                </div>
-                <div className="overflow-x-auto rounded-lg border border-[#e4e5eb]">
-                  <div className="grid min-w-[720px] grid-cols-[52px_repeat(3,minmax(0,1fr))_128px] gap-4 border-b border-[#e4e5eb] bg-[#fafafd] px-4 py-3 text-[10px] font-semibold text-[#858796]">
-                    <span>번호</span>
-                    <span>단과대학</span>
-                    <span>학부</span>
-                    <span>학과</span>
-                    <span>관리</span>
-                  </div>
-
-                  {visibleDepartments.map((dept) => (
-                    <form
-                      key={dept.id}
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        saveDepartment();
-                      }}
-                      className="grid min-w-[720px] grid-cols-[52px_repeat(3,minmax(0,1fr))_128px] items-center gap-4 border-b border-[#ececf0] px-4 py-3 text-[#5d6070] transition last:border-b-0 hover:bg-[#fafafd]"
-                    >
-                      <div>
-                        {isAddingDepartment && departmentDraft?.id === dept.id
-                          ? "신규"
-                          : dept.id}
-                      </div>
-                      {departmentFields.map(({ key, label }) => (
-                        <div key={key} className="min-w-0 break-words">
-                          {departmentDraft?.id === dept.id ? (
-                            <input
-                              aria-label={`${dept.id}번 ${label}`}
-                              placeholder={`${label} 입력`}
-                              value={departmentDraft[key] ?? ""}
-                              required={key === "majorName"}
-                              pattern={
-                                key === "majorName" ? ".*\\S.*" : undefined
-                              }
-                              title={
-                                key === "majorName"
-                                  ? "공백이 아닌 학과명을 입력하세요."
-                                  : undefined
-                              }
-                              autoFocus={key === "majorName"}
-                              onChange={(event) =>
-                                setDepartmentDraft((prev) =>
-                                  prev
-                                    ? { ...prev, [key]: event.target.value }
-                                    : prev,
-                                )
-                              }
-                              className={inputClass}
-                            />
-                          ) : (
-                            dept[key] || (
-                              <span className="text-[#a0a3b0]">—</span>
-                            )
-                          )}
-                        </div>
-                      ))}
-                      <div className="flex gap-2">
-                        {departmentDraft?.id === dept.id ? (
-                          <>
-                            <button
-                              key="save"
-                              type="submit"
-                              className={`${buttonClass} !border-[#7658e9] !bg-[#7658e9] !text-white`}
-                            >
-                              저장
-                            </button>
-                            <button
-                              key="cancel"
-                              type="button"
-                              onClick={cancelDepartmentEdit}
-                              className={buttonClass}
-                            >
-                              취소
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              key="edit"
-                              type="button"
-                              disabled={departmentDraft !== null}
-                              onClick={(event) => {
-                                event.preventDefault();
-                                setDepartmentDraft({ ...dept });
-                              }}
-                              className={`${buttonClass} disabled:cursor-not-allowed disabled:opacity-50`}
-                            >
-                              수정
-                            </button>
-                            <button
-                              key="delete"
-                              type="button"
-                              aria-label={`${dept.majorName} 삭제`}
-                              onClick={() =>
-                                setDepartmentList((prev) =>
-                                  prev.filter((item) => item.id !== dept.id),
-                                )
-                              }
-                              className={`${buttonClass} hover:!border-red-200 hover:!bg-red-50 hover:!text-red-600`}
-                            >
-                              삭제
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </form>
-                  ))}
-                  {visibleDepartments.length === 0 && (
-                    <p className="px-4 py-10 text-center text-[#858796]">
-                      등록된 학과가 없습니다. 학과 추가 버튼으로 등록하세요.
-                    </p>
-                  )}
-                </div>
-                <p className="mt-3 text-[10px] text-[#858796]">
-                  변경 사항은 현재 화면에만 적용되며, 새로고침하면 초기화됩니다.
-                </p>
-              </div>
-            )}
+            <div hidden={selectCategory !== "학과"}>
+              <AdminDepartments departments={departmentList} onChange={setDepartmentList} />
+            </div>
 
             {selectCategory === "과목" && (
               <AdminCourses

@@ -33,11 +33,5 @@ export default function CatalogBoundary({ children }: { children: ReactNode }) {
     </div>
   </div>;
   if (!loaded) return <div role="status">강의 정보를 준비하고 있습니다…</div>;
-  return <>
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e3e4e9] bg-white px-5 py-2 text-xs text-[#777985]">
-      <span>개설 강의 {data?.courses.length ?? 0}개 · 시간표와 관심강좌는 이 브라우저에 저장됩니다.</span>
-      <button disabled={isFetching} onClick={() => void refetch()} className="rounded border border-[#dedfe5] px-3 py-1 disabled:opacity-50">{isFetching ? "새로고침 중…" : "강의 정보 새로고침"}</button>
-    </div>
-    {children}
-  </>;
+  return <>{children}</>;
 }

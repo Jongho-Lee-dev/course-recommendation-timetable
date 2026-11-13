@@ -4,9 +4,12 @@ import { useState } from "react"
 import { readCourseExcel, convertCourseExcel, type ExcelValidationError, } from "../utils/importCourses";
 import type { CourseListItem } from "../../shared/types/database";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
+import { api } from "../../shared/api";
 
 export default function CourseExcelImport() {
-  const { departments } = useCatalog().data!;
+  const catalog = useCatalog();
+  const { departments } = catalog.data!;
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [rows, setRows] = useState<unknown[][]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,6 +21,7 @@ export default function CourseExcelImport() {
 
   return (
     <div>
+      <p className="mb-3">시트를 적용하면 과목 목록이 DB에 저장됩니다. 시트에 없는 기존 과목은 비활성화됩니다.</p>
       <input type="file"
         accept=".xlsx"
         disabled={loading}
@@ -27,6 +31,7 @@ export default function CourseExcelImport() {
           if (!file) return;
 
           setRows([]);
+          setSelectedFile(null);
           setError("");
           setValidationErrors([]);
           setPreviewCourses([]);
@@ -39,6 +44,7 @@ export default function CourseExcelImport() {
             setRows(result);
             setValidationErrors(converted.errors);
             setPreviewCourses(converted.courses);
+            setSelectedFile(file);
           }
           catch {
             setError("엑셀 파일을 읽지 못했습니다.");
@@ -89,17 +95,29 @@ export default function CourseExcelImport() {
       <div className="mt-4 flex justify-end">
         <button
           type="button"
-          disabled={loading || !previewCourses.length || validationErrors.length > 0}
-          onClick={() => {
-            const merged = new Map(courses.map(course => [course.id, course]));
-            previewCourses.forEach(course => merged.set(course.id, course));
-            useCourseCatalogStore.getState().setCourses([...merged.values()]);
-            setRows([]); setPreviewCourses([]);
-            toast.success("엑셀 과목을 브라우저 미리보기에 적용했습니다. DB에는 저장되지 않습니다.");
+          disabled={loading || !selectedFile || !previewCourses.length || validationErrors.length > 0}
+          onClick={async () => {
+            if (!selectedFile) return;
+            setLoading(true);
+            setError("");
+            try {
+              const body = new FormData();
+              body.append("file", selectedFile);
+              const result = await api<{ savedCount: number }>("/admin/courses-import", { method: "POST", body });
+              setRows([]); setPreviewCourses([]); setSelectedFile(null);
+              toast.success(`${result.savedCount}개 과목을 DB에 저장했습니다.`);
+              const refreshed = await catalog.refetch();
+              if (refreshed.data && !refreshed.isError) useCourseCatalogStore.getState().setCourses(refreshed.data.courses);
+              else setError("DB 저장은 완료됐지만 목록을 다시 불러오지 못했습니다. 페이지를 새로고침하세요.");
+            } catch (error) {
+              setError(error instanceof Error ? error.message : "DB 저장 실패");
+            } finally {
+              setLoading(false);
+            }
           }}
           className="cursor-pointer rounded-md bg-[#7658e9] px-4 py-2 font-semibold text-white hover:bg-[#6546d6] active:bg-[#5538bd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7658e9]"
         >
-          엑셀 시트 적용하기
+          {loading ? "처리 중…" : "엑셀 시트 적용하기"}
         </button>
       </div>
     </div>

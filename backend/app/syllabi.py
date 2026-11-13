@@ -64,7 +64,10 @@ def install_syllabi(app, db):
     @app.put("/api/admin/courses/{course_id}/syllabus")
     async def upload_syllabus(course_id: int, file: UploadFile = File(...)):
         course = await get_course(course_id)
-        content = await file.read(MAX_BYTES + 1)
+        try:
+            content = await file.read(MAX_BYTES + 1)
+        finally:
+            await file.close()
         if len(content) > MAX_BYTES:
             raise HTTPException(413, "강의계획서는 10MB 이하만 업로드할 수 있습니다.")
         if not (file.filename or "").lower().endswith(".pdf") or not content.startswith(

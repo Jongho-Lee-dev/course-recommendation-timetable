@@ -4,7 +4,6 @@ import { persist } from "zustand/middleware";
 interface User {
   departmentId?: number;
   studentId: string;
-  departmentId: number;
   name: string;
   grade: number;
   collegeName?: string;
