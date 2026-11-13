@@ -9,7 +9,7 @@ const server = await createServer({
 });
 
 try {
-  const { saveDepartmentExcel, departmentExcelErrorMessage } =
+  const { saveDepartmentExcel, readDepartmentExcel, departmentExcelErrorMessage } =
     await server.ssrLoadModule("/src/admin/utils/departmentExcel.ts");
   const book = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(
@@ -57,6 +57,21 @@ try {
   assert.equal(updated[1].majorName, "다른학과");
   const savedBook = XLSX.read(saved, { type: "array" });
   assert.equal(savedBook.Sheets["학과"].D2.v, "수정학과");
+
+  // The added row must survive a file round trip and remain importable.
+  reads = 1;
+  const added = await saveDepartmentExcel(handle,
+    { id: 3, majorName: "신규학과", collegeName: "공과대학" }, false);
+  assert.equal(added.length, 3);
+  const imported = await readDepartmentExcel({
+    size: saved.byteLength, arrayBuffer: async () => saved,
+  });
+  assert.deepEqual(imported, added);
+  assert.equal(imported[0].majorName, "기존학과");
+  const writeCount = writes;
+  await assert.rejects(saveDepartmentExcel(handle, draft, false), /같은 학과코드/);
+  await assert.rejects(saveDepartmentExcel(handle, { id: 99, majorName: "없음" }, true), /수정할 학과코드/);
+  assert.equal(writes, writeCount, "Invalid add/edit must not change the file");
 
   reads = 0;
   writes = 0;

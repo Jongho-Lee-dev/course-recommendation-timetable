@@ -35,7 +35,23 @@ export default function AdminDepartments({
   const [excelHandle, setExcelHandle] = useState<FileSystemFileHandle | null>(
     null,
   );
-  const disabled = busy;
+  const [excelDepartments, setExcelDepartments] = useState<Department[] | null>(null);
+  const [pendingSync, setPendingSync] = useState<Department | null>(null);
+  const disabled = busy || pendingSync !== null;
+  const visibleDepartments = excelDepartments ?? departments;
+  const syncDepartment = async (item: Department) => {
+    await api<{ savedCount: number }>("/admin/departments-import", {
+      method: "POST", body: JSON.stringify({ items: [item] }),
+    });
+    setPendingSync(null);
+    onChange([...departments.filter((d) => d.id !== item.id), item].sort((a, b) => a.id - b.id));
+    const refreshed = await catalog.refetch();
+    if (refreshed.data && !refreshed.isError) onChange(refreshed.data.departments);
+    else setError("DB 저장은 완료됐지만 목록을 다시 불러오지 못했습니다. 페이지를 새로고침하세요.");
+    setDraft(null);
+    setMode("edit");
+    setMessage("선택한 엑셀 파일과 DB에 학과 정보를 저장했습니다.");
+  };
   const selectExcel = async () => {
     if (!("showOpenFilePicker" in window)) {
       setError(
@@ -61,12 +77,12 @@ export default function AdminDepartments({
       const sameFile = excelHandle && (await excelHandle.isSameEntry(handle));
       const items = await readDepartmentExcelHandle(handle);
       setExcelHandle(handle);
-      onChange(items);
-      if (sameFile && draft) {
+      setExcelDepartments(items);
+      if (draft && (sameFile || (mode === "edit" && items.some((d) => d.id === draft.id)))) {
         setDraft(draft);
       } else if (mode === "add")
         setDraft({
-          id: Math.max(0, ...items.map((d) => d.id)) + 1,
+          id: Math.max(0, ...items.map((d) => d.id), ...departments.map((d) => d.id)) + 1,
           majorName: "",
           collegeName: "",
           facultyName: "",
@@ -90,13 +106,13 @@ export default function AdminDepartments({
     setFile(null);
     if (next === "add")
       setDraft({
-        id: Math.max(0, ...departments.map((d) => d.id)) + 1,
+        id: Math.max(0, ...visibleDepartments.map((d) => d.id), ...departments.map((d) => d.id)) + 1,
         majorName: "",
         collegeName: "",
         facultyName: "",
       });
   };
-  const filtered = departments.filter((d) =>
+  const filtered = visibleDepartments.filter((d) =>
     [d.id, d.majorName, d.facultyName, d.collegeName]
       .join(" ")
       .includes(search.trim()),
@@ -115,15 +131,21 @@ export default function AdminDepartments({
             throw new Error(
               "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
             );
+          if (mode === "add" && departments.some((d) => d.id === draft.id))
+            throw new Error("DB에 같은 학과코드가 있습니다. 다른 코드를 입력하거나 학과 수정에서 변경하세요.");
           const updated = await saveDepartmentExcel(
             excelHandle,
             draft,
             mode === "edit",
           );
-          onChange(updated);
-          setDraft(null);
-          if (mode !== "edit") setMode("list");
-          setMessage("선택한 엑셀 파일에 학과 정보를 저장했습니다.");
+          setExcelDepartments(updated);
+          const saved = updated.find((d) => d.id === draft.id)!;
+          setPendingSync(saved);
+          try {
+            await syncDepartment(saved);
+          } catch (e) {
+            throw new Error(`엑셀은 저장됐지만 DB 저장에 실패했습니다. 아래 ‘DB 저장 다시 시도’를 누르거나 엑셀 시트 적용으로 동기화하세요. ${departmentExcelErrorMessage(e)}`, { cause: e });
+          }
         } catch (e) {
           fail(e);
         } finally {
@@ -141,7 +163,7 @@ export default function AdminDepartments({
             max="9007199254740991"
             step="1"
             required
-            disabled={busy || mode === "edit"}
+            disabled={disabled || mode === "edit"}
             value={draft.id}
             onChange={(e) => setDraft({ ...draft, id: Number(e.target.value) })}
           />
@@ -154,7 +176,7 @@ export default function AdminDepartments({
               required={key === "majorName"}
               pattern={key === "majorName" ? ".*\\S.*" : undefined}
               maxLength={120}
-              disabled={busy}
+              disabled={disabled}
               value={draft[key] ?? ""}
               onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
             />
@@ -167,7 +189,7 @@ export default function AdminDepartments({
       <div className="flex justify-end gap-2">
         <button
           className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
-          disabled={busy}
+          disabled={disabled}
           type="button"
           onClick={() => (mode === "add" ? changeMode("list") : setDraft(null))}
         >
@@ -246,7 +268,7 @@ export default function AdminDepartments({
         <button
           type="button"
           className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
-          disabled={busy}
+          disabled={disabled}
           onClick={() => changeMode("list")}
         >
           선택 화면으로
@@ -257,7 +279,7 @@ export default function AdminDepartments({
           <>
             <button
               type="button"
-              disabled={busy}
+              disabled={disabled}
               onClick={selectExcel}
               className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
             >
@@ -272,9 +294,40 @@ export default function AdminDepartments({
           {error}
         </p>
       )}
+      {pendingSync && (
+        <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          className="my-3 rounded-md bg-[#7658e9] px-4 py-2 text-white disabled:opacity-50"
+          onClick={async () => {
+            setBusy(true);
+            setError("");
+            try { await syncDepartment(pendingSync); }
+            catch (e) { fail(e); }
+            finally { setBusy(false); }
+          }}
+        >
+          {busy ? "저장 중…" : "DB 저장 다시 시도"}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          className="my-3 rounded-md border border-[#dddfe6] px-4 py-2"
+          onClick={() => { setPendingSync(null); changeMode("import"); }}
+        >
+          엑셀 시트 적용으로 이동
+        </button>
+        </div>
+      )}
       {message && (
         <p role="status" className="text-green-700">
           {message}
+        </p>
+      )}
+      {mode !== "import" && (
+        <p className="mb-4 text-[#858796]">
+          학과를 저장하면 선택한 엑셀과 DB에 함께 반영됩니다. 파일 선택만으로 DB 목록은 변경되지 않습니다.
         </p>
       )}
       {mode === "add" && departmentForm}
@@ -350,6 +403,7 @@ export default function AdminDepartments({
                     method: "POST", body: JSON.stringify({ items: preview }),
                   });
                   setExcelHandle(null);
+                  setExcelDepartments(null);
                   setPreview([]);
                   setFile(null);
                   setMessage(`${result.savedCount}개 학과를 DB에 저장했습니다.`);
@@ -422,12 +476,12 @@ export default function AdminDepartments({
               {draft?.id === d.id && departmentForm}
             </div>
           ))}
-          {departments.length > 0 && filtered.length === 0 && (
+          {visibleDepartments.length > 0 && filtered.length === 0 && (
             <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">
               검색 조건에 맞는 학과가 없습니다.
             </p>
           )}
-          {!departments.length && (
+          {!visibleDepartments.length && (
             <p>
               등록된 학과가 없습니다. 학과 추가 또는 엑셀 적용으로 등록하세요.
             </p>
