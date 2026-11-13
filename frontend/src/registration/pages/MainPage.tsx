@@ -1,7 +1,7 @@
 import { useCatalog } from "../../shared/hooks/useCatalog";
 import { filterCourses } from "../../shared/data/filterCourses";
 import { sortCourses } from "../../shared/data/sortCourses";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { CourseListItem } from "../../shared/types/database";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import { createCourseFilters } from "../../shared/data/CourseFilters";
@@ -15,6 +15,8 @@ import { useUserStore } from "../store/userStore";
 import { isExcludedFromCourse } from "../data/courseEligibility";
 import { toast } from "sonner";
 import { getConflicts } from "../utils/courseRules";
+import { Download } from "lucide-react";
+import { downloadElementAsJpg } from "../utils/downloadTimetable";
 
 export default function MainPage() {
   const { categories } = useCatalog().data!;
@@ -31,6 +33,8 @@ export default function MainPage() {
   const [selectedFilters, setSelectedFilters] = useState<
     Record<number, number[]>
   >({});
+
+  const timetableRef = useRef<HTMLDivElement>(null);
 
   const selected = useCourseStore((state) => state.selected);
   const toggleSelected = useCourseStore((state) => state.toggleSelected);
@@ -158,7 +162,41 @@ export default function MainPage() {
           />
         </section>
 
-        <WeeklyTimetable selected={selected} />
+        <div className="min-w-0">
+          <div ref={timetableRef}>
+            <WeeklyTimetable selected={selected} />
+          </div>
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              disabled={selected.length === 0}
+              onClick={async () => {
+                if (!timetableRef.current) return;
+
+                try {
+                  const now = new Date();
+                  const date = [
+                    now.getFullYear(),
+                    String(now.getMonth() + 1).padStart(2, "0"),
+                    String(now.getDate()).padStart(2, "0"),
+                  ].join("-");
+                  await downloadElementAsJpg(
+                    timetableRef.current,
+                    `내_시간표_${date}.jpg`,
+                  );
+                  toast.success("시간표를 JPG 파일로 다운로드했습니다.");
+                } catch (error) {
+                  console.error("시간표 이미지 다운로드 실패:", error);
+                  toast.error("시간표 다운로드에 실패했습니다. 다시 시도해 주세요.");
+                }
+              }}
+              className="flex items-center justify-center gap-2 rounded-lg border border-[#dedfe8] bg-white px-3 py-2 text-[10px] font-bold text-[#6652d7] shadow-[0_2px_8px_rgba(26,28,44,0.03)] transition hover:border-[#cfc6ff] hover:bg-[#f8f6ff] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Download size={14} />
+              시간표 JPG 다운로드
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 신청 강좌 + 시간표 필터 */}
