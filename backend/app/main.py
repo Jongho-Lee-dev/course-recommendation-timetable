@@ -5,7 +5,7 @@ import time
 from threading import Lock
 from contextlib import closing
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
@@ -14,7 +14,10 @@ from psycopg2.extras import RealDictCursor, Json
 
 from app.database import get_connection
 from app.excel import parse_excel
-from app.models import DepartmentImport, Course
+from app.models import DepartmentImport, Course, Student
+from app.auth import install_auth
+from app.session import token, claims
+from app.student_db import student_query
 from app.syllabi import install_syllabi
 from starlette.concurrency import run_in_threadpool
 
@@ -330,3 +333,45 @@ def get_filter_categories():
                                "field": field, "value": value})
             next_id += 1
     return categories
+
+
+@app.post("/api/students")
+async def save_student(body: Student, c=Depends(claims)):
+    if c["role"] != "student":
+        raise HTTPException(403, "학생 세션이 필요합니다.")
+    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
+    if not rows:
+        raise HTTPException(404, "학생 정보가 없습니다.")
+    if rows[0]["studentId"] != body.studentId:
+        raise HTTPException(403, "학번은 변경할 수 없습니다.")
+    if body.departmentId not in {d["id"] for d in await departments()}:
+        raise HTTPException(422, "학과코드 오류")
+    await db("PATCH", "tt_students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
+    return {"token": token("student", c["sub"]), "student": body.model_dump()}
+
+
+@app.get("/api/students/me")
+async def me(c=Depends(claims)):
+    if c["role"] != "student":
+        raise HTTPException(403, "학생 세션이 필요합니다.")
+    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
+    if not rows:
+        raise HTTPException(404, "학생 정보가 없습니다.")
+    return Student.model_validate(rows[0]).model_dump()
+
+
+
+
+async def db(*args, **kwargs):
+    return await run_in_threadpool(student_query, *args, **kwargs)
+
+
+async def auth_db(*args, **kwargs):
+    return await db(*args, **kwargs)
+
+
+async def departments():
+    return await db("GET", "tt_departments", params={"order": "id"})
+
+
+install_auth(app, auth_db, token, departments)

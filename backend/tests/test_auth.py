@@ -102,3 +102,24 @@ def test_legacy_student_cannot_be_claimed(setup):
         == 401
     )
     assert len(rows) == 1
+
+
+def test_unknown_login_has_cors_and_never_creates_account(setup):
+    c, rows = setup
+    origin = 'https://course-recommendation-timetable.vercel.app'
+    response = c.post('/api/auth/login', json={'studentId': 'unknown', 'password': 'wrong'},
+                      headers={'Origin': origin})
+    assert response.status_code == 401
+    assert response.headers['access-control-allow-origin'] == origin
+    assert rows == []
+
+
+def test_invalid_or_expired_sessions_are_rejected(setup, monkeypatch):
+    c, _ = setup
+    valid = main.token('student', 'test-owner')
+    for value in ['bad-token', valid + 'tampered']:
+        assert c.get('/api/students/me', headers={'Authorization': 'Bearer ' + value}).status_code == 401
+    from app import session
+    now = session.time.time()
+    monkeypatch.setattr(session.time, 'time', lambda: now + 30000)
+    assert c.get('/api/students/me', headers={'Authorization': 'Bearer ' + valid}).status_code == 401
