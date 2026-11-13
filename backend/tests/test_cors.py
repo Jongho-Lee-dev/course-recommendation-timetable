@@ -4,19 +4,43 @@ from fastapi.testclient import TestClient
 from app import main
 
 
-ORIGIN = "https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app"
+ORIGIN = "https://course-recommendation-timetable.vercel.app"
 
 
 def test_courses_cors(monkeypatch):
-    async def catalog():
+    def catalog():
         return []
 
-    monkeypatch.setattr(main, "get_catalog", catalog)
+    monkeypatch.setattr(main, "get_courses", catalog)
     with TestClient(main.app) as client:
         response = client.get("/api/courses", headers={"Origin": ORIGIN})
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == ORIGIN
     assert "Origin" in response.headers["vary"]
+
+
+def test_filter_categories_cors(monkeypatch):
+    monkeypatch.setattr(main, "read_catalog_queries", lambda queries: [[]])
+    response = TestClient(main.app).get('/filter-categories', headers={'Origin': ORIGIN})
+    assert response.status_code == 200
+    assert response.headers['access-control-allow-origin'] == ORIGIN
+
+
+def test_cors_environment_additions_are_normalized(monkeypatch):
+    monkeypatch.setenv('CORS_ORIGINS', ' https://custom.example/ , ,*')
+    origins = main.cors_origins()
+    assert ORIGIN in origins
+    assert 'https://custom.example' in origins
+    assert '*' not in origins
+
+
+def test_db_error_still_has_cors_headers(monkeypatch):
+    def fail():
+        raise RuntimeError('DB unavailable')
+    monkeypatch.setattr(main, 'get_connection', fail)
+    response = TestClient(main.app).get('/filter-categories', headers={'Origin': ORIGIN})
+    assert response.status_code == 503
+    assert response.headers['access-control-allow-origin'] == ORIGIN
 
 
 @pytest.mark.parametrize("origin,allowed", [

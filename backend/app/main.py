@@ -21,9 +21,24 @@ from starlette.concurrency import run_in_threadpool
 app = FastAPI()
 logger = logging.getLogger(__name__)
 
+
+def cors_origins():
+    defaults = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://course-recommendation-timetable.vercel.app",
+        "https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app",
+    ]
+    configured = os.getenv("CORS_ORIGINS", "").split(",")
+    return list(dict.fromkeys(
+        origin.strip().rstrip("/") for origin in defaults + configured
+        if origin.strip() and origin.strip() != "*"
+    ))
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=cors_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
