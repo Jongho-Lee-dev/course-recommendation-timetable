@@ -2,7 +2,7 @@
 import { toJpeg } from "html-to-image";
 
 /**
- * 지정한 DOM 요소를 JPG 이미지로 변환해 다운로드합니다.
+ * 지정한 DOM 요소를 JPG 이미지로 변환해 다운로드합니다
  */
 export async function downloadElementAsJpg(
   element: HTMLElement,
