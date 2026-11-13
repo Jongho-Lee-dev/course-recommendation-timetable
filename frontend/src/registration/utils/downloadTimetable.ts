@@ -42,10 +42,31 @@ export async function downloadElementAsJpg(
     });
   };
 
-  copyComputedStyles(element, clone);
+  
+copyComputedStyles(element, clone);
 
-  // 새로고침 버튼 등은 이미지에서 제외합니다.
-  clone.querySelectorAll("button").forEach((button) => button.remove());
+// 새로고침 버튼은 이미지에서 제외합니다.
+clone.querySelectorAll("button").forEach((button) => button.remove());
+
+// Canvas 보안 오류를 방지하기 위해 이미지 리소스를 제거합니다.
+const elements = [clone, ...Array.from(clone.querySelectorAll("*"))];
+
+elements.forEach((item) => {
+  const htmlElement = item as HTMLElement;
+
+  // 외부 이미지가 포함될 수 있는 CSS 배경 제거
+  htmlElement.style.backgroundImage = "none";
+  htmlElement.style.borderImageSource = "none";
+  htmlElement.style.maskImage = "none";
+  htmlElement.style.setProperty("-webkit-mask-image", "none");
+  htmlElement.style.listStyleImage = "none";
+});
+
+// HTML 이미지 및 SVG 이미지 제거
+clone.querySelectorAll("img, svg image").forEach((image) => {
+  image.remove();
+});
+
 
   clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
   clone.style.width = `${width}px`;
