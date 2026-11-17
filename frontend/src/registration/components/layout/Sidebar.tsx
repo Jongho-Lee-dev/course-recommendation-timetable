@@ -5,6 +5,7 @@ const menu = [
   ["▦", "대시보드", "/mainPage"],
   ["⌕", "강의검색", "/courses"],
   ["◫", "나의 시간표", "/timetable"],
+  ["▤", "예비시간표", "/pre-timetable"],
   ["✦", "필터 기반 시간표 추천", "/ai"],
   ["✧", "AI 학업 도우미", "/chatbot"],
   ["♙", "내 정보 수정", "/profile"],
