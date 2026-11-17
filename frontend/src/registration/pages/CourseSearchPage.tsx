@@ -1,3 +1,4 @@
+
 import { useUserStore } from "../store/userStore";
 import { useCatalog } from "../../shared/hooks/useCatalog";
 import { useMemo, useState } from "react";
@@ -22,7 +23,10 @@ export default function CourseSearchPage() {
   const { categories } = useCatalog().data!;
   const courses = useCourseCatalogStore((state) => state.courses);
 
-  const maxCredits = useUserStore(state => state.user?.maxCredits ?? 18);
+  const maxCredits = useUserStore(
+    (state) => state.user?.maxCredits ?? 18,
+  );
+
   const [keyword, setKeyword] = useState("");
   const [professorKeyword, setProfessorKeyword] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<
@@ -34,10 +38,16 @@ export default function CourseSearchPage() {
 
   const selected = useCourseStore((s) => s.selected);
   const favorites = useCourseStore((s) => s.favorites);
+  const preSelected = useCourseStore((s) => s.preSelected);
+
   const toggleSelected = useCourseStore((s) => s.toggleSelected);
   const toggleFavorite = useCourseStore((s) => s.toggleFavorite);
+  const togglePreSelected = useCourseStore((s) => s.togglePreSelected);
 
-  const courseFilters = useMemo(() => createCourseFilters(courses, categories), [courses, categories]);
+  const courseFilters = useMemo(
+    () => createCourseFilters(courses, categories),
+    [courses, categories],
+  );
 
   const filteredCourses = useMemo(() => {
     const result = courses.filter((course) => {
@@ -78,7 +88,9 @@ export default function CourseSearchPage() {
           options = option.children ?? [];
         }
 
-        return chosen.every((option) => matchesCourseFilter(course, option));
+        return chosen.every((option) =>
+          matchesCourseFilter(course, option),
+        );
       });
     });
 
@@ -184,6 +196,8 @@ export default function CourseSearchPage() {
           favorites={favorites}
           toggleFavorite={toggleFavorite}
           onCourseClick={setDetail}
+          preSelected={preSelected}
+          togglePreSelected={togglePreSelected}
         />
       </section>
 

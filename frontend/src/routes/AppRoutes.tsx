@@ -14,6 +14,8 @@ import { useUserStore } from "../registration/store/userStore";
 import { Navigate, Routes, Route } from "react-router-dom";
 import type { ReactNode } from "react";
 import AdminPage from "../admin/pages/AdminPage";
+import PreTimetablePage from "../registration/pages/PreTimetablePage";
+
 
 export default function AppRoutes() {
   const user = useUserStore((state) => state.user);

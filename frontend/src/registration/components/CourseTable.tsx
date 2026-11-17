@@ -1,3 +1,4 @@
+
 import { useUserStore } from "../store/userStore";
 import type { CourseListItem } from "../../shared/types/database";
 import { toast } from "sonner";
@@ -7,8 +8,6 @@ import { useCatalog } from "../../shared/hooks/useCatalog";
 import { isExcludedFromCourse } from "../data/courseEligibility";
 import SyllabusLink from "../../shared/components/SyllabusLink";
 
-
-
 interface CourseTableProps {
   courses: CourseListItem[];
   selected: CourseListItem[];
@@ -16,6 +15,8 @@ interface CourseTableProps {
   favorites?: CourseListItem[];
   toggleFavorite?: (course: CourseListItem) => void;
   onCourseClick?: (course: CourseListItem) => void;
+  preSelected?: CourseListItem[];
+  togglePreSelected?: (course: CourseListItem) => void;
 }
 
 export default function CourseTable({
@@ -25,9 +26,13 @@ export default function CourseTable({
   favorites = [],
   toggleFavorite,
   onCourseClick,
+  preSelected = [],
+  togglePreSelected,
 }: CourseTableProps) {
   const { departments } = useCatalog().data!;
-  const departmentNames = new Map(departments.map(d => [d.id, d.majorName]));
+  const departmentNames = new Map(
+    departments.map((d) => [d.id, d.majorName]),
+  );
   const user = useUserStore((state) => state.user);
 
   const handleToggleCourse = (course: CourseListItem) => {
@@ -60,6 +65,7 @@ export default function CourseTable({
     if (totalCredits + course.credit > (user?.maxCredits ?? 18)) {
       const exceededCredits =
         totalCredits + course.credit - (user?.maxCredits ?? 18);
+
       toast.error(
         `'${course.title}' 추가 시 ${exceededCredits}학점 초과합니다. (최대 ${user?.maxCredits ?? 18}학점)`,
       );
@@ -71,23 +77,35 @@ export default function CourseTable({
 
   return (
     <div className="overflow-x-auto border-t border-[#ececf0]">
-      <div className="grid min-w-[640px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_44px_36px] items-center gap-2 bg-[#fafafd] px-5 py-2.5 text-[8px] text-[#9a9daa]">
+      <div className="grid min-w-[700px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_48px_48px_36px] items-center gap-2 bg-[#fafafd] px-5 py-2.5 text-[8px] text-[#9a9daa]">
         <span>강좌명</span>
         <span>교수명</span>
         <span>요일/시간/강의실</span>
         <span>학점</span>
         <span>정원</span>
         <span>시간표</span>
+        <span>예비</span>
         <span>관심</span>
       </div>
 
       <div className="max-h-[470px] overflow-y-auto">
         {courses.map((course) => {
-          const isSelected = selected.some((item) => item.id === course.id);
+          const isSelected = selected.some(
+            (item) => item.id === course.id,
+          );
+
+          const isPreSelected = preSelected.some(
+            (item) => item.id === course.id,
+          );
+
           const excludedDepartments = [
             ...new Set(course.excludedDepartmentIds ?? []),
           ].map((id) => departmentNames.get(id) ?? `학과 ID ${id}`);
-          const isFull = course.isFull ?? (course.enrolledCount ?? 0) >= course.capacity;
+
+          const isFull =
+            course.isFull ??
+            (course.enrolledCount ?? 0) >= course.capacity;
+
           const isExcluded = isExcludedFromCourse(course, user);
 
           const scheduleText = course.isOnline
@@ -98,9 +116,10 @@ export default function CourseTable({
                     `${schedule.dayOfWeek} ${schedule.startPeriod}~${schedule.endPeriod}교시 (${schedule.classroom})`,
                 )
                 .join(", ");
+
           return (
             <div
-              className={`grid min-h-[47px] min-w-[640px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_44px_36px] items-center gap-2 border-t border-[#f0f0f3] px-5 py-2 text-[9px] transition hover:bg-[#fafafd] ${
+              className={`grid min-h-[47px] min-w-[700px] grid-cols-[1.35fr_0.75fr_1.1fr_0.42fr_0.65fr_48px_48px_36px] items-center gap-2 border-t border-[#f0f0f3] px-5 py-2 text-[9px] transition hover:bg-[#fafafd] ${
                 isSelected ? "bg-[#faf8ff]" : ""
               }`}
               key={course.id}
@@ -113,12 +132,19 @@ export default function CourseTable({
                 >
                   {course.title}
                 </button>
+
                 <small className="mt-1 block text-[8px] text-[#9b9eab]">
                   {course.courseCode} · {course.courseType ?? course.category}
                 </small>
+
                 <SyllabusLink courseId={course.id} />
+
                 <small
-                  className={`mt-1 block break-words text-[8px] leading-relaxed ${excludedDepartments.length > 0 ? "text-amber-700" : "text-[#9b9eab]"}`}
+                  className={`mt-1 block break-words text-[8px] leading-relaxed ${
+                    excludedDepartments.length > 0
+                      ? "text-amber-700"
+                      : "text-[#9b9eab]"
+                  }`}
                 >
                   수강 제외 대상:{" "}
                   {excludedDepartments.length > 0
@@ -126,17 +152,22 @@ export default function CourseTable({
                     : "없음"}
                 </small>
               </div>
+
               <span>{course.professorName}</span>
               <span>{scheduleText}</span>
               <span>{course.credit} cr</span>
+
               <span className="text-[#8b8e9c]">
                 {`${course.enrolledCount ?? 0}/${course.capacity}`}
               </span>
 
               <button
+                type="button"
                 disabled={(isExcluded || isFull) && !isSelected}
                 title={
-                  isExcluded ? "소속 전공이 수강 제외 대상입니다." : undefined
+                  isExcluded
+                    ? "소속 전공이 수강 제외 대상입니다."
+                    : undefined
                 }
                 className={`rounded-md px-1.5 py-1.5 text-[8px] disabled:cursor-not-allowed disabled:bg-[#ececf0] disabled:text-[#777a88] ${
                   isSelected
@@ -145,8 +176,30 @@ export default function CourseTable({
                 }`}
                 onClick={() => handleToggleCourse(course)}
               >
-                {isSelected ? "제거" : isExcluded ? "제외" : course.isFull ? "마감" : "추가"}
+                {isSelected
+                  ? "제거"
+                  : isExcluded
+                    ? "제외"
+                    : isFull
+                      ? "마감"
+                      : "추가"}
               </button>
+
+              {togglePreSelected ? (
+                <button
+                  type="button"
+                  onClick={() => togglePreSelected(course)}
+                  className={`rounded-md px-1.5 py-1.5 text-[8px] ${
+                    isPreSelected
+                      ? "bg-[#eee9ff] text-[#7658e9]"
+                      : "bg-[#f1f2f5] text-[#777985] hover:bg-[#eee9ff] hover:text-[#7658e9]"
+                  }`}
+                >
+                  {isPreSelected ? "담김" : "담기"}
+                </button>
+              ) : (
+                <span />
+              )}
 
               {toggleFavorite ? (
                 <button
