@@ -16,7 +16,6 @@ import type { ReactNode } from "react";
 import AdminPage from "../admin/pages/AdminPage";
 import PreTimetablePage from "../registration/pages/PreTimetablePage";
 
-
 export default function AppRoutes() {
   const user = useUserStore((state) => state.user);
 
