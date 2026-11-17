@@ -45,6 +45,9 @@ export default function AppRoutes() {
         {/* 나의 시간표 */}
         <Route path="/timetable" element={protectedPage(<TimetablePage />)} />
 
+        {/* 예비 시간표 */}
+        <Route path="/pre-timetable" element={protectedPage(<PreTimetablePage />)}/>
+
         {/* 필터 기반 시간표 추천 */}
         <Route path="/ai" element={protectedPage(<AIRecommendationPage />)} />
 
