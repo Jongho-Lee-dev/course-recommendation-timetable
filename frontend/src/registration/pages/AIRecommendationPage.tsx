@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
+import { isExcludedFromCourse } from "../data/courseEligibility";
 import type { CourseListItem } from "../../shared/types/database";
 import { api } from "../../shared/api";
 
@@ -18,6 +19,7 @@ type Recommendation = { courses: CourseListItem[]; reason: string };
 
 export default function AIRecommendationPage({ demoMode = false }: { demoMode?: boolean }) {
   const catalogCourses = useCourseCatalogStore(state => state.courses);
+  const user = useUserStore((s) => s.user);
   const sampleCourses: CourseListItem[] = [
     { id: 90001, courseCode: "TEST301", title: "테스트 자료구조", category: "전공", courseType: "전공필수", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 2, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 1, dayOfWeek: "월", startPeriod: 3, endPeriod: 4, classroom: "테스트 강의실", openCourseId: 90001 }] },
     { id: 90002, courseCode: "TEST302", title: "테스트 운영체제", category: "전공", courseType: "전공필수", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 2, dayOfWeek: "화", startPeriod: 5, endPeriod: 6, classroom: "테스트 강의실", openCourseId: 90002 }] },
@@ -26,7 +28,7 @@ export default function AIRecommendationPage({ demoMode = false }: { demoMode?: 
     { id: 90005, courseCode: "TEST305", title: "테스트 소프트웨어공학", category: "전공", courseType: "전공선택", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 5, dayOfWeek: "금", startPeriod: 3, endPeriod: 4, classroom: "테스트 강의실", openCourseId: 90005 }] },
   ];
   const courses = demoMode ? sampleCourses : catalogCourses;
-  const user = useUserStore((s) => s.user);
+  const eligibleCourses = courses.filter((course) => !isExcludedFromCourse(course, user));
   const selected = useCourseStore((s) => s.selected);
   const setSelected = useCourseStore((s) => s.setSelected);
   const [preferences, setPreferences] = useState<Preferences>({
@@ -45,8 +47,8 @@ export default function AIRecommendationPage({ demoMode = false }: { demoMode?: 
 
   const generate = async () => {
     if (busy) return;
-    if (!courses.length) {
-      toast.error("추천할 강좌가 없습니다. 테스트 과목을 불러오거나 DB를 연결하세요.");
+    if (!eligibleCourses.length) {
+      toast.error("제외 대상을 빼고 추천할 강좌가 없습니다.");
       return;
     }
     setBusy(true);
@@ -56,14 +58,15 @@ export default function AIRecommendationPage({ demoMode = false }: { demoMode?: 
         {
           method: "POST",
           body: JSON.stringify({
-            courses,
+            courses: eligibleCourses,
+            studentDepartmentId: user?.departmentId ?? null,
             preferences: { ...preferences, major: user?.major ?? null },
             selectedCourseIds: selected.map((course) => course.id),
           }),
         },
         "student",
       );
-      const byId = new Map(courses.map((course) => [course.id, course]));
+      const byId = new Map(eligibleCourses.map((course) => [course.id, course]));
       const mapped = result.recommendations.map((item) => ({
         courses: item.courseIds.flatMap((id) => byId.has(id) ? [byId.get(id)!] : []),
         reason: item.reason,

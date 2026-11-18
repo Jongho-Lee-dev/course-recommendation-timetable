@@ -27,6 +27,7 @@ class CourseInput(BaseModel):
     credit: float = Field(gt=0, le=30)
     isOnline: bool = False
     schedules: list[ScheduleInput] = Field(default_factory=list, max_length=30)
+    excludedDepartmentIds: list[int] = Field(default_factory=list, max_length=200)
 
 
 class RecommendationPreferences(BaseModel):
@@ -41,6 +42,7 @@ class RecommendationRequest(BaseModel):
     courses: list[CourseInput] = Field(min_length=1, max_length=100)
     preferences: RecommendationPreferences
     selectedCourseIds: list[int] = Field(default_factory=list, max_length=100)
+    studentDepartmentId: int | None = Field(default=None, gt=0)
 
 
 _requests: dict[str, deque[float]] = defaultdict(deque)
@@ -101,6 +103,8 @@ async def _generate(body: RecommendationRequest):
     candidates = [course for course in body.courses if
         (not prefs.majorOnly or course.category == "전공") and
         (prefs.online or not course.isOnline) and
+        (body.studentDepartmentId is None or
+         body.studentDepartmentId not in course.excludedDepartmentIds) and
         (not prefs.avoidMorning or not any(s.startPeriod <= 2 for s in course.schedules))]
     if not candidates:
         raise HTTPException(422, "조건에 맞는 추천 대상 과목이 없습니다.")
