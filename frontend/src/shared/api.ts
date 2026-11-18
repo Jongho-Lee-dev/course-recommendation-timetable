@@ -1,0 +1,70 @@
+import { useUserStore } from "../registration/store/userStore";
+import type { CourseListItem } from "./types/database";
+
+const base = (import.meta.env.VITE_API_BASE_URL?.trim() || (import.meta.env.PROD ? "https://course-recommendation-timetable.onrender.com" : "http://localhost:8000")).replace(/\/+$/, "");
+
+export async function api<T>(
+  path: string,
+  options: RequestInit = {},
+  role: "admin" | "student" = "admin",
+): Promise<T> {
+  const token =
+    role === "student" ? sessionStorage.getItem("student-token") : null;
+  const response = await fetch(`${base}/api${path}`, {
+    ...options,
+    headers: {
+      ...(options.body && !(options.body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 && role === "student")
+      useUserStore.getState().reset();
+    const contentType = response.headers.get("content-type") ?? "";
+    const error = contentType.includes("application/json")
+      ? await response.json().catch(() => ({}))
+      : {};
+    throw new Error(
+      typeof error.detail === "string"
+        ? error.detail
+        : `백엔드 응답 오류 (${response.status}). API 주소와 백엔드 실행 상태를 확인하세요.`,
+    );
+  }
+
+  if (path.endsWith(".xlsx")) return (await response.blob()) as T;
+  return (await response.json()) as T;
+}
+
+export async function saveCourse(course: CourseListItem, editId?: number) {
+  return api<CourseListItem[]>(`/admin/courses${editId ? `/${editId}` : ""}`, {
+    method: editId ? "PUT" : "POST",
+    body: JSON.stringify(course),
+  });
+}
+
+export async function downloadExcel() {
+  const blob = await api<Blob>("/admin/courses.xlsx");
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "과목_최신목록.xlsx";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function syllabusUrl(courseId: number) {
+  return `${base}/api/courses/${courseId}/syllabus`;
+}
+
+export async function saveSyllabus(courseId: number, file: File | null) {
+  const body = new FormData();
+  if (file) body.append("file", file);
+  return api<Pick<CourseListItem, "syllabusPath" | "syllabusName">>(
+    `/admin/courses/${courseId}/syllabus`,
+    { method: file ? "PUT" : "DELETE", ...(file ? { body } : {}) },
+  );
+}

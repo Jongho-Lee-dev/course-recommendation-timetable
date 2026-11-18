@@ -44,3 +44,9 @@ env/
 *.njsproj
 *.sln
 *.sw?
+
+# Generated load-test results and reports
+/outputs/
+baseline-*-run*.json
+diagnostic-*-run*.json
+pool*-vus*-run*.json

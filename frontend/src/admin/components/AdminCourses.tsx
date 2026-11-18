@@ -1,0 +1,866 @@
+import { useCatalog } from "../../shared/hooks/useCatalog";
+import { api, saveCourse, saveSyllabus } from "../../shared/api";
+import { useMemo, useState } from "react";
+import { BookOpen, Plus, Sheet } from "lucide-react";
+import type {
+  CourseListItem,
+  CourseSchedule,
+  Department,
+} from "../../shared/types/database";
+import { createCourseFilters } from "../../shared/data/CourseFilters";
+import { filterCourses } from "../../shared/data/filterCourses";
+import { sortCourses } from "../../shared/data/sortCourses";
+import {
+  getClassificationPath,
+  withClassificationPath,
+} from "../../shared/data/courseClassification";
+import ClassificationEditor from "./ClassificationEditor";
+import DepartmentTreeSelect from "./DepartmentTreeSelect";
+import CourseFilters from "../../shared/components/CourseFilters";
+import SyllabusLink, { PdfLink } from "../../shared/components/SyllabusLink";
+import CourseExcelImport from "./CourseExcelImport";
+import { appendCourseExcel, updateCourseExcel } from "../utils/saveCourseExcel";
+
+const textFields = [
+  ["courseCode", "학수번호"],
+  ["title", "과목명"],
+  ["sectionNo", "분반"],
+  ["professorName", "담당교수"],
+] as const;
+const numberFields = [
+  ["credit", "학점", 0],
+  ["capacity", "정원", 1],
+  ["targetGrade", "대상학년", 1],
+] as const;
+
+function createSchedule(openCourseId: number, id = 1): CourseSchedule {
+  return {
+    id,
+    openCourseId,
+    dayOfWeek: "월",
+    startPeriod: 1,
+    endPeriod: 1,
+    classroom: "",
+  };
+}
+
+function CourseForm({
+  course,
+  courses,
+  departments,
+  onSave,
+  onCancel,
+}: {
+  course: CourseListItem;
+  courses: CourseListItem[];
+  departments: Department[];
+  onSave: (
+    course: CourseListItem,
+    syllabus: File | null | undefined,
+  ) => void | Promise<void>;
+  onCancel: () => void;
+}) {
+  const [draft, setDraft] = useState<CourseListItem>(() => {
+    const initial = structuredClone(course);
+    if (!initial.isOnline && initial.schedules.length === 0)
+      initial.schedules = [createSchedule(initial.id)];
+    return initial;
+  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [syllabus, setSyllabus] = useState<File | null | undefined>(undefined);
+  const [readingPdf, setReadingPdf] = useState(false);
+  const [fileError, setFileError] = useState("");
+
+  return (
+    <form
+      className="space-y-4 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        if (saving || readingPdf || fileError) return;
+        if (
+          [
+            draft.courseCode,
+            draft.title,
+            draft.category,
+            draft.professorName,
+            draft.sectionNo,
+          ].some((value) => !value.trim())
+        ) {
+          setError("학수번호, 과목명, 구분, 분반, 담당교수를 입력하세요.");
+          return;
+        }
+        if (!draft.departmentId) {
+          setError("소속 학과를 선택하세요.");
+          return;
+        }
+        if (!draft.courseType?.trim()) {
+          setError("이수구분을 선택하거나 입력하세요.");
+          return;
+        }
+        if (
+          !draft.isOnline &&
+          (draft.schedules.length === 0 ||
+            draft.schedules.some(
+              (schedule) =>
+                schedule.endPeriod < schedule.startPeriod ||
+                !schedule.classroom.trim(),
+            ))
+        ) {
+          setError("강의 시간을 추가하고 종료 교시와 강의실을 확인하세요.");
+          return;
+        }
+        setError("");
+        setSaving(true);
+        try {
+          await onSave(
+            {
+              ...withClassificationPath(
+                draft,
+                getClassificationPath(draft).map((value) => value.trim()),
+              ),
+              courseType: draft.courseType?.trim() ?? "",
+              courseCode: draft.courseCode.trim(),
+              title: draft.title.trim(),
+              professorName: draft.professorName.trim(),
+              category: draft.category.trim(),
+              sectionNo: draft.sectionNo.trim(),
+              schedules: draft.isOnline ? [] : draft.schedules,
+            },
+            syllabus,
+          );
+        } catch (error) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "엑셀 저장에 실패했습니다. 다시 시도하세요.",
+          );
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <ClassificationEditor
+        path={getClassificationPath(draft)}
+        courses={[...courses, course]}
+        onChange={(path) => {
+          setDraft(withClassificationPath(draft, path));
+          setError("");
+        }}
+      />
+      <div className="grid gap-4 min-[701px]:grid-cols-2">
+        {textFields.map(([key, label]) => (
+          <label key={key} className="space-y-1.5 text-[#5d6070]">
+            <span className="block font-semibold">{label}</span>
+            <input
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+              value={draft[key] ?? ""}
+              required={[
+                "courseCode",
+                "title",
+                "category",
+                "sectionNo",
+                "professorName",
+              ].includes(key)}
+              onChange={(event) =>
+                setDraft({ ...draft, [key]: event.target.value })
+              }
+            />
+          </label>
+        ))}
+        {numberFields.map(([key, label, min]) => (
+          <label key={key} className="space-y-1.5 text-[#5d6070]">
+            <span className="block font-semibold">{label}</span>
+            <input
+              className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+              type="number"
+              min={min}
+              step={1}
+              required
+              value={draft[key]}
+              onChange={(event) =>
+                setDraft({ ...draft, [key]: Number(event.target.value) })
+              }
+            />
+          </label>
+        ))}
+        <label className="space-y-1.5 text-[#5d6070]">
+          <span className="block font-semibold">소속 학과</span>
+          <select
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+            required
+            value={draft.departmentId || ""}
+            onChange={(event) => {
+              const department = departments.find(
+                (item) => item.id === Number(event.target.value),
+              );
+              if (department)
+                setDraft({
+                  ...draft,
+                  departmentId: department.id,
+                  majorName: department.majorName,
+                  facultyName: department.facultyName,
+                  collegeName: department.collegeName,
+                });
+            }}
+          >
+            <option value="">학과 선택</option>
+            {!departments.some((item) => item.id === draft.departmentId) &&
+              draft.departmentId !== 0 && (
+                <option value={draft.departmentId}>{draft.majorName}</option>
+              )}
+            {departments.map((department) => (
+              <option key={department.id} value={department.id}>
+                {[
+                  department.collegeName,
+                  department.facultyName,
+                  department.majorName,
+                ]
+                  .filter(Boolean)
+                  .join(" / ")}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1.5 text-[#5d6070]">
+          <span className="block font-semibold">수업형태</span>
+          <select
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+            value={draft.isOnline ? "online" : "offline"}
+            onChange={(event) => {
+              const isOnline = event.target.value === "online";
+              setDraft({
+                ...draft,
+                isOnline,
+                schedules:
+                  !isOnline && draft.schedules.length === 0
+                    ? [createSchedule(draft.id)]
+                    : draft.schedules,
+              });
+              setError("");
+            }}
+          >
+            <option value="offline">오프라인</option>
+            <option value="online">온라인</option>
+          </select>
+        </label>
+      </div>
+      <div className="space-y-2 rounded-lg border border-[#e4e5eb] bg-white p-4">
+        <label className="block space-y-2 font-semibold">
+          <span>강의계획서 (PDF, 선택)</span>
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            disabled={readingPdf}
+            className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (!file) return;
+              setFileError("");
+              if (!file.name.toLowerCase().endsWith(".pdf")) {
+                setFileError("PDF 파일만 첨부할 수 있습니다.");
+                return;
+              }
+              if (file.size > 10 * 1024 * 1024) {
+                setFileError("10MB 이하의 PDF 파일을 선택하세요.");
+                return;
+              }
+              setReadingPdf(true);
+              try {
+                const header = new TextDecoder().decode(
+                  await file.slice(0, 5).arrayBuffer(),
+                );
+                if (header !== "%PDF-") {
+                  setFileError("올바른 PDF 파일을 선택하세요.");
+                  return;
+                }
+                setSyllabus(file);
+              } catch {
+                setFileError("파일을 읽을 수 없습니다. 다시 선택하세요.");
+              } finally {
+                setReadingPdf(false);
+              }
+            }}
+          />
+        </label>
+        <p className="text-[10px] text-[#858796]">
+          최대 10MB · 다른 파일을 선택하면 저장 시 교체됩니다.
+        </p>
+        {readingPdf && <p role="status">PDF 확인 중…</p>}
+        {fileError && (
+          <p role="alert" className="text-red-600">
+            {fileError}{" "}
+            <button
+              type="button"
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+              onClick={() => setFileError("")}
+            >
+              선택 취소
+            </button>
+          </p>
+        )}
+        {syllabus || (syllabus === undefined && course.syllabusPath) ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {syllabus ? (
+              <PdfLink file={syllabus} />
+            ) : (
+              <SyllabusLink courseId={course.id} />
+            )}
+            <button
+              type="button"
+              disabled={readingPdf}
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+              onClick={() => {
+                setSyllabus(null);
+                setFileError("");
+              }}
+            >
+              첨부 삭제
+            </button>
+          </div>
+        ) : (
+          <p className="text-[10px] text-[#858796]">
+            첨부된 강의계획서가 없습니다.
+          </p>
+        )}
+      </div>
+      <fieldset className="min-w-0 space-y-3 rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4">
+        <legend className="px-2 font-semibold">수강 제외 대상 (선택)</legend>
+        <p className="text-[#858796]">
+          대학·학부를 선택하면 현재 소속된 학과가 모두 선택됩니다. 학과별로
+          선택을 해제할 수 있으며, 선택하지 않으면 제외 대상이 없습니다.
+        </p>
+        <DepartmentTreeSelect
+          departments={departments}
+          selectedIds={draft.excludedDepartmentIds ?? []}
+          onChange={(excludedDepartmentIds) =>
+            setDraft({ ...draft, excludedDepartmentIds })
+          }
+        />
+      </fieldset>
+      {!draft.isOnline && (
+        <>
+          <div className="flex items-center justify-between gap-2 border-t border-[#e4e5eb] pt-4">
+            <strong>강의 시간</strong>
+            <button
+              type="button"
+              className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+              onClick={() =>
+                setDraft({
+                  ...draft,
+                  schedules: [
+                    ...draft.schedules,
+                    createSchedule(
+                      draft.id,
+                      Math.max(0, ...draft.schedules.map((item) => item.id)) +
+                        1,
+                    ),
+                  ],
+                })
+              }
+            >
+              시간 추가하기
+            </button>
+          </div>
+          <p className="text-[#858796]">
+            오프라인 강의는 강의 시간을 최소 1개 입력해야 합니다.
+          </p>
+          {draft.schedules.map((schedule) => (
+            <div
+              key={schedule.id}
+              className="grid items-end gap-3 rounded-lg border border-[#e4e5eb] bg-white p-3 min-[501px]:grid-cols-2 min-[1101px]:grid-cols-[repeat(4,minmax(0,1fr))_auto]"
+            >
+              <label>
+                요일
+                <select
+                  className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+                  value={schedule.dayOfWeek}
+                  onChange={(event) =>
+                    setDraft({
+                      ...draft,
+                      schedules: draft.schedules.map((item) =>
+                        item.id === schedule.id
+                          ? { ...item, dayOfWeek: event.target.value }
+                          : item,
+                      ),
+                    })
+                  }
+                >
+                  {["월", "화", "수", "목", "금", "토", "일"].map((day) => (
+                    <option key={day}>{day}</option>
+                  ))}
+                </select>
+              </label>
+              {(["startPeriod", "endPeriod", "classroom"] as const).map(
+                (key) => (
+                  <label key={key}>
+                    {key === "startPeriod"
+                      ? "시작 교시"
+                      : key === "endPeriod"
+                        ? "종료 교시"
+                        : "강의실"}
+                    <input
+                      className="w-full min-w-0 rounded-md border border-[#dddfe6] bg-white px-3 py-2 text-[11px] text-[#5d6070] outline-none focus:border-[#a99aed]"
+                      required
+                      type={key === "classroom" ? "text" : "number"}
+                      min={key === "endPeriod" ? schedule.startPeriod : 1}
+                      step={1}
+                      value={schedule[key]}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          schedules: draft.schedules.map((item) =>
+                            item.id === schedule.id
+                              ? {
+                                  ...item,
+                                  [key]:
+                                    key === "classroom"
+                                      ? event.target.value
+                                      : Number(event.target.value),
+                                }
+                              : item,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                ),
+              )}
+              <button
+                type="button"
+                className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={draft.schedules.length <= 1}
+                onClick={() =>
+                  setDraft({
+                    ...draft,
+                    schedules:
+                      draft.schedules.length > 1
+                        ? draft.schedules.filter(
+                            (item) => item.id !== schedule.id,
+                          )
+                        : draft.schedules,
+                  })
+                }
+              >
+                삭제하기
+              </button>
+            </div>
+          ))}
+        </>
+      )}
+      {error && (
+        <p role="alert" className="text-red-600">
+          {error}
+        </p>
+      )}
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+          onClick={onCancel}
+          disabled={saving}
+        >
+          취소
+        </button>
+        <button
+          type="submit"
+          disabled={saving || readingPdf || !!fileError}
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6] disabled:opacity-50"
+        >
+          {saving ? "저장 중..." : "저장하기"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default function AdminCourses({
+  courses,
+  departments,
+  onChange,
+}: {
+  courses: CourseListItem[];
+  departments: Department[];
+  onChange: (courses: CourseListItem[]) => void;
+}) {
+  const [mode, setMode] = useState<"choose" | "add" | "edit" | "excel">(
+    "choose",
+  );
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState("default");
+  const [professorKeyword, setProfessorKeyword] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<number, number[]>
+  >({});
+  const [excelHandle, setExcelHandle] = useState<FileSystemFileHandle | null>(
+    null,
+  );
+  const [savingExcel, setSavingExcel] = useState(false);
+
+  async function selectExcelFile() {
+    if (!("showOpenFilePicker" in window)) {
+      alert("엑셀 직접 저장은 데스크톱 Chrome 또는 Edge에서 사용하세요.");
+      return;
+    }
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: "엑셀 파일",
+            accept: {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                [".xlsx"],
+            },
+          },
+        ],
+      });
+
+      setExcelHandle(handle);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      alert("엑셀 파일을 선택하지 못했습니다.");
+    }
+  }
+
+  const { categories } = useCatalog().data!;
+  const filters = useMemo(() => createCourseFilters(courses, categories), [courses, categories]);
+  const filtered = sortCourses(
+    filterCourses(courses, filters, keyword, professorKeyword, selectedFilters),
+    sort,
+  );
+  const resetFilters = () => {
+    setKeyword("");
+    setProfessorKeyword("");
+    setSelectedFilters({});
+    setSort("default");
+  };
+  const newId = Math.max(0, ...courses.map((course) => course.id)) + 1;
+  const newCourse: CourseListItem = {
+    id: newId,
+    courseCode: "",
+    title: "",
+    category: "",
+    courseType: "",
+    credit: 3,
+    sectionNo: "01",
+    professorName: "",
+    capacity: 40,
+    targetGrade: 1,
+    departmentId: 0,
+    majorName: "",
+    isOnline: false,
+    schedules: [
+      {
+        id: 1,
+        openCourseId: newId,
+        dayOfWeek: "월",
+        startPeriod: 1,
+        endPeriod: 1,
+        classroom: "",
+      },
+    ],
+  };
+
+  if (mode === "choose")
+    return (
+      <div>
+        <h2 className="!mb-4 !text-sm !font-bold">과목 관리</h2>
+
+        <div className="grid grid-cols-2 gap-3 min-[701px]:gap-4">
+          {(
+            [
+              {
+                mode: "add",
+                title: "과목 추가",
+                description: "새로운 과목과 강의 시간을 등록합니다.",
+                icon: Plus,
+              },
+              {
+                mode: "edit",
+                title: "과목 수정",
+                description: "필터로 과목을 찾아 정보를 수정합니다.",
+                icon: BookOpen,
+              },
+              {
+                mode: "excel",
+                title: "엑셀 데이터 적용",
+                description: "엑셀 파일에 작성한 내용을 저장합니다.",
+                icon: Sheet,
+              },
+            ] as const
+          ).map(({ mode: next, title, description, icon: Icon }) => (
+            <button
+              key={next}
+              type="button"
+              onClick={() => setMode(next)}
+              className="flex cursor-pointer flex-col items-start gap-3 rounded-xl border border-[#e3e4e9] bg-[#fafafd] p-4 text-left transition hover:border-[#a99aed] hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] min-[701px]:p-7"
+            >
+              <span className="rounded-xl bg-[#f0edff] p-3 text-[#7658e9]">
+                <Icon size={24} />
+              </span>
+              <strong className="text-sm">{title}</strong>
+              <span className="text-[11px] leading-5 text-[#858796]">
+                {description}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-[#ececf0] pb-4">
+        <h2 className="!mb-0 !text-sm !font-bold">
+          {mode === "add"
+            ? "과목 추가하기"
+            : mode === "excel"
+              ? "엑셀 파일 업로드"
+              : "과목 수정하기"}
+        </h2>
+        <button
+          type="button"
+          className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+          disabled={savingExcel}
+          onClick={() => {
+            setMode("choose");
+            setEditingId(null);
+          }}
+        >
+          선택 화면으로
+        </button>
+      </div>
+      {mode !== "excel" && (
+        <div className="mb-4 flex items-center gap-3">
+          <button
+            type="button"
+            className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+            onClick={selectExcelFile}
+            disabled={savingExcel}
+          >
+            저장할 엑셀 선택
+          </button>
+          <span>{excelHandle ? excelHandle.name : "선택된 파일 없음"}</span>
+        </div>
+      )}
+      {mode === "add" ? (
+        <CourseForm
+          key="new"
+          course={newCourse}
+          courses={courses}
+          departments={departments}
+          onCancel={() => setMode("choose")}
+          onSave={async (course, syllabus) => {
+            if (!excelHandle) {
+              throw new Error(
+                "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
+              );
+            }
+            if (
+              courses.some(
+                (item) =>
+                  item.courseCode === course.courseCode &&
+                  item.sectionNo === course.sectionNo,
+              )
+            ) {
+              throw new Error("같은 학수번호와 분반의 과목이 이미 있습니다.");
+            }
+            setSavingExcel(true);
+            try {
+              await appendCourseExcel(excelHandle, course, departments);
+              try {
+                const updated = await saveCourse(course);
+                onChange(updated);
+                const created = updated.find(
+                  (item) =>
+                    item.courseCode === course.courseCode &&
+                    item.sectionNo === course.sectionNo,
+                );
+                if (syllabus && created) {
+                  try {
+                    const attachment = await saveSyllabus(created.id, syllabus);
+                    onChange(
+                      updated.map((item) =>
+                        item.id === created.id ? { ...item, ...attachment } : item,
+                      ),
+                    );
+                  } catch (error) {
+                    resetFilters();
+                    setMode("edit");
+                    setEditingId(created.id);
+                    alert(
+                      `과목은 저장됐지만 강의계획서 업로드에 실패했습니다. 수정 화면에서 PDF를 다시 첨부하세요. ${error instanceof Error ? error.message : ""}`,
+                    );
+                    return;
+                  }
+                }
+              } catch (e) {
+                throw new Error(
+                  `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
+                  { cause: e },
+                );
+              }
+            } finally {
+              setSavingExcel(false);
+            }
+
+            resetFilters();
+            setMode("edit");
+          }}
+        />
+      ) : mode === "excel" ? (
+        <>
+          <CourseExcelImport />
+        </>
+      ) : (
+        <>
+          <CourseFilters
+            filters={filters}
+            keyword={keyword}
+            setKeyword={setKeyword}
+            professorKeyword={professorKeyword}
+            setProfessorKeyword={setProfessorKeyword}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            onReset={resetFilters}
+            sort={sort}
+            setSort={setSort}
+          />
+          <p className="mb-3 text-[#858796]">총 {filtered.length}개 과목</p>
+          {filtered.map((course) => (
+            <div
+              key={course.id}
+              className="mb-3 overflow-hidden rounded-lg border border-[#dddfe6]"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="flex flex-wrap gap-x-5 gap-y-2 text-[#5d6070]">
+                  <span>{course.courseCode}</span>
+                  <strong>{course.title}</strong>
+                  <span>{course.professorName}</span>
+                  <span>{course.credit}학점</span>
+                </div>
+                <SyllabusLink courseId={course.id} />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9]"
+                    disabled={savingExcel}
+                    onClick={() =>
+                      setEditingId(editingId === course.id ? null : course.id)
+                    }
+                  >
+                    {editingId === course.id ? "닫기" : "수정하기"}
+                  </button>
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-md border border-[#dddfe6] px-3 py-2 text-[11px] font-semibold transition hover:bg-[#f0edff] focus-visible:outline-2 focus-visible:outline-[#7658e9] text-red-600"
+                    disabled={savingExcel}
+                    onClick={async () => {
+                      setSavingExcel(true);
+                      try {
+                        onChange(
+                          await api<CourseListItem[]>(
+                            `/admin/courses/${course.id}`,
+                            { method: "DELETE" },
+                          ),
+                        );
+                        setSelectedFilters({});
+                        if (editingId === course.id) setEditingId(null);
+                      } catch (e) {
+                        alert(e instanceof Error ? e.message : "DB 삭제 실패");
+                      } finally {
+                        setSavingExcel(false);
+                      }
+                    }}
+                  >
+                    삭제하기
+                  </button>
+                </div>
+              </div>
+              {editingId === course.id && (
+                <CourseForm
+                  key={course.id}
+                  course={course}
+                  courses={courses}
+                  departments={departments}
+                  onCancel={() => setEditingId(null)}
+                  onSave={async (saved, syllabus) => {
+                    if (!excelHandle) {
+                      throw new Error(
+                        "위의 ‘저장할 엑셀 선택’ 버튼으로 파일을 먼저 선택하세요.",
+                      );
+                    }
+                    if (
+                      courses.some(
+                        (item) =>
+                          item.id !== course.id &&
+                          item.courseCode === saved.courseCode &&
+                          item.sectionNo === saved.sectionNo,
+                      )
+                    ) {
+                      throw new Error(
+                        "같은 학수번호와 분반의 과목이 이미 있습니다.",
+                      );
+                    }
+                    setSavingExcel(true);
+                    try {
+                      await updateCourseExcel(excelHandle, course, saved, departments);
+                      try {
+                        const updated = await saveCourse(saved, course.id);
+                        onChange(updated);
+                        if (syllabus !== undefined) {
+                          try {
+                            const attachment = await saveSyllabus(
+                              course.id,
+                              syllabus,
+                            );
+                            onChange(
+                              updated.map((item) =>
+                                item.id === course.id
+                                  ? { ...item, ...attachment }
+                                  : item,
+                              ),
+                            );
+                          } catch (error) {
+                            alert(
+                              `과목은 저장됐지만 강의계획서 변경에 실패했습니다. 다시 저장해 주세요. ${error instanceof Error ? error.message : ""}`,
+                            );
+                            return;
+                          }
+                        }
+                      } catch (e) {
+                        throw new Error(
+                          `엑셀은 저장됐지만 DB 저장에 실패했습니다. 엑셀 데이터 적용으로 다시 동기화하세요. ${e instanceof Error ? e.message : ""}`,
+                          { cause: e },
+                        );
+                      }
+                    } finally {
+                      setSavingExcel(false);
+                    }
+
+                    setSelectedFilters({});
+                    setEditingId(null);
+                  }}
+                />
+              )}
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <p className="rounded-lg bg-[#fafafd] p-10 text-center text-[#858796]">
+              검색 조건에 맞는 과목이 없습니다.
+            </p>
+          )}
+        </>
+      )}
+      <p className="mt-3 text-[10px] text-[#858796]">
+        추가·수정한 과목은 선택한 엑셀 파일과 DB에 저장됩니다.
+        강의계획서는 서버에 저장되며 수강생도 강좌 상세에서 볼 수 있습니다.
+      </p>
+    </div>
+  );
+}

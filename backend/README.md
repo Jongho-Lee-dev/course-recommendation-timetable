@@ -1,6 +1,132 @@
+# FastAPI + Supabase 백엔드
 
-### 적용된 기술
-- Python: 백엔드 개발
-- FastAPI: API 서버 구축
-- Uvicorn: ASGI 서버 실행
-- Redis(Docker) DECR 연산 동시성 차단
+## 강의계획서 영구 저장
+
+Supabase SQL Editor에서 `supabase/006_course_syllabi.sql`을 실행하세요.
+기존 강좌 데이터는 유지하며 강좌 테이블에 `syllabusPath`, `syllabusName`을
+추가하고 비공개 Storage 버킷 `course-syllabi`를 생성합니다.
+
+- 관리자의 과목 저장 시 PDF(최대 10MB)를 업로드하고 DB 발급 강좌 ID에 연결합니다.
+- 기존 첨부는 변경하지 않으면 유지되고, 교체·삭제 시 이전 파일을 정리합니다.
+- 수강생은 강좌 상세의 ‘강의계획서 보기’로 저장된 PDF를 새 탭에서 봅니다.
+- `GET /api/courses/{id}/syllabus`는 기존 공개 강좌 조회와 동일하게 인증 없이 조회합니다.
+- Storage 접근은 백엔드의 service role 키로만 수행합니다. 프런트에 키를 노출하지 않습니다.
+- 관리자 업로드·삭제 API는 기존 관리자 API와 동일하게 인증이 없는 상태입니다.
+- DB 저장 실패 시 새 파일을 정리하고 기존 첨부를 유지합니다. 정리 실패는 서버 로그에 남습니다.
+
+DB/Storage 설정 전에는 첨부 기능이 동작하지 않습니다. 기존에 브라우저 메모리에만
+보관하던 PDF는 자동 이관할 수 없으므로 다시 첨부해야 합니다.
+검증: `python -m pytest tests/test_syllabi.py -q`.
+
+첨부 요청 범위: 엑셀 일괄 저장, 관리자 과목 추가/수정, 과목 조회, 학생 정보 저장.
+기존 프론트 화면과 엑셀 직접 저장 기능을 유지하고 API 호출에 필요한 부분만 연결했습니다. 관리자 인증은 사용자 요청으로 제거했습니다.
+
+## 1. Supabase SQL 실행
+
+프로젝트의 SQL Editor에서 다음을 **순서대로** 실행하세요.
+
+1. `supabase/001_schema.sql`: 테이블, 제약조건, 트랜잭션 함수, 접근권한
+2. `supabase/002_seed.sql`: 원본 18개 + 추가 가데이터 22개 = **강좌 40개**, 학과 13개
+
+강좌는 학수번호+분반 기준입니다. 자료구조는 월/수 두 줄이므로 엑셀 데이터 행은 41행입니다.
+원본 `과목 데이터.xlsx`는 수정하지 않았습니다. 제공한 `과목_가데이터_40개.xlsx`를 사용하세요.
+시드는 다시 실행하면 과목 기본정보를 시드 값으로 갱신하므로 초기 설치 때만 실행하는 것을 권장합니다.
+시드 실행은 기존 다른 강좌를 비활성화하지 않습니다. 빈 새 테이블에서 정확히 40개입니다.
+
+기존 팀 DB 구조/접속 정보가 제공되지 않아 `tt_` 접두사 테이블을 사용합니다.
+`shared/types/database.ts`의 전체 학사 DB 설계를 모두 구현한 것은 아닙니다.
+현재 학기 하나를 지원하며 과목 원장/개설강좌/시간표/학과는 분리했습니다.
+분류 경로와 제외 학과 목록은 개설강좌 배열 컬럼에 저장합니다.
+기존 팀 테이블이 있으면 이 SQL을 실행하기 전에 테이블 매핑을 협의하세요.
+
+## 2. 서버 환경변수
+
+로컬 설정은 `backend/.env`에서 관리합니다. Redis 설정은 유지하고, 아래 DB 연결 및 세션/CORS 변수를 설정하세요. `.env`는 Git에서 제외됩니다. 배포 시에는 Render Environment에 별도로 등록하세요.
+
+```dotenv
+SUPABASE_URL=https://프로젝트ID.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=서버에서만_사용하는_service_role_키
+SESSION_SECRET=32자이상의임의문자열
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://course-recommendation-timetable.vercel.app
+```
+
+`service_role` 키는 서버 전용입니다. 프론트 `VITE_` 변수에 넣거나 Git에 올리지 마세요.
+프론트 팀은 백엔드 API 주소만 받아 작업할 수 있습니다. 팀원 전체에게 DB 비밀키를 공유할 필요가 없습니다.
+Render의 `CORS_ORIGINS` 환경변수를 별도로 설정했다면 위 세 주소를 모두 포함하세요. Vercel 프론트엔드 주소를 허용하지 않으면 브라우저에서 API 요청이 차단됩니다.
+
+## 3. 실행 (Windows PowerShell)
+
+프로젝트 루트에서:
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+별도 터미널:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+`frontend/.env`의 `VITE_API_BASE_URL`에 백엔드 주소를 설정하세요. 로컬 백엔드는 `http://localhost:8000`, 배포 백엔드는 `https://course-recommendation-timetable.onrender.com`입니다. Vercel에서는 같은 변수를 Environment에 등록하고 재배포하세요. 백엔드 `CORS_ORIGINS`에는 접속할 프론트 주소를 쉼표로 구분해 등록합니다.
+서버 문서: http://localhost:8000/docs
+현재 Vercel 배포 주소 `https://course-recommendation-timetable-fczu2l407-dustljhs-projects.vercel.app`는 코드에서 기본 허용합니다. 추가 주소는 Render의 `CORS_ORIGINS`에 등록하세요. 공백과 마지막 `/`는 자동으로 제거합니다. 코드 수정은 Render 백엔드를 재배포해야 적용되며, Vercel 주소가 바뀌면 새 주소도 등록해야 합니다.
+DB 연결 확인: http://localhost:8000/api/health
+
+Docker로 서버 실행할 수도 있습니다:
+
+```powershell
+docker build -t course-api backend
+docker run --env-file backend/.env -p 8000:8000 course-api
+```
+
+## 4. 기존 화면에서 사용
+
+- 이름에 `admin` 또는 `ADMIN` 입력 → 저장 → 기존 관리자 페이지 → 관리자 화면으로 바로 이동.
+- 과목 추가/수정: 기존처럼 ‘저장할 엑셀 선택’으로 **40개짜리 엑셀** 선택 후 저장. 로컬 엑셀을 갱신하고 API를 통해 DB에도 저장합니다.
+- 엑셀 데이터 적용: 파일 검증 및 미리보기 후 적용하면 서버가 다시 검증하고 한 번의 DB 트랜잭션으로 전체 목록을 반영합니다.
+- 파일에 없는 강좌는 삭제 대신 비활성화됩니다. 같은 학수번호/분반은 기존 ID를 유지합니다.
+- 과목 검색/시간표 추천은 DB 목록을 사용합니다. 다른 브라우저는 새로고침하면 최신 목록을 읽습니다.
+- 학생 정보 저장은 DB 성공 후 기존 다음 화면으로 이동합니다.
+- 공지 화면은 원본의 샘플 데이터 동작을 유지합니다. 실제 DB/API 연결은 공지 담당자 작업에서 진행합니다.
+- DB 최신 목록을 별도 엑셀로 받는 API도 제공합니다: `GET /api/admin/courses.xlsx` (관리자 인증 없음).
+
+로컬 파일과 원격 DB를 하나의 트랜잭션으로 묶을 수는 없습니다. 로컬 파일 저장 뒤 DB 저장이 실패하면 화면에 구분해서 알립니다. 이때 해당 파일을 ‘엑셀 데이터 적용’으로 다시 업로드하면 복구할 수 있습니다. 서버는 로컬 파일을 백그라운드에서 자동 수정하지 않습니다.
+기존 삭제 버튼은 원래 로컬 엑셀을 수정하지 않았으며, 이 동작은 유지했습니다. DB에서 삭제한 과목이 오래된 엑셀에 남아 있으면 다시 업로드할 때 복원될 수 있으므로 최신 엑셀을 사용하세요.
+
+## 5. 구현 범위와 인증
+
+학생 입력은 기존 화면을 유지한 **시연용 프로필 등록**입니다. 첫 저장 시 브라우저 세션을 발급하고, 그 세션 소유 정보만 수정할 수 있습니다. 학번만 입력해서 다른 프로필을 덮어쓸 수 없습니다. 이미 등록한 학번을 새 브라우저에서 입력하면 중복 오류가 납니다. 정식 학교 로그인/본인확인/계정 복구는 별도 구현 대상입니다.
+관리자 비밀번호 입력과 관리자 API 토큰 검사는 제거했습니다. 서버에 접근할 수 있는 사람은 관리자 API를 호출할 수 있습니다. 학생 프로필 소유 세션은 그대로 유지하므로 SESSION_SECRET은 필요합니다. 기존 .env에 ADMIN_PASSWORD가 있어도 사용하지 않습니다.
+프론트가 DB를 직접 수정하지 못하도록 RLS 및 권한을 제한했습니다.
+
+강의계획서 파일은 위의 ‘강의계획서 영구 저장’ 절에 따라 Storage 및 DB에 저장합니다.
+
+## 6. 검증
+
+```powershell
+cd backend
+python -m pytest tests -q
+```
+
+엑셀 원본 보존, 40개 시드와 배포 엑셀 일치, 잘못된 파일 차단, 권한 차단, 일괄 저장 호출, 학생 입력 검증을 확인합니다.
+프론트: `npm run build`, `npm run lint`.
+SQL은 별도 PostgreSQL 호환 엔진에서 스키마/시드/전체목록 갱신/ID 유지/롤백/익명 접근 차단을 검증했습니다. 실제 Supabase 프로젝트 연결 검증은 사용자 환경변수 설정 뒤 해야 합니다.
+
+SQL 테스트를 직접 재실행하려면 프로젝트 루트에서 `cd supabase/tests`, `npm install`, `npm test`를 실행하세요. 테스트는 메모리 내 PostgreSQL에서 실행하며 실제 Supabase 데이터를 수정하지 않습니다.
+
+참고한 공식 문서: https://supabase.com/docs/guides/database/postgres/row-level-security, https://supabase.com/docs/guides/database/functions
+
+## Gemini AI 추천 및 학업 도우미
+
+백엔드 `backend/.env`에 `GEMINI_API_KEY`를 설정하고 백엔드를 재시작하세요. 모델은 필요하면 `GEMINI_MODEL`로 지정할 수 있으며 기본값은 `gemini-2.5-flash`입니다. AI 시간표 추천 API(`/api/recommendations`)는 화면에서 보낸 강좌 목록만 사용하므로 DB 없이 `/ai-test`에서 샘플 과목으로 연결을 확인할 수 있습니다. 실제 강좌 추천은 DB에서 불러온 강좌를 사용합니다.
+
+AI 학업 도우미 API(`/api/chat`)는 로그인한 학생만 사용할 수 있습니다. 강좌·시간표 질문은 DB를 조회하고, DB에 연결되지 않으면 실제 개설 강좌나 시간을 지어내지 않도록 응답합니다. DB 기반 로그인과 챗봇을 확인하려면 `DATABASE_URL` 등 기존 백엔드 설정이 필요합니다.
+
+로컬 프론트엔드 기본 API 주소는 `http://localhost:8000`이며, 변경할 때는 `frontend/.env.local`에 `VITE_API_BASE_URL=http://localhost:8000`처럼 설정하고 Vite를 다시 시작하세요. `/ai-test`는 AI 연결 점검용 테스트 화면입니다.

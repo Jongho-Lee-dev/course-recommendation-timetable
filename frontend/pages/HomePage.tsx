@@ -67,7 +67,8 @@ const recommendations = [
     credits: 18,
     emptyDays: "월 / 금",
     classDays: "화 / 수 / 목",
-    description: "수업을 3일에 집중하고 월요일과 금요일을 공강으로 확보했습니다.",
+    description:
+      "수업을 3일에 집중하고 월요일과 금요일을 공강으로 확보했습니다.",
     score: 96,
   },
   {
@@ -75,7 +76,8 @@ const recommendations = [
     credits: 18,
     emptyDays: "월 / 수",
     classDays: "화 / 목 / 금",
-    description: "수업일을 최소화하고 하루의 수업 시간을 효율적으로 배치했습니다.",
+    description:
+      "수업일을 최소화하고 하루의 수업 시간을 효율적으로 배치했습니다.",
     score: 92,
   },
   {
@@ -95,14 +97,11 @@ export default function HomePage() {
   const [preferredTime, setPreferredTime] = useState("상관없음");
   const [loading, setLoading] = useState(false);
 
-  const currentRecommendation =
-    recommendations[selectedRecommendation];
+  const currentRecommendation = recommendations[selectedRecommendation];
 
   const toggleDay = (day: string) => {
     setPreferredDays((prev) =>
-      prev.includes(day)
-        ? prev.filter((item) => item !== day)
-        : [...prev, day],
+      prev.includes(day) ? prev.filter((item) => item !== day) : [...prev, day],
     );
   };
 
@@ -111,9 +110,7 @@ export default function HomePage() {
 
     setTimeout(() => {
       setLoading(false);
-      setSelectedRecommendation(
-        (prev) => (prev + 1) % recommendations.length,
-      );
+      setSelectedRecommendation((prev) => (prev + 1) % recommendations.length);
     }, 800);
   };
 
@@ -130,12 +127,8 @@ export default function HomePage() {
             </div>
 
             <div>
-              <div className="text-lg font-bold tracking-tight">
-                Timely
-              </div>
-              <div className="text-[10px] text-gray-500">
-                AI COURSE PLANNER
-              </div>
+              <div className="text-lg font-bold tracking-tight">Timely</div>
+              <div className="text-[10px] text-gray-500">AI COURSE PLANNER</div>
             </div>
           </div>
 
@@ -159,9 +152,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium">김도현</p>
-              <p className="text-xs text-gray-500">
-                컴퓨터공학과 · 3학년
-              </p>
+              <p className="text-xs text-gray-500">컴퓨터공학과 · 3학년</p>
             </div>
 
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold">
@@ -194,8 +185,8 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-2 text-sm text-gray-500">
-              희망 학점과 공강, 선호 시간 등을 설정하면 최적의
-              시간표를 추천해드려요.
+              희망 학점과 공강, 선호 시간 등을 설정하면 최적의 시간표를
+              추천해드려요.
             </p>
           </div>
 
@@ -319,10 +310,7 @@ export default function HomePage() {
                       {timetableCourses
                         .filter((course) => course.day === day)
                         .map((course) => (
-                          <CourseBlock
-                            key={course.code}
-                            course={course}
-                          />
+                          <CourseBlock key={course.code} course={course} />
                         ))}
                     </div>
                   ))}
@@ -346,9 +334,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <h2 className="text-xl font-bold">
-                    AI 시간표 추천
-                  </h2>
+                  <h2 className="text-xl font-bold">AI 시간표 추천</h2>
 
                   <p className="mt-1 text-xs leading-5 text-gray-500">
                     원하는 조건을 입력하면 AI가
@@ -361,9 +347,7 @@ export default function HomePage() {
               {/* Credits */}
               <div className="mb-5">
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-sm font-medium">
-                    희망 학점
-                  </label>
+                  <label className="text-sm font-medium">희망 학점</label>
 
                   <span className="text-sm font-bold text-violet-300">
                     {desiredCredits}학점
@@ -390,13 +374,9 @@ export default function HomePage() {
               {/* Preferred Empty Days */}
               <div className="mb-5">
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-sm font-medium">
-                    공강 희망 요일
-                  </label>
+                  <label className="text-sm font-medium">공강 희망 요일</label>
 
-                  <span className="text-xs text-gray-600">
-                    복수 선택
-                  </span>
+                  <span className="text-xs text-gray-600">복수 선택</span>
                 </div>
 
                 <div className="grid grid-cols-5 gap-2">
@@ -441,27 +421,15 @@ export default function HomePage() {
 
               {/* Options */}
               <div className="mb-5 space-y-2">
-                <p className="mb-2 text-sm font-medium">
-                  우선 조건
-                </p>
+                <p className="mb-2 text-sm font-medium">우선 조건</p>
 
-                <CheckOption
-                  label="공강 최대화"
-                  checked
-                />
+                <CheckOption label="공강 최대화" checked />
 
-                <CheckOption
-                  label="수업일 최소화"
-                  checked
-                />
+                <CheckOption label="수업일 최소화" checked />
 
-                <CheckOption
-                  label="오전 수업 최소화"
-                />
+                <CheckOption label="오전 수업 최소화" />
 
-                <CheckOption
-                  label="선호 강의 우선"
-                />
+                <CheckOption label="선호 강의 우선" />
               </div>
 
               <button
@@ -488,9 +456,7 @@ export default function HomePage() {
             <div>
               <div className="mb-1 flex items-center gap-2">
                 <span className="text-lg">✦</span>
-                <h2 className="text-lg font-bold">
-                  AI 추천 시간표
-                </h2>
+                <h2 className="text-lg font-bold">AI 추천 시간표</h2>
               </div>
 
               <p className="text-xs text-gray-500">
@@ -542,20 +508,11 @@ export default function HomePage() {
                     value={`${recommendation.credits}학점`}
                   />
 
-                  <InfoBox
-                    label="공강"
-                    value={recommendation.emptyDays}
-                  />
+                  <InfoBox label="공강" value={recommendation.emptyDays} />
 
-                  <InfoBox
-                    label="수업일"
-                    value={recommendation.classDays}
-                  />
+                  <InfoBox label="수업일" value={recommendation.classDays} />
 
-                  <InfoBox
-                    label="충돌"
-                    value="없음"
-                  />
+                  <InfoBox label="충돌" value="없음" />
                 </div>
 
                 <p className="text-xs leading-5 text-gray-500">
@@ -690,30 +647,18 @@ function CheckOption({
         ✓
       </span>
 
-      <span
-        className={`text-xs ${
-          active ? "text-gray-300" : "text-gray-600"
-        }`}
-      >
+      <span className={`text-xs ${active ? "text-gray-300" : "text-gray-600"}`}>
         {label}
       </span>
     </button>
   );
 }
 
-function InfoBox({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function InfoBox({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
       <p className="text-[10px] text-gray-600">{label}</p>
-      <p className="mt-0.5 text-xs font-medium text-gray-300">
-        {value}
-      </p>
+      <p className="mt-0.5 text-xs font-medium text-gray-300">{value}</p>
     </div>
   );
 }
@@ -730,9 +675,7 @@ function CourseBlock({ course }: { course: Course }) {
         height: `${height}px`,
       }}
     >
-      <div className="text-[10px] font-bold text-white">
-        {course.code}
-      </div>
+      <div className="text-[10px] font-bold text-white">{course.code}</div>
 
       <div className="mt-0.5 truncate text-xs font-semibold text-white">
         {course.name}
