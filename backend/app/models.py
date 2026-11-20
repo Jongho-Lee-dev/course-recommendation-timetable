@@ -77,3 +77,8 @@ class Student(BaseModel):
         if self.completedCredits > self.graduationCredits:
             raise ValueError("이수 학점이 졸업 학점보다 큽니다.")
         return self
+
+
+class StudentIdUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    studentId: str = Field(min_length=1, max_length=30)

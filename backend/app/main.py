@@ -14,7 +14,7 @@ from psycopg2.extras import RealDictCursor, Json
 
 from app.database import get_connection
 from app.excel import parse_excel
-from app.models import DepartmentImport, Course, Student
+from app.models import DepartmentImport, Course, Student, StudentIdUpdate
 from app.auth import install_auth
 from app.session import token, claims
 from app.student_db import student_query
@@ -336,18 +336,18 @@ def get_filter_categories():
 
 
 @app.post("/api/students")
-async def save_student(body: Student, c=Depends(claims)):
+async def save_student(body: StudentIdUpdate, c=Depends(claims)):
     if c["role"] != "student":
         raise HTTPException(403, "학생 세션이 필요합니다.")
     rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
     if not rows:
         raise HTTPException(404, "학생 정보가 없습니다.")
-    if rows[0]["studentId"] != body.studentId:
-        raise HTTPException(403, "학번은 변경할 수 없습니다.")
-    if body.departmentId not in {d["id"] for d in await departments()}:
-        raise HTTPException(422, "학과코드 오류")
-    await db("PATCH", "tt_students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
-    return {"token": token("student", c["sub"]), "student": body.model_dump()}
+    existing = await db("GET", "tt_students", params={"studentId": f"eq.{body.studentId}"})
+    if any(row["owner"] != c["sub"] for row in existing):
+        raise HTTPException(409, "이미 등록된 학번입니다.")
+    updated = await db("PATCH", "tt_students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
+    student = Student.model_validate(updated[0]).model_dump()
+    return {"token": token("student", c["sub"]), "student": student}
 
 
 @app.get("/api/students/me")

@@ -101,7 +101,7 @@ def test_catalog_shows_real_counts(client, monkeypatch):
     )
 
 
-def test_student_cannot_change_identity(client, monkeypatch):
+def test_student_cannot_change_other_profile_fields(client, monkeypatch):
     writes = []
 
     async def fake(method, path, body=None, params=None):
@@ -123,7 +123,7 @@ def test_student_cannot_change_identity(client, monkeypatch):
         "maxCredits": 18,
     }
     r = client.post("/api/students", headers=headers(), json=body)
-    assert r.status_code == 403
+    assert r.status_code == 422
     assert writes == []
 
 
