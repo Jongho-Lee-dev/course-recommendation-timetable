@@ -13,7 +13,7 @@ class EnrollmentChange(BaseModel):
 def install_enrollments(app, db, claims, get_catalog):
     async def with_syllabi(result):
         items = [*result.get("courses", []), *result.get("enrolled", [])]
-        if not items:
+        if not items or all("syllabusPath" in item and "syllabusName" in item for item in items):
             return result
         rows = await db(
             "GET",

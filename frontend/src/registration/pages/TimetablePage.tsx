@@ -13,6 +13,7 @@ import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
 import { getConflicts, getTotalCredits } from "../utils/courseRules";
 import { Link } from "react-router-dom";
+import CourseRegistrationList from "../components/CourseRegistrationList";
 
 export default function TimetablePage() {
   const selected = useCourseStore((s) => s.selected),
@@ -85,6 +86,7 @@ export default function TimetablePage() {
       <div className="grid gap-4 min-[1101px]:grid-cols-[minmax(0,1.4fr)_minmax(340px,0.75fr)]">
         <div>
           <WeeklyTimetable selected={selected} />
+          <div className="mt-4"><CourseRegistrationList selected={selected} totalCredits={totalCredits} /></div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
             <div className="text-[8px] text-[#9699a7]">
               {savedAt
@@ -215,7 +217,7 @@ export default function TimetablePage() {
               </p>
             )}
             <p className="mt-2 text-[8px] text-[#a0a3ae]">
-              백엔드 연결 후 수강신청 시뮬레이션 가능 여부를 함께 검증할 수 있습니다.
+              시간표 편집 후 수강신청 버튼으로 신청하세요. 신청 취소는 신청내역에서 할 수 있습니다.
             </p>
           </div>
         </section>

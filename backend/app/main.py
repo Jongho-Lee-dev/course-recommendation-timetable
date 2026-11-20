@@ -1,4 +1,4 @@
-"""강의·학과·필터·공지 조회 API. 학생/수강신청 쓰기 API는 후속 구현 대상입니다."""
+"""강의·학과·공지·학생 인증 및 수강신청 API."""
 import logging
 import os
 import time
@@ -19,6 +19,8 @@ from app.auth import install_auth
 from app.session import token, claims
 from app.student_db import student_query
 from app.syllabi import install_syllabi
+from app.enrollments import install_enrollments
+from app.enrollment_db import enrollment_query
 from starlette.concurrency import run_in_threadpool
 
 app = FastAPI()
@@ -363,6 +365,11 @@ async def me(c=Depends(claims)):
 
 
 async def db(*args, **kwargs):
+    if len(args) > 1 and args[1] in {"rpc/tt_enrollment_state", "rpc/tt_apply_enrollments"}:
+        result = await run_in_threadpool(enrollment_query, *args, **kwargs)
+        if args[1] == "rpc/tt_apply_enrollments":
+            clear_catalog_cache()
+        return result
     return await run_in_threadpool(student_query, *args, **kwargs)
 
 
@@ -375,3 +382,4 @@ async def departments():
 
 
 install_auth(app, auth_db, token, departments)
+install_enrollments(app, auth_db, claims, None)

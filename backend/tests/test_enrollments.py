@@ -76,23 +76,9 @@ def test_invalid_requests(client, payload):
 
 
 def test_catalog_shows_real_counts(client, monkeypatch):
-    async def fake(method, path, body=None, params=None):
-        if path == "rpc/tt_enrollment_snapshot":
-            return {"counts": [{"id": 1, "enrolledCount": 2}], "courseIds": []}
-        if path == "tt_open_courses":
-            return [
-                {
-                    "id": 1,
-                    "capacity": 3,
-                    "active": True,
-                    "classificationPath": ["전공", "전공 필수"],
-                    "tt_courses": {"courseCode": "CS", "credit": 3, "title": "test"},
-                    "tt_departments": {"id": 1, "majorName": "컴퓨터"},
-                    "tt_schedules": [],
-                }
-            ]
-
-    monkeypatch.setattr(main, "db", fake)
+    monkeypatch.setattr(main, "read_catalog_queries", lambda queries: [
+        [{"id": 1, "capacity": 3, "enrolledCount": 2, "remainingSeats": 1}], []
+    ])
     course = client.get("/api/courses").json()[0]
     assert (
         course["enrolledCount"] == 2
@@ -139,25 +125,17 @@ def test_my_enrollments_one_db_request(client, monkeypatch):
     assert calls == ["rpc/tt_enrollment_state"]
 
 
-def test_reuses_server_http_connection_pool(monkeypatch):
-    import httpx
+def test_enrollment_write_invalidates_catalog(client, monkeypatch):
+    calls = []
 
-    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
-    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-key")
-    original = httpx.AsyncClient
-    clients = []
+    def query(method, path, body=None, params=None):
+        calls.append((path, body))
+        return {"studentId": "TEST", "courses": [], "enrolled": []}
 
-    def factory(*args, **kwargs):
-        kwargs["transport"] = httpx.MockTransport(
-            lambda request: httpx.Response(200, json=[{"id": 1}])
-        )
-        client = original(*args, **kwargs)
-        clients.append(client)
-        return client
-
-    monkeypatch.setattr(main.httpx, "AsyncClient", factory)
-    with TestClient(main.app) as running:
-        assert running.get("/api/health").status_code == 200
-        assert running.get("/api/health").status_code == 200
-        assert len(clients) == 1
-    assert clients[0].is_closed
+    monkeypatch.setattr(main, "enrollment_query", query)
+    main._catalog_cache.update(body=b"stale")
+    response = client.post("/api/enrollments", headers=headers(),
+                           json={"courseIds": [1], "action": "cancel"})
+    assert response.status_code == 200
+    assert calls[0][0] == "rpc/tt_apply_enrollments"
+    assert main._catalog_cache["body"] is None

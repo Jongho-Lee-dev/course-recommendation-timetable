@@ -18,19 +18,15 @@ interface CourseStore {
   applyPreSelected: () => void;
 
   favorites: CourseListItem[];
-  history: CourseListItem[];
 
   toggleSelected: (course: CourseListItem) => void;
   setSelected: (courses: CourseListItem[]) => boolean;
   removeSelected: (courseId: number) => void;
 
   toggleFavorite: (course: CourseListItem) => void;
-  addHistory: (course: CourseListItem) => void;
-  removeHistory: (courseId: number) => void;
 
   clearSelected: () => void;
   clearFavorites: () => void;
-  clearHistory: () => void;
 }
 
 export const useCourseStore = create<CourseStore>()(
@@ -40,7 +36,6 @@ export const useCourseStore = create<CourseStore>()(
       selected: [],
       preSelected: [],
       favorites: [],
-      history: [],
 
       syncCatalog: (courses) =>
         set((state) => {
@@ -56,7 +51,6 @@ export const useCourseStore = create<CourseStore>()(
             selected: refresh(state.selected),
             preSelected: refresh(state.preSelected),
             favorites: refresh(state.favorites),
-            history: refresh(state.history),
           };
         }),
 
@@ -193,29 +187,15 @@ export const useCourseStore = create<CourseStore>()(
             : { favorites: [...state.favorites, course] },
         ),
 
-      addHistory: (course) =>
-        set((state) => ({
-          history: state.history.some((item) => item.id === course.id)
-            ? state.history
-            : [...state.history, course],
-        })),
-
-      removeHistory: (courseId) =>
-        set((state) => ({
-          history: state.history.filter((item) => item.id !== courseId),
-        })),
-
       clearSelected: () => set({ selected: [] }),
       clearFavorites: () => set({ favorites: [] }),
-      clearHistory: () => set({ history: [] }),
     }),
     {
       name: "course-storage",
-      partialize: ({ selected, preSelected, favorites, history }) => ({
+      partialize: ({ selected, preSelected, favorites }) => ({
         selected,
         preSelected,
         favorites,
-        history,
       }),
     },
   ),

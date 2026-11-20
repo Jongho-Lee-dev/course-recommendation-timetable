@@ -1,5 +1,19 @@
 # FastAPI + Supabase 백엔드
 
+## 수강신청·취소 및 신청내역
+
+`GET /api/enrollments`는 로그인한 학생의 신청 완료 강좌를 조회합니다.
+`POST /api/enrollments`는 `{ "courseIds": [1], "action": "add" }` 또는
+`"action": "cancel"`로 신청·취소하며, 저장 결과와 최신 잔여석을 반환합니다.
+학생은 Bearer 세션으로 식별하고 정원·학점·시간 충돌은 기존 DB 함수에서 검증합니다.
+
+현재 PostgreSQL `DATABASE_URL` 연결을 사용합니다. 기존 DB에
+`003_enrollments.sql`, `004_enrollment_response.sql`, `006_course_syllabi.sql`이
+적용되어 있어야 합니다. 이미 적용했다면 재실행할 필요가 없습니다.
+시간표에 담기와 실제 신청은 별개이며, 대시보드/나의 시간표/신청내역에서
+수강신청 버튼을 누르고 신청내역에서 개별 또는 전체 취소할 수 있습니다.
+브라우저에 있던 신청 시뮬레이션 데이터는 실제 신청으로 자동 이관하지 않습니다.
+
 ## 강의계획서 영구 저장
 
 Supabase SQL Editor에서 `supabase/006_course_syllabi.sql`을 실행하세요.

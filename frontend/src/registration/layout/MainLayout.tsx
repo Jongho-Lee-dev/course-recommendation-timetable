@@ -2,8 +2,15 @@ import { Outlet } from "react-router-dom";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
+import { useEffect } from "react";
+import { useUserStore } from "../store/userStore";
+import { useEnrollmentStore } from "../store/enrollmentStore";
 
 export default function MainLayout() {
+  const studentId = useUserStore((state) => state.user?.studentId);
+  useEffect(() => {
+    if (studentId) void useEnrollmentStore.getState().load();
+  }, [studentId]);
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#f5f6f9]">
       <Header />
