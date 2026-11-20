@@ -136,3 +136,17 @@ SQL은 별도 PostgreSQL 호환 엔진에서 스키마/시드/전체목록 갱�
 SQL 테스트를 직접 재실행하려면 프로젝트 루트에서 `cd supabase/tests`, `npm install`, `npm test`를 실행하세요. 테스트는 메모리 내 PostgreSQL에서 실행하며 실제 Supabase 데이터를 수정하지 않습니다.
 
 참고한 공식 문서: https://supabase.com/docs/guides/database/postgres/row-level-security, https://supabase.com/docs/guides/database/functions
+
+## Gemini AI 추천 및 챗봇
+
+`POST /api/recommendations`는 제공된 강좌와 선호 조건으로 Gemini 시간표 추천을 생성합니다.
+추천 결과는 학점·시간 중복·중복 분반·최대 6과목 조건을 검증하며, 프론트엔드는
+기존 시간표 선택 규칙으로 정원 및 제외 학과도 확인합니다. 추천안 적용은 실제 수강신청과 별개입니다.
+`POST /api/chat`은 학생 세션으로 호출하며, 강좌 질문에는 DB에서 조회한 과목 정보를 제공합니다.
+
+백엔드 환경변수에 `GEMINI_API_KEY`를 설정하세요. 선택 변수 `GEMINI_MODEL`의 기본값은
+`gemini-2.5-flash`입니다. 키는 프론트엔드 환경변수에 넣지 않습니다.
+키가 없으면 AI API는 설정 안내 오류를 반환하며 기존 수강신청 API는 유지됩니다.
+
+기존 main의 실제 신청·취소·신청내역, 예비 시간표, 학번 수정, 관리자 및 강의계획서 기능을 유지합니다.
+검증: `python -m pytest tests -q` (AI 응답은 모킹하므로 실제 Gemini 비용이 발생하지 않습니다).

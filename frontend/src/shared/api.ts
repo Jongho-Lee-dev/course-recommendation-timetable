@@ -28,7 +28,7 @@ export async function api<T>(
     throw new Error(
       typeof error.detail === "string"
         ? error.detail
-        : `요청 실패 (${response.status})`,
+        : `백엔드 응답 오류 (${response.status}). API 주소와 백엔드 실행 상태를 확인하세요.`,
     );
   }
 

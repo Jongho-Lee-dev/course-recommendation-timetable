@@ -52,6 +52,6 @@ export async function downloadElementAsJpg(
     link.remove();
   } catch (error) {
     console.error("시간표 이미지 다운로드 실패:", error);
-    throw new Error("시간표 JPG 생성에 실패했습니다.");
+    throw new Error("시간표 JPG 생성에 실패했습니다.", { cause: error });
   }
 }

@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Check, Clock3, Sparkles, WandSparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useCourseCatalogStore } from "../../shared/store/courseCatalogStore";
-import { getSelectionError } from "../utils/courseRules";
 import { useCourseStore } from "../store/courseStore";
 import { useUserStore } from "../store/userStore";
+import { getSelectionError } from "../utils/courseRules";
 import type { CourseListItem } from "../../shared/types/database";
+import { api } from "../../shared/api";
 
 type Preferences = {
   credits: number;
@@ -14,55 +15,20 @@ type Preferences = {
   avoidMorning: boolean;
 };
 
-function hasConflict(a: CourseListItem, b: CourseListItem) {
-  if (a.isOnline || b.isOnline) return false;
-  return a.schedules.some((x) =>
-    b.schedules.some(
-      (y) =>
-        x.dayOfWeek === y.dayOfWeek &&
-        x.startPeriod <= y.endPeriod &&
-        x.endPeriod >= y.startPeriod,
-    ),
-  );
-}
+type Recommendation = { courses: CourseListItem[]; reason: string };
 
-function buildRecommendation(
-  preferences: Preferences,
-  courses: CourseListItem[],
-  seed: number,
-  user: ReturnType<typeof useUserStore.getState>["user"],
-) {
-  const pool = [...courses]
-    .filter(
-      (c) =>
-        (!preferences.majorOnly || c.category === "전공") &&
-        (preferences.online || !c.isOnline),
-    )
-    .sort(
-      (a, b) =>
-        b.credit - a.credit || ((a.id + seed) % 3) - ((b.id + seed) % 3),
-    );
-  const result: CourseListItem[] = [];
-  let credits = 0;
-  for (const course of pool) {
-    if (getSelectionError(course, result, user)) continue;
-    if (credits + course.credit > preferences.credits) continue;
-    if (
-      preferences.avoidMorning &&
-      course.schedules.some((s) => s.startPeriod <= 2)
-    )
-      continue;
-    if (result.some((selected) => hasConflict(selected, course))) continue;
-    result.push(course);
-    credits += course.credit;
-    if (credits >= preferences.credits - 2) break;
-  }
-  return result;
-}
-
-export default function AIRecommendationPage() {
-  const courses = useCourseCatalogStore(state => state.courses);
+export default function AIRecommendationPage({ demoMode = false }: { demoMode?: boolean }) {
+  const catalogCourses = useCourseCatalogStore(state => state.courses);
   const user = useUserStore((s) => s.user);
+  const sampleCourses: CourseListItem[] = [
+    { id: 90001, courseCode: "TEST301", title: "테스트 자료구조", category: "전공", courseType: "전공필수", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 2, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 1, dayOfWeek: "월", startPeriod: 3, endPeriod: 4, classroom: "테스트 강의실", openCourseId: 90001 }] },
+    { id: 90002, courseCode: "TEST302", title: "테스트 운영체제", category: "전공", courseType: "전공필수", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 2, dayOfWeek: "화", startPeriod: 5, endPeriod: 6, classroom: "테스트 강의실", openCourseId: 90002 }] },
+    { id: 90003, courseCode: "TEST303", title: "테스트 데이터베이스", category: "전공", courseType: "전공선택", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 3, dayOfWeek: "수", startPeriod: 3, endPeriod: 4, classroom: "테스트 강의실", openCourseId: 90003 }] },
+    { id: 90004, courseCode: "TEST304", title: "테스트 인공지능", category: "전공", courseType: "전공선택", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 4, dayOfWeek: "목", startPeriod: 5, endPeriod: 6, classroom: "테스트 강의실", openCourseId: 90004 }] },
+    { id: 90005, courseCode: "TEST305", title: "테스트 소프트웨어공학", category: "전공", courseType: "전공선택", credit: 3, sectionNo: "01", professorName: "테스트 교수", capacity: 40, targetGrade: 3, departmentId: 1, majorName: "컴퓨터공학과", isOnline: false, schedules: [{ id: 5, dayOfWeek: "금", startPeriod: 3, endPeriod: 4, classroom: "테스트 강의실", openCourseId: 90005 }] },
+  ];
+  const courses = demoMode ? sampleCourses : catalogCourses;
+  const eligibleCourses = courses.filter((course) => !getSelectionError(course, [], user));
   const selected = useCourseStore((s) => s.selected);
   const setSelected = useCourseStore((s) => s.setSelected);
   const [preferences, setPreferences] = useState<Preferences>({
@@ -73,23 +39,58 @@ export default function AIRecommendationPage() {
   });
   const [generated, setGenerated] = useState(false);
   const [active, setActive] = useState(0);
-
-  const recommendations = useMemo(
-    () =>
-      [0, 1, 2].map((seed) =>
-        buildRecommendation(preferences, courses, seed, user),
-      ),
-    [preferences, courses, user],
-  );
-  const current = recommendations[active];
+  const [busy, setBusy] = useState(false);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const current = recommendations[active]?.courses ?? [];
+  const currentReason = recommendations[active]?.reason ?? "";
   const currentCredits = current.reduce((sum, c) => sum + c.credit, 0);
 
-  const generate = () => {
-    setGenerated(true);
-    setActive(0);
-    toast.success("현재 조건에 맞는 시간표 후보를 만들었습니다.");
+  const generate = async () => {
+    if (busy) return;
+    if (!eligibleCourses.length) {
+      toast.error("제외 대상을 빼고 추천할 강좌가 없습니다.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await api<{ recommendations: { courseIds: number[]; reason: string }[] }>(
+        "/recommendations",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            courses: eligibleCourses,
+            studentDepartmentId: user?.departmentId ?? null,
+            preferences: { ...preferences, major: user?.major ?? null },
+            selectedCourseIds: selected.map((course) => course.id),
+          }),
+        },
+        "student",
+      );
+      const byId = new Map(eligibleCourses.map((course) => [course.id, course]));
+      const mapped = result.recommendations.map((item) => {
+        const valid: CourseListItem[] = [];
+        for (const id of item.courseIds) {
+          const course = byId.get(id);
+          if (course && !getSelectionError(course, valid, user)) valid.push(course);
+        }
+        return { courses: valid, reason: item.reason };
+      }).filter((item) => item.courses.length);
+      if (!mapped.length) throw new Error("AI가 추천 과목을 반환하지 않았습니다.");
+      setRecommendations(mapped);
+      setGenerated(true);
+      setActive(0);
+      toast.success("Gemini AI가 시간표 후보를 만들었습니다.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "AI 추천에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
   };
   const apply = () => {
+    if (demoMode) {
+      toast.message("AI 테스트 모드에서는 시간표 저장을 사용할 수 없습니다.");
+      return;
+    }
     if (!current.length) return;
     if (
       selected.length &&
@@ -109,9 +110,9 @@ export default function AIRecommendationPage() {
               <Sparkles size={19} />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold">AI 시간표 추천</h1>
+              <h1 className="text-sm font-extrabold">AI 시간표 추천{demoMode ? " · TEST" : ""}</h1>
               <p className="mt-1 text-[9px] text-[#9699a7]">
-                원하는 조건을 설정하면 후보 시간표를 구성합니다.
+                {demoMode ? "샘플 강좌로 AI 연결을 확인합니다." : "원하는 조건을 설정하면 후보 시간표를 구성합니다."}
               </p>
             </div>
           </div>
@@ -161,10 +162,11 @@ export default function AIRecommendationPage() {
             구성합니다.
           </div>
           <button
-            onClick={generate}
+            onClick={() => void generate()}
+            disabled={busy}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7658e9] py-3 text-[10px] font-bold text-white hover:bg-[#6749dc]"
           >
-            <WandSparkles size={14} /> 추천 시간표 만들기
+            <WandSparkles size={14} /> {busy ? "Gemini가 추천 중…" : "AI 추천 시간표 만들기"}
           </button>
         </section>
 
@@ -201,16 +203,17 @@ export default function AIRecommendationPage() {
                       추천 {i + 1}
                     </span>
                     <b className="mt-1 block text-[11px]">
-                      {rec.reduce((s, c) => s + c.credit, 0)}학점 · {rec.length}
+                      {rec.courses.reduce((s, c) => s + c.credit, 0)}학점 · {rec.courses.length}
                       과목
                     </b>
-                    <span className="mt-1 block text-[8px] text-[#8d8f9c]">
-                      조건 충족 후보
+                    <span className="mt-1 block truncate text-[8px] text-[#8d8f9c]">
+                      AI 추천 후보
                     </span>
                   </button>
                 ))}
               </div>
               <div className="mt-4 space-y-2">
+                {currentReason && <p className="rounded-xl bg-[#f7f5ff] px-4 py-3 text-[10px] leading-5 text-[#6552ae]">{currentReason}</p>}
                 {current.length ? (
                   current.map((course) => (
                     <div
@@ -250,21 +253,21 @@ export default function AIRecommendationPage() {
                 )}
               </div>
               <div className="mt-5 flex justify-end">
-                <button
+                {!demoMode && <button
                   onClick={apply}
                   disabled={!current.length}
                   className="flex items-center gap-2 rounded-xl bg-[#7658e9] px-5 py-3 text-[10px] font-bold text-white disabled:cursor-not-allowed disabled:bg-[#d8d6e3]"
                 >
                   <Check size={14} /> 이 시간표 사용하기
-                </button>
+                </button>}
               </div>
             </>
           )}
         </section>
       </div>
       <p className="mt-3 px-1 text-[8px] text-[#aaaab4]">
-        ※ 현재는 백엔드 AI API 연결 전 단계의 추천 시뮬레이션입니다. 실제
-        서비스에서는 학생 조건과 개설 강좌 데이터를 API로 전달합니다.
+      ※ 추천은 백엔드에서 Gemini AI로 생성하며, API 키는 서버에만 저장됩니다.
+      {demoMode ? " 테스트 강좌만 사용하며 시간표 저장은 비활성화됩니다." : ""}
       </p>
     </main>
   );
@@ -311,7 +314,7 @@ function EmptyAI({ onGenerate }: { onGenerate: () => void }) {
           시간표를 만들어줍니다.
         </p>
         <button
-          onClick={onGenerate}
+          onClick={() => void onGenerate()}
           className="mt-5 rounded-lg border border-[#dcd9ea] px-4 py-2 text-[9px] font-bold text-[#7658e9]"
         >
           추천 시작하기
