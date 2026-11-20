@@ -51,8 +51,19 @@ def _rate_limit(request: Request):
 def _needs_catalog(question: str) -> bool:
     return any(term in question for term in (
         "전공", "과목", "강의", "수업", "개설", "교수", "학과", "시간표",
-        "시간대", "시간", "요일", "교시", "정원", "추천", "수강",
+        "교양", "시간대", "시간", "요일", "교시", "정원", "추천", "수강",
     ))
+
+
+def _is_liberal_arts(course: dict) -> bool:
+    labels = [
+        course.get("category"),
+        course.get("courseType"),
+        course.get("generalEducationArea"),
+        course.get("generalEducationElectiveArea"),
+        *(course.get("classificationPath") or []),
+    ]
+    return any("교양" in str(label) for label in labels if label)
 
 
 def _select_courses(courses, question: str, major: str | None):
@@ -75,7 +86,13 @@ def _select_courses(courses, question: str, major: str | None):
         ranked.append((score, major_match, is_major, course))
 
     specific_match = bool(terms) and any(score >= 3 for score, *_ in ranked)
-    if specific_match:
+    liberal_arts_query = "교양" in question and not any(
+        phrase in question for phrase in ("교양 제외", "교양 말고", "교양 빼고")
+    )
+    if liberal_arts_query:
+        # 교양 요청은 학생 전공 소속으로 제한하지 않고 교양 분류 전체에서 찾습니다.
+        ranked = [item for item in ranked if _is_liberal_arts(item[3])]
+    elif specific_match:
         ranked = [item for item in ranked if item[0] >= 3]
     elif major:
         major_courses = [item for item in ranked if item[1] and item[2]]
@@ -130,6 +147,7 @@ async def _ask_gemini(body: ChatRequest, catalog_status: str, catalog: list[dict
             "아래 학생 정보는 사용자가 이 사이트에 입력한 참고 정보일 뿐이며, 모르는 사실을 추측해 단정하지 마세요. "
             "특정 과목의 개설 여부, 담당 교수, 정원, 요일과 교시는 제공된 DB 조회 결과만 사용하세요. "
             "전공 과목을 물으면 학생 전공에 맞는 과목명, 학수번호, 학점, 요일·교시를 정리하세요. "
+            "교양 과목을 물으면 학생 전공에 한정하지 말고 DB 조회 결과에서 교양으로 분류된 강좌를 안내하세요. "
             "시간표를 추천할 때는 DB에 있는 강좌와 실제 요일·교시만 사용하고 시간이 겹치는 수업은 함께 추천하지 마세요. "
             "온라인 강좌에는 고정 시간표가 없다고 알려주세요. DB 결과에 없는 과목이나 시간은 지어내지 마세요. "
             "개인별 공식 졸업요건은 단정하지 말고 학교 공식 학사 안내를 함께 확인하도록 안내하세요. "
