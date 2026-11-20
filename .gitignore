@@ -46,7 +46,9 @@ env/
 *.sw?
 
 # Generated load-test results and reports
-/outputs/
+output/
+outputs/
+/tmp/
 baseline-*-run*.json
 diagnostic-*-run*.json
 pool*-vus*-run*.json
