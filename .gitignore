@@ -46,6 +46,7 @@ env/
 *.sw?
 
 # Generated load-test results and reports
+/artifacts/
 output/
 outputs/
 /tmp/

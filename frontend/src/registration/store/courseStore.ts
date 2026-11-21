@@ -5,6 +5,9 @@ import type { CourseListItem } from "../../shared/types/database";
 import { getSelectionError } from "../utils/courseRules";
 import { useUserStore } from "./userStore";
 import { toast } from "sonner";
+import { readPreTimetable, writePreTimetable } from "./preTimetableStorage";
+
+let preTimetableOwner = useUserStore.getState().user?.studentId;
 
 interface CourseStore {
   catalog: CourseListItem[];
@@ -34,7 +37,7 @@ export const useCourseStore = create<CourseStore>()(
     (set, get) => ({
       catalog: [],
       selected: [],
-      preSelected: [],
+      preSelected: readPreTimetable(preTimetableOwner),
       favorites: [],
 
       syncCatalog: (courses) =>
@@ -56,6 +59,7 @@ export const useCourseStore = create<CourseStore>()(
 
       // 예비 수강신청
       togglePreSelected: (draft) => {
+        if (!preTimetableOwner) return;
         const { preSelected, catalog } = get();
 
         if (preSelected.some((item) => item.id === draft.id)) {
@@ -192,11 +196,37 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: "course-storage",
-      partialize: ({ selected, preSelected, favorites }) => ({
+      partialize: ({ selected, favorites }) => ({
         selected,
-        preSelected,
         favorites,
       }),
+      // Legacy shared drafts have no owner; never assign them to a new login.
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<CourseStore> | null;
+        return {
+          ...current,
+          selected: Array.isArray(saved?.selected) ? saved.selected : [],
+          favorites: Array.isArray(saved?.favorites) ? saved.favorites : [],
+        };
+      },
     },
   ),
 );
+
+useCourseStore.subscribe((state, previous) => {
+  if (!preTimetableOwner || state.preSelected === previous.preSelected) return;
+  try {
+    writePreTimetable(preTimetableOwner, state.preSelected);
+  } catch {
+    toast.error("예비시간표를 브라우저에 저장하지 못했습니다.");
+  }
+});
+
+useUserStore.subscribe((state) => {
+  const nextOwner = state.user?.studentId;
+  if (nextOwner === preTimetableOwner) return;
+  // Clear ownership during the switch so another user's draft is never written.
+  preTimetableOwner = undefined;
+  useCourseStore.setState({ preSelected: readPreTimetable(nextOwner) });
+  preTimetableOwner = nextOwner;
+});
