@@ -263,6 +263,7 @@ export default function MainPage() {
               onClick={() => navigate("/chatbot")}
             >
               AI 학업 도우미
+            </button>
             <button
               type="button"
               className="rounded-md border border-[#e0dafa] bg-white px-3 py-2 text-[10px] font-bold text-[#6652d7] transition hover:bg-[#f8f6ff]"
