@@ -1,88 +1,191 @@
-import { useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, Save, UserRound } from "lucide-react";
+
+import { ArrowLeft, GraduationCap, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { api } from "../../shared/api";
-import { departments } from "../../shared/data/departments";
-import { toUser, type StudentProfile } from "../../shared/studentSession";
 import { useUserStore } from "../store/userStore";
 
-type SavedStudent = { token: string; student: StudentProfile };
-
-const fieldClass = "mt-2 w-full rounded-xl border border-[#e3e5ed] bg-white px-3.5 py-3 text-sm text-[#272638] outline-none transition placeholder:text-[#a6a8b5] focus:border-[#8a78ee] focus:ring-4 focus:ring-[#8a78ee]/10 disabled:cursor-not-allowed disabled:bg-[#f6f6f9] disabled:text-[#8b8d9b]";
-const labelClass = "block text-xs font-bold text-[#555667]";
+function InfoItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-xl border border-[#ececf2] bg-[#fafafd] px-4 py-3.5">
+      <p className="text-[11px] font-semibold text-[#9294a2]">
+        {label}
+      </p>
+      <p className="mt-1.5 break-words text-sm font-bold text-[#292a3b]">
+        {value || "-"}
+      </p>
+    </div>
+  );
+}
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();
   const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  const [name] = useState(user?.name ?? "");
-  const [grade] = useState(String(user?.grade ?? 1));
-  const [departmentId] = useState(String(user?.departmentId ?? departments.find((d) => d.majorName === user?.major)?.id ?? departments[0]?.id ?? 1));
-  const [completedCredits] = useState(String(user?.completedCredits ?? 0));
-  const [graduationCredits] = useState(String(user?.graduationCredits ?? 130));
-  const [maxCredits] = useState(String(user?.maxCredits ?? 18));
-  const [studentId, setStudentId] = useState(user?.studentId ?? "");
-  const [saving, setSaving] = useState(false);
-  const selectedDepartment = useMemo(() => departments.find((d) => d.id === Number(departmentId)), [departmentId]);
 
   if (!user) {
-    return <main className="mx-auto w-full max-w-3xl p-6"><div className="rounded-2xl border border-[#e5e6ed] bg-white p-8 text-center"><p className="font-bold">로그인이 필요합니다.</p><button className="mt-4 rounded-xl bg-[#7560e8] px-4 py-2 text-sm font-bold text-white" onClick={() => navigate("/")}>로그인으로 이동</button></div></main>;
+    return (
+      <main className="mx-auto w-full max-w-3xl p-6">
+        <div className="rounded-2xl border border-[#e5e6ed] bg-white p-8 text-center">
+          <p className="font-bold">로그인이 필요합니다.</p>
+          <button
+            type="button"
+            className="mt-4 rounded-xl bg-[#7560e8] px-4 py-2 text-sm font-bold text-white"
+            onClick={() => navigate("/")}
+          >
+            로그인으로 이동
+          </button>
+        </div>
+      </main>
+    );
   }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!studentId.trim()) return toast.error("학번을 입력해주세요.");
-    setSaving(true);
-    try {
-      const result = await api<SavedStudent>("/students", {
-        method: "POST",
-        body: JSON.stringify({
-          studentId: studentId.trim(),
-        }),
-      }, "student");
-      if (result.token) sessionStorage.setItem("student-token", result.token);
-      setUser(toUser(result.student));
-      toast.success("개인정보가 저장되었습니다.");
-      navigate("/mainPage");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "정보를 저장하지 못했습니다.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-4 py-7 text-[#252638] sm:px-7">
-      <button type="button" onClick={() => navigate(-1)} className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-[#77798a] transition hover:text-[#6651d8]"><ArrowLeft size={15} /> 이전 페이지</button>
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-[#77798a] hover:text-[#6651d8]"
+      >
+        <ArrowLeft size={15} /> 이전 페이지
+      </button>
+
       <div className="mb-6 flex items-start gap-4">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#eeeaff] text-[#765fe7]"><UserRound size={22} /></div>
-        <div><p className="text-[11px] font-bold uppercase tracking-[.16em] text-[#8979e6]">MY ACCOUNT</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight">내 정보 수정</h1><p className="mt-2 text-sm text-[#858797]">학번만 수정할 수 있습니다. 다른 정보는 조회만 가능합니다.</p></div>
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#eeeaff] text-[#765fe7]">
+          <UserRound size={22} />
+        </div>
+
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[.16em] text-[#8979e6]">
+            MY ACCOUNT
+          </p>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight">
+            내 정보
+          </h1>
+          <p className="mt-2 text-sm text-[#858797]">
+            등록된 개인정보와 학점 정보를 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <span className="ml-auto rounded-full bg-[#f0edff] px-3 py-1.5 text-[10px] font-bold text-[#7560e8]">
+          조회 전용
+        </span>
       </div>
-      <form onSubmit={handleSubmit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <section className="rounded-2xl border border-[#e6e7ee] bg-white p-5 shadow-[0_4px_18px_rgba(25,27,45,.03)] sm:p-7">
-          <div className="mb-6 border-b border-[#f0f0f4] pb-4"><h2 className="text-sm font-extrabold">기본 정보</h2><p className="mt-1 text-xs text-[#9294a2]">학번 변경 후에는 변경한 학번으로 로그인해주세요.</p></div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className={labelClass}>이름<input className={fieldClass} value={name} disabled maxLength={80} required /></label>
-            <label className={labelClass}>학번<input className={fieldClass} value={studentId} onChange={(e) => setStudentId(e.target.value)} maxLength={30} required /></label>
-            <label className={labelClass}>학년<select className={fieldClass} value={grade} disabled>{[1,2,3,4,5,6].map((n) => <option key={n} value={n}>{n}학년</option>)}</select></label>
-            <label className={labelClass}>학과<select className={fieldClass} value={departmentId} disabled>{departments.map((d) => <option key={d.id} value={d.id}>{d.majorName}</option>)}</select></label>
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <section className="rounded-2xl border border-[#e6e7ee] bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 border-b border-[#f0f0f4] pb-4">
+            <h2 className="text-sm font-extrabold">기본 정보</h2>
+            <p className="mt-1 text-xs text-[#9294a2]">
+              현재 계정에 등록된 학생 정보입니다.
+            </p>
           </div>
-          <div className="mb-6 mt-8 border-b border-[#f0f0f4] pb-4"><h2 className="text-sm font-extrabold">학점 정보</h2><p className="mt-1 text-xs text-[#9294a2]">시간표 추천과 수강 신청 가능 학점 계산에 활용됩니다.</p></div>
-          <div className="grid gap-5 sm:grid-cols-3">
-            <label className={labelClass}>현재 이수 학점<input className={fieldClass} type="number" min="0" step="0.5" value={completedCredits} disabled required /></label>
-            <label className={labelClass}>졸업 필요 학점<input className={fieldClass} type="number" min="1" step="0.5" value={graduationCredits} disabled required /></label>
-            <label className={labelClass}>최대 신청 학점<input className={fieldClass} type="number" min="1" max="50" step="0.5" value={maxCredits} disabled required /></label>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InfoItem label="이름" value={user.name} />
+            <InfoItem label="학번" value={user.studentId} />
+            <InfoItem label="학년" value={`${user.grade}학년`} />
+            <InfoItem label="학과" value={user.major} />
+            {user.collegeName && (
+              <InfoItem label="단과대학" value={user.collegeName} />
+            )}
+            {user.facultyName && (
+              <InfoItem label="학부" value={user.facultyName} />
+            )}
           </div>
-          <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-[#f0f0f4] pt-5"><button type="button" onClick={() => navigate(-1)} className="rounded-xl border border-[#e2e3eb] px-5 py-3 text-xs font-bold text-[#6e7080] hover:bg-[#f8f8fb]">취소</button><button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#7560e8] px-5 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#654fd7] disabled:cursor-wait disabled:opacity-60"><Save size={15} />{saving ? "저장 중…" : "변경사항 저장"}</button></div>
+
+          <div className="mb-5 mt-9 flex items-center gap-2 border-b border-[#f0f0f4] pb-4">
+            <GraduationCap size={18} className="text-[#7560e8]" />
+            <div>
+              <h2 className="text-sm font-extrabold">학점 정보</h2>
+              <p className="mt-1 text-xs text-[#9294a2]">
+                시간표 추천과 수강 신청 가능 학점 계산에 사용됩니다.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-[#e8e4ff] bg-[#faf9ff] p-4">
+              <p className="text-[11px] font-semibold text-[#85819e]">
+                현재 이수 학점
+              </p>
+              <p className="mt-2 text-2xl font-extrabold text-[#7560e8]">
+                {user.completedCredits}
+                <span className="ml-1 text-xs font-semibold">학점</span>
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[#ececf2] bg-[#fafafd] p-4">
+              <p className="text-[11px] font-semibold text-[#9294a2]">
+                졸업 필요 학점
+              </p>
+              <p className="mt-2 text-2xl font-extrabold text-[#292a3b]">
+                {user.graduationCredits}
+                <span className="ml-1 text-xs font-semibold">학점</span>
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[#ececf2] bg-[#fafafd] p-4">
+              <p className="text-[11px] font-semibold text-[#9294a2]">
+                최대 신청 학점
+              </p>
+              <p className="mt-2 text-2xl font-extrabold text-[#292a3b]">
+                {user.maxCredits}
+                <span className="ml-1 text-xs font-semibold">학점</span>
+              </p>
+            </div>
+          </div>
         </section>
+
         <aside className="h-fit rounded-2xl border border-[#e6e7ee] bg-white p-5">
-          <div className="flex items-center gap-2 text-sm font-extrabold"><CheckCircle2 size={17} className="text-[#7560e8]" />변경 정보 미리보기</div>
-          <div className="mt-5 flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-full bg-[#eeeaff] text-lg font-extrabold text-[#7560e8]">{name.trim().slice(0,1) || "학"}</div><div className="min-w-0"><p className="truncate text-sm font-extrabold">{name || "이름"}</p><p className="mt-1 truncate text-xs text-[#8a8c9a]">{selectedDepartment?.majorName ?? "학과"} · {grade}학년</p></div></div>
-          <p className="mt-4 text-xs text-[#555667]">학번: {studentId || "미입력"}</p><div className="mt-5 space-y-3 border-t border-[#f0f0f4] pt-4 text-xs"><div className="flex justify-between"><span className="text-[#8a8c9a]">이수 학점</span><strong>{completedCredits || 0}학점</strong></div><div className="flex justify-between"><span className="text-[#8a8c9a]">졸업 필요</span><strong>{graduationCredits || 0}학점</strong></div><div className="flex justify-between"><span className="text-[#8a8c9a]">신청 상한</span><strong>{maxCredits || 0}학점</strong></div></div>
-          <p className="mt-5 rounded-xl bg-[#f7f6ff] p-3 text-[11px] leading-5 text-[#756aab]">저장하면 연결된 서버에 정보가 반영됩니다. 저장에 실패하면 기존 정보는 유지됩니다.</p>
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#eeeaff] text-sm font-extrabold text-[#7560e8]">
+              {user.name.slice(0, 1) || "학"}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold">{user.name}</p>
+              <p className="mt-1 truncate text-[11px] text-[#8a8c9a]">
+                {user.major} · {user.grade}학년
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-3 border-t border-[#f0f0f4] pt-4 text-xs">
+            <div className="flex justify-between gap-3">
+              <span className="text-[#8a8c9a]">학번</span>
+              <strong>{user.studentId}</strong>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-[#8a8c9a]">이수 학점</span>
+              <strong>{user.completedCredits}학점</strong>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-[#8a8c9a]">졸업 필요</span>
+              <strong>{user.graduationCredits}학점</strong>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-[#8a8c9a]">신청 상한</span>
+              <strong>{user.maxCredits}학점</strong>
+            </div>
+          </div>
+
+          <p className="mt-5 rounded-xl bg-[#f7f6ff] p-3 text-[11px] leading-5 text-[#756aab]">
+            이 페이지에서는 개인정보와 학점 정보를 조회할 수 있습니다.
+            정보 변경이 필요한 경우 학교의 공식 학사 시스템을 이용해 주세요.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/mainPage")}
+            className="mt-4 w-full rounded-xl border border-[#e2e3eb] px-4 py-3 text-xs font-bold text-[#6e7080] hover:bg-[#f8f8fb]"
+          >
+            대시보드로 돌아가기
+          </button>
         </aside>
-      </form>
+      </div>
     </main>
   );
 }
