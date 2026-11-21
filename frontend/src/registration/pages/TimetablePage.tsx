@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   CalendarDays,
-  CheckCircle2,
   Trash2,
   AlertTriangle,
   Save,
@@ -190,8 +189,8 @@ export default function TimetablePage() {
               ))}
             </div>
           )}
-          <div className="border-t border-[#f0f0f3] bg-[#fafafd] px-5 py-4">
-            {conflicts.length ? (
+          {conflicts.length > 0 && (
+            <div className="border-t border-[#f0f0f3] bg-[#fafafd] px-5 py-4">
               <>
                 <p className="flex items-center gap-1.5 text-[9px] font-semibold text-[#d95d6b]">
                   <AlertTriangle size={12} /> 시간 충돌 {conflicts.length}건이
@@ -211,15 +210,8 @@ export default function TimetablePage() {
                   ))}
                 </div>
               </>
-            ) : (
-              <p className="flex items-center gap-1.5 text-[9px] font-semibold text-[#3b9279]">
-                <CheckCircle2 size={12} /> 현재 시간표에 시간 충돌이 없습니다.
-              </p>
-            )}
-            <p className="mt-2 text-[8px] text-[#a0a3ae]">
-              시간표 편집 후 수강신청 버튼으로 신청하세요. 신청 취소는 신청내역에서 할 수 있습니다.
-            </p>
-          </div>
+            </div>
+          )}
         </section>
       </div>
     </main>
