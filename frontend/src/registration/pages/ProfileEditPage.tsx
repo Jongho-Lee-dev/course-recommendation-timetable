@@ -1,4 +1,3 @@
-
 import { ArrowLeft, GraduationCap, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
