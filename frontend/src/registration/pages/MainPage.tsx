@@ -103,7 +103,7 @@ export default function MainPage() {
         <div className="mt-3 mb-3 ml-auto grid w-full grid-cols-3 gap-2 min-[701px]:w-auto">
           <div className="min-w-0 rounded-lg border border-[#e4e5eb] bg-white px-3 py-2.5">
             <span className="block text-[9px] text-[#9699a6]">
-              수강신청 시뮬레이션 현황
+              수강신청 현황
             </span>
 
             <strong

@@ -1,6 +1,7 @@
 import type { CourseListItem } from "../../shared/types/database";
 import { Link } from "react-router-dom";
 import { useEnrollmentStore } from "../store/enrollmentStore";
+import { useRegistrationStatus } from "../../shared/hooks/useRegistrationStatus";
 
 type CourseRegistrationListProps = {
   selected: CourseListItem[];
@@ -12,6 +13,7 @@ export default function CourseRegistrationList({
   totalCredits,
 }: CourseRegistrationListProps) {
   const { enrolled, busy, loading, loaded, error, change, load } = useEnrollmentStore();
+  const { canEnroll, closedMessage } = useRegistrationStatus();
   const pending = selected.filter(course => !enrolled.some(item => item.id === course.id));
   return (
     <div className="overflow-hidden rounded-xl border border-[#e3e4e9] bg-white shadow-[0_3px_14px_rgba(26,28,44,0.035)]">
@@ -48,12 +50,13 @@ export default function CourseRegistrationList({
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3 border-t border-[#ececf0] px-5 py-3 text-xs">
-        <button disabled={busy || loading || !loaded || !pending.length}
+        <button disabled={busy || loading || !loaded || !pending.length || !canEnroll}
           className="rounded-lg bg-[#7658e9] px-4 py-2 font-bold text-white disabled:opacity-40"
           onClick={() => void change(pending.map(course => course.id), "add")}>
           {busy ? "처리 중…" : `수강신청 (${pending.length}과목)`}
         </button>
         <Link to="/history" className="text-[#7658e9]">신청내역 · 취소</Link>
+        {closedMessage && <span role="status" className="text-[#777985]">{closedMessage}</span>}
         {loading && <span role="status">신청내역 확인 중…</span>}
         {error && <span role="alert">{error} <button onClick={() => void load()} disabled={busy || loading}>다시 조회</button></span>}
       </div>

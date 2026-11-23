@@ -28,16 +28,38 @@ export default function RegistrationSettings() {
     endDate: "",
     endTime: "",
   });
-  const setPreview = useRegistrationStore((state) => state.setPreview);
-  const { preview, status, statusLabel, remaining, remainingLabel } =
-    useRegistrationStatus();
+  const save = useRegistrationStore((state) => state.save);
+  const stop = useRegistrationStore((state) => state.stop);
+  const offset = useRegistrationStore((state) => state.offset);
+  const {
+    preview,
+    status,
+    statusLabel,
+    remaining,
+    remainingLabel,
+    error: loadError,
+  } = useRegistrationStatus();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const run = async (action: () => Promise<void>, done: string) => {
+    setBusy(true);
+    try {
+      await action();
+      setMessage(done);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장하지 못했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const applyPreview = (immediate: boolean) => {
     setError("");
     setMessage("");
-    const currentTime = Date.now();
+    // 이 컴퓨터 시계가 틀려도 서버 시간 기준으로 확인합니다.
+    const currentTime = Date.now() + offset;
     if (
       !fields.endDate ||
       !fields.endTime ||
@@ -73,11 +95,11 @@ export default function RegistrationSettings() {
       );
       return;
     }
-    setPreview({ startsAt, endsAt, stopped: false });
-    setMessage(
+    void run(
+      () => save(immediate ? null : startsAt, endsAt),
       immediate
-        ? "진행 중 상태로 미리보기를 시작했습니다."
-        : "예약을 미리보기에 반영했습니다.",
+        ? "수강신청을 지금 시작했습니다. 학생들이 바로 신청할 수 있습니다."
+        : "수강신청 기간을 저장했습니다.",
     );
   };
 
@@ -101,8 +123,8 @@ export default function RegistrationSettings() {
       </div>
 
       <div className="mb-5 rounded-lg border border-[#e7e1fb] bg-[#f7f5ff] px-4 py-3 text-[11px] leading-5 text-[#7967b0]">
-        화면 미리보기입니다. 메인 페이지의 현황과 남은 시간에 반영되며,
-        새로고침하면 초기화됩니다.
+        저장한 기간은 서버에 기록되어 모든 학생 화면에 반영됩니다. 학생은 이
+        기간에만 수강신청과 취소를 할 수 있습니다.
         <Link
           to="/mainPage"
           className="ml-2 inline-block font-semibold underline underline-offset-2"
@@ -114,7 +136,7 @@ export default function RegistrationSettings() {
       <div className="mb-5 grid gap-3 min-[901px]:grid-cols-3">
         <div className="rounded-lg border border-[#e4e5eb] bg-[#fafafd] p-4">
           <span className="text-[10px] text-[#858796]">
-            현재 상태 · 미리보기
+            현재 상태
           </span>
           <div className="mt-2" role="status">
             <strong
@@ -204,9 +226,9 @@ export default function RegistrationSettings() {
             ‘지금 시작’은 입력한 시작 시간 대신 현재 시간을 적용합니다. 종료
             시간은 반드시 입력해주세요.
           </p>
-          {error && (
+          {(error || loadError) && (
             <p role="alert" className="mt-3 text-[11px] text-red-600">
-              {error}
+              {error || loadError}
             </p>
           )}
           <p role="status" className="mt-2 text-[11px] text-[#7658e9]">
@@ -217,25 +239,16 @@ export default function RegistrationSettings() {
           {(status === "scheduled" || status === "open") && (
             <button
               type="button"
-              className={`${buttonClass} mr-auto border-[#dddfe6] bg-white text-[#777985] hover:bg-[#f0edff]`}
+              disabled={busy}
+              className={`${buttonClass} mr-auto border-[#dddfe6] bg-white text-[#777985] hover:bg-[#f0edff] disabled:cursor-wait disabled:opacity-50`}
               onClick={() => {
-                const currentTime = Date.now();
-                const hasStarted =
-                  preview !== null && currentTime >= preview.startsAt;
-                setPreview(
-                  hasStarted && preview
-                    ? {
-                        ...preview,
-                        stopped: true,
-                        endsAt: Math.min(preview.endsAt, currentTime),
-                      }
-                    : null,
-                );
                 setError("");
-                setMessage(
-                  hasStarted
-                    ? "미리보기를 종료했습니다."
-                    : "예약 미리보기를 취소했습니다.",
+                setMessage("");
+                void run(
+                  stop,
+                  status === "open"
+                    ? "수강신청을 종료했습니다."
+                    : "예약을 취소했습니다.",
                 );
               }}
             >
@@ -244,15 +257,17 @@ export default function RegistrationSettings() {
           )}
           <button
             type="button"
+            disabled={busy}
             onClick={() => applyPreview(true)}
-            className={`${buttonClass} border-[#dddfe6] bg-white text-[#5d6070] hover:border-[#a99aed] hover:bg-[#f0edff]`}
+            className={`${buttonClass} border-[#dddfe6] bg-white text-[#5d6070] hover:border-[#a99aed] hover:bg-[#f0edff] disabled:cursor-wait disabled:opacity-50`}
           >
             <Play size={14} aria-hidden="true" />
             지금 시작
           </button>
           <button
             type="submit"
-            className={`${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6]`}
+            disabled={busy}
+            className={`${buttonClass} border-[#7658e9] bg-[#7658e9] text-white hover:bg-[#6546d6] disabled:cursor-wait disabled:opacity-50`}
           >
             <CalendarClock size={14} aria-hidden="true" />
             {status === "scheduled" ? "예약 변경" : "예약하기"}
