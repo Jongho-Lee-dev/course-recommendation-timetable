@@ -10,7 +10,7 @@ class EnrollmentChange(BaseModel):
     action: Literal["add", "cancel", "replace"] = "add"
 
 
-def install_enrollments(app, db, claims, get_catalog):
+def install_enrollments(app, db, claims, get_catalog, ensure_open=None):
     async def with_syllabi(result):
         items = [*result.get("courses", []), *result.get("enrolled", [])]
         if not items or all("syllabusPath" in item and "syllabusName" in item for item in items):
@@ -46,6 +46,9 @@ def install_enrollments(app, db, claims, get_catalog):
     async def change_enrollments(body: EnrollmentChange, c=Depends(student_session)):
         if any(isinstance(x, bool) or x < 1 for x in body.courseIds):
             raise HTTPException(422, "강좌 ID가 올바르지 않습니다.")
+        # 관리자가 정한 수강신청 기간에만 신청·취소할 수 있습니다.
+        if ensure_open:
+            await ensure_open()
         result = await db(
             "POST",
             "rpc/tt_apply_enrollments",

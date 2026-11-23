@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { ClipboardList, CheckCircle2, Search, Trash2 } from "lucide-react";
 import { useCourseStore } from "../store/courseStore";
 import { useEnrollmentStore } from "../store/enrollmentStore";
+import { useRegistrationStatus } from "../../shared/hooks/useRegistrationStatus";
 
 export default function HistoryPage() {
   const selected = useCourseStore((s) => s.selected);
   const { enrolled: history, loading, busy, loaded, error, load, change } = useEnrollmentStore();
   useEffect(() => { void load(); }, [load]);
+  const { canEnroll, closedMessage } = useRegistrationStatus();
   const [keyword, setKeyword] = useState("");
   const [tab, setTab] = useState("전체");
   const pending = selected.filter(course => !history.some(item => item.id === course.id));
@@ -50,13 +52,13 @@ export default function HistoryPage() {
             <div className="flex gap-2">
               <button
                 onClick={addAll}
-                disabled={busy || loading || !loaded || !pending.length}
-                className="rounded-lg bg-[#7658e9] px-3 py-2 text-[9px] font-bold text-white"
+                disabled={busy || loading || !loaded || !pending.length || !canEnroll}
+                className="rounded-lg bg-[#7658e9] px-3 py-2 text-[9px] font-bold text-white disabled:opacity-40"
               >
                 {busy ? "처리 중…" : "현재 시간표 수강신청"}
               </button>
               <button
-                disabled={busy || loading || !loaded || !history.length}
+                disabled={busy || loading || !loaded || !history.length || !canEnroll}
                 aria-label="전체 수강신청 취소"
                 onClick={() => {
                   if (
@@ -96,6 +98,7 @@ export default function HistoryPage() {
             ))}
           </div>
         </header>
+        {closedMessage && <p role="status" className="px-5 py-3 text-xs text-[#777985]">{closedMessage} 신청과 취소는 수강신청 기간에만 할 수 있습니다.</p>}
         {error && <p role="alert" className="px-5 py-3 text-xs text-red-600">{error} 위의 새로고침으로 다시 조회하세요.</p>}
         {loading && <p role="status" className="px-5 py-3 text-xs">신청내역을 불러오는 중입니다…</p>}
         {!loaded ? null : filtered.length === 0 ? (
@@ -137,7 +140,7 @@ export default function HistoryPage() {
                         .join(" / ")}
                 </span>
                 <button
-                  disabled={busy || loading}
+                  disabled={busy || loading || !canEnroll}
                   aria-label={`${course.title} 수강신청 취소`}
                   onClick={() => {
                     if (window.confirm(`'${course.title}' 수강신청을 취소할까요?`))

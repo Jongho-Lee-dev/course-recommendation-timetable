@@ -21,6 +21,7 @@ from app.student_db import student_query
 from app.syllabi import install_syllabi
 from app.enrollments import install_enrollments
 from app.enrollment_db import enrollment_query
+from app.registration_period import install_registration_period, ensure_registration_open
 from app.recommendations import install_recommendations
 from app.chat import install_chat
 from starlette.concurrency import run_in_threadpool
@@ -384,6 +385,7 @@ async def departments():
 
 
 install_auth(app, auth_db, token, departments)
-install_enrollments(app, auth_db, claims, None)
+install_registration_period(app)
+install_enrollments(app, auth_db, claims, None, ensure_registration_open)
 install_recommendations(app)
 install_chat(app)
