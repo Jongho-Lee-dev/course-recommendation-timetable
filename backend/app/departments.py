@@ -88,7 +88,7 @@ def export_departments(items):
 def install_departments(app, db):
     @app.post("/api/admin/departments")
     async def add_department(body: Department):
-        return (await db("POST", "tt_departments", body.model_dump()))[0]
+        return (await db("POST", "departments", body.model_dump()))[0]
 
     @app.put("/api/admin/departments/{department_id}")
     async def update_department(department_id: int, body: Department):
@@ -96,7 +96,7 @@ def install_departments(app, db):
             raise HTTPException(422, "학과코드는 변경할 수 없습니다.")
         rows = await db(
             "PATCH",
-            "tt_departments",
+            "departments",
             body.model_dump(),
             params={"id": f"eq.{department_id}"},
         )
@@ -118,16 +118,16 @@ def install_departments(app, db):
 
         await db(
             "POST",
-            "tt_departments",
+            "departments",
             items,
             params={"on_conflict": "id"},
             prefer="resolution=merge-duplicates,return=representation",
         )
-        return await db("GET", "tt_departments", params={"order": "id"})
+        return await db("GET", "departments", params={"order": "id"})
 
     @app.get("/api/admin/departments.xlsx")
     async def download_departments():
-        items = await db("GET", "tt_departments", params={"order": "id"})
+        items = await db("GET", "departments", params={"order": "id"})
         return Response(
             export_departments(items),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

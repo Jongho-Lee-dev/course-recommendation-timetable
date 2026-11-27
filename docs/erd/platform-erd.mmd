@@ -1,0 +1,78 @@
+erDiagram
+    direction LR
+    %% Verified PostgreSQL physical tables. View dependencies are in the SVG/PNG.
+    %% NULL Y/N in column comments. Compound UQ constraints are table notes in SVG/PNG.
+    departments {
+        bigint id PK "NULL N"
+        text majorName "NULL N"
+        text facultyName "NULL Y"
+        text collegeName "NULL Y"
+    }
+    students {
+        uuid owner PK "NULL N"
+        text studentId UK "NULL N"
+        text name "NULL N"
+        integer grade "NULL N"
+        bigint departmentId FK "NULL N"
+        numeric completedCredits "NULL N"
+        numeric graduationCredits "NULL N"
+        numeric maxCredits "NULL N"
+        text passwordHash "NULL Y"
+    }
+    courses {
+        text courseCode PK "NULL N"
+        text title "NULL N"
+        numeric credit "NULL N"
+    }
+    open_courses {
+        bigint id PK "NULL N"
+        text courseCode FK "NULL N"
+        text sectionNo "NULL N"
+        text professorName "NULL N"
+        integer capacity "NULL N"
+        integer targetGrade "NULL N"
+        bigint departmentId FK "NULL N"
+        boolean isOnline "NULL N"
+        text[] classificationPath "NULL N"
+        bigint[] excludedDepartmentIds "NULL N"
+        boolean active "NULL N"
+        text syllabusPath "NULL Y"
+        text syllabusName "NULL Y"
+    }
+    enrollments {
+        bigint id PK "NULL N"
+        uuid studentOwner FK "NULL N"
+        bigint openCourseId FK "NULL N"
+        text status "NULL N"
+        timestamptz createdAt "NULL N"
+        timestamptz updatedAt "NULL N"
+    }
+    schedules {
+        bigint id PK "NULL N"
+        bigint openCourseId FK "NULL N"
+        text dayOfWeek "NULL N"
+        integer startPeriod "NULL N"
+        integer endPeriod "NULL N"
+        text classroom "NULL N"
+    }
+    notice {
+        bigint id PK "NULL N"
+        text title "NULL N"
+        text content "NULL N"
+        text author "NULL Y"
+        boolean is_pinned "NULL Y"
+        timestamptz created_at "NULL N"
+    }
+    registration_period {
+        smallint id PK "NULL N"
+        timestamptz startsAt "NULL N"
+        timestamptz endsAt "NULL N"
+        boolean stopped "NULL N"
+        timestamptz updatedAt "NULL N"
+    }
+    open_courses ||..o{ enrollments : "openCourseId"
+    students ||..o{ enrollments : "studentOwner"
+    courses ||..o{ open_courses : "courseCode"
+    departments ||..o{ open_courses : "departmentId"
+    open_courses ||..o{ schedules : "openCourseId"
+    departments ||..o{ students : "departmentId"

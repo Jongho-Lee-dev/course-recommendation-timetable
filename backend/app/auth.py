@@ -49,7 +49,7 @@ def install_auth(app, db, token, departments):
             raise HTTPException(422, "학과코드 오류")
         existing = await db(
             "GET",
-            "tt_students",
+            "students",
             params={"studentId": f"eq.{body.studentId}", "select": "owner"},
         )
         if existing:
@@ -62,14 +62,14 @@ def install_auth(app, db, token, departments):
             owner=str(uuid.uuid4()),
             passwordHash=await asyncio.to_thread(password_hash, body.password),
         )
-        await db("POST", "tt_students", payload)
+        await db("POST", "students", payload)
         return {"status": "created"}
 
     @app.post("/api/auth/login")
     async def login(body: Login):
         rows = await db(
             "GET",
-            "tt_students",
+            "students",
             params={"studentId": f"eq.{body.studentId.strip()}", "limit": "1"},
         )
         row = rows[0] if rows else None

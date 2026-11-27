@@ -1,0 +1,1095 @@
+{
+  "relations": [
+    {
+      "schema_name": "public",
+      "name": "course_seats",
+      "kind": "v"
+    },
+    {
+      "schema_name": "public",
+      "name": "courses",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "departments",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "enrollments",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "notice",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "open_courses",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "registration_period",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "schedules",
+      "kind": "r"
+    },
+    {
+      "schema_name": "public",
+      "name": "students",
+      "kind": "r"
+    }
+  ],
+  "columns": [
+    {
+      "table_name": "course_seats",
+      "column_name": "openCourseId",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "course_seats",
+      "column_name": "courseCode",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "course_seats",
+      "column_name": "sectionNo",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "course_seats",
+      "column_name": "capacity",
+      "ordinal_position": 4,
+      "data_type": "integer",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "course_seats",
+      "column_name": "enrolledCount",
+      "ordinal_position": 5,
+      "data_type": "integer",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "course_seats",
+      "column_name": "remainingSeats",
+      "ordinal_position": 6,
+      "data_type": "integer",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "courses",
+      "column_name": "courseCode",
+      "ordinal_position": 1,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "courses",
+      "column_name": "title",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "courses",
+      "column_name": "credit",
+      "ordinal_position": 3,
+      "data_type": "numeric",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "departments",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "departments",
+      "column_name": "majorName",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "departments",
+      "column_name": "facultyName",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "departments",
+      "column_name": "collegeName",
+      "ordinal_position": 4,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "a",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "studentOwner",
+      "ordinal_position": 2,
+      "data_type": "uuid",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "openCourseId",
+      "ordinal_position": 3,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "status",
+      "ordinal_position": 4,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": "'enrolled'::text",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "createdAt",
+      "ordinal_position": 5,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": "now()",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "enrollments",
+      "column_name": "updatedAt",
+      "ordinal_position": 6,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": "now()",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "d",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "title",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "content",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "author",
+      "ordinal_position": 4,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": "'관리자'::text",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "is_pinned",
+      "ordinal_position": 5,
+      "data_type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "notice",
+      "column_name": "created_at",
+      "ordinal_position": 6,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": "now()",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "a",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "courseCode",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "sectionNo",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "professorName",
+      "ordinal_position": 4,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "capacity",
+      "ordinal_position": 5,
+      "data_type": "integer",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "targetGrade",
+      "ordinal_position": 6,
+      "data_type": "integer",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "departmentId",
+      "ordinal_position": 7,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "isOnline",
+      "ordinal_position": 8,
+      "data_type": "boolean",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "classificationPath",
+      "ordinal_position": 9,
+      "data_type": "text[]",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "excludedDepartmentIds",
+      "ordinal_position": 10,
+      "data_type": "bigint[]",
+      "not_null": true,
+      "default_expression": "'{}'::bigint[]",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "active",
+      "ordinal_position": 11,
+      "data_type": "boolean",
+      "not_null": true,
+      "default_expression": "true",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "syllabusPath",
+      "ordinal_position": 12,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "open_courses",
+      "column_name": "syllabusName",
+      "ordinal_position": 13,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "registration_period",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "smallint",
+      "not_null": true,
+      "default_expression": "1",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "registration_period",
+      "column_name": "startsAt",
+      "ordinal_position": 2,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "registration_period",
+      "column_name": "endsAt",
+      "ordinal_position": 3,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "registration_period",
+      "column_name": "stopped",
+      "ordinal_position": 4,
+      "data_type": "boolean",
+      "not_null": true,
+      "default_expression": "false",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "registration_period",
+      "column_name": "updatedAt",
+      "ordinal_position": 5,
+      "data_type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": "now()",
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "a",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "openCourseId",
+      "ordinal_position": 2,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "dayOfWeek",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "startPeriod",
+      "ordinal_position": 4,
+      "data_type": "integer",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "endPeriod",
+      "ordinal_position": 5,
+      "data_type": "integer",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "schedules",
+      "column_name": "classroom",
+      "ordinal_position": 6,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "owner",
+      "ordinal_position": 1,
+      "data_type": "uuid",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "studentId",
+      "ordinal_position": 2,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "name",
+      "ordinal_position": 3,
+      "data_type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "grade",
+      "ordinal_position": 4,
+      "data_type": "integer",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "departmentId",
+      "ordinal_position": 5,
+      "data_type": "bigint",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "completedCredits",
+      "ordinal_position": 6,
+      "data_type": "numeric",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "graduationCredits",
+      "ordinal_position": 7,
+      "data_type": "numeric",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "maxCredits",
+      "ordinal_position": 8,
+      "data_type": "numeric",
+      "not_null": true,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    },
+    {
+      "table_name": "students",
+      "column_name": "passwordHash",
+      "ordinal_position": 9,
+      "data_type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity_kind": "",
+      "generated_kind": ""
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "courses",
+      "name": "tt_courses_credit_check",
+      "type": "c",
+      "definition": "CHECK (credit >= 0::numeric)",
+      "columns": [
+        "credit"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "courses",
+      "name": "tt_courses_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (\"courseCode\")",
+      "columns": [
+        "courseCode"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "departments",
+      "name": "tt_departments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_openCourseId_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"openCourseId\") REFERENCES open_courses(id)",
+      "columns": [
+        "openCourseId"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "open_courses",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_status_check",
+      "type": "c",
+      "definition": "CHECK (status = ANY (ARRAY['enrolled'::text, 'cancelled'::text]))",
+      "columns": [
+        "status"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_studentOwner_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"studentOwner\") REFERENCES students(owner)",
+      "columns": [
+        "studentOwner"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "students",
+      "referenced_columns": [
+        "owner"
+      ]
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_studentOwner_openCourseId_key",
+      "type": "u",
+      "definition": "UNIQUE (\"studentOwner\", \"openCourseId\")",
+      "columns": [
+        "studentOwner",
+        "openCourseId"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "notice",
+      "name": "notice_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_capacity_check",
+      "type": "c",
+      "definition": "CHECK (capacity > 0)",
+      "columns": [
+        "capacity"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_courseCode_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"courseCode\") REFERENCES courses(\"courseCode\")",
+      "columns": [
+        "courseCode"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "courses",
+      "referenced_columns": [
+        "courseCode"
+      ]
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_courseCode_sectionNo_key",
+      "type": "u",
+      "definition": "UNIQUE (\"courseCode\", \"sectionNo\")",
+      "columns": [
+        "courseCode",
+        "sectionNo"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_departmentId_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"departmentId\") REFERENCES departments(id)",
+      "columns": [
+        "departmentId"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "departments",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_targetGrade_check",
+      "type": "c",
+      "definition": "CHECK (\"targetGrade\" >= 1)",
+      "columns": [
+        "targetGrade"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "registration_period",
+      "name": "tt_registration_period_check",
+      "type": "c",
+      "definition": "CHECK (\"endsAt\" > \"startsAt\")",
+      "columns": [
+        "endsAt",
+        "startsAt"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "registration_period",
+      "name": "tt_registration_period_id_check",
+      "type": "c",
+      "definition": "CHECK (id = 1)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "registration_period",
+      "name": "tt_registration_period_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_check",
+      "type": "c",
+      "definition": "CHECK (\"endPeriod\" >= \"startPeriod\")",
+      "columns": [
+        "endPeriod",
+        "startPeriod"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_dayOfWeek_check",
+      "type": "c",
+      "definition": "CHECK (\"dayOfWeek\" = ANY (ARRAY['월'::text, '화'::text, '수'::text, '목'::text, '금'::text, '토'::text, '일'::text]))",
+      "columns": [
+        "dayOfWeek"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_openCourseId_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"openCourseId\") REFERENCES open_courses(id)",
+      "columns": [
+        "openCourseId"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "open_courses",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "columns": [
+        "id"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_startPeriod_check",
+      "type": "c",
+      "definition": "CHECK (\"startPeriod\" >= 1)",
+      "columns": [
+        "startPeriod"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_check",
+      "type": "c",
+      "definition": "CHECK (\"completedCredits\" <= \"graduationCredits\")",
+      "columns": [
+        "completedCredits",
+        "graduationCredits"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_completedCredits_check",
+      "type": "c",
+      "definition": "CHECK (\"completedCredits\" >= 0::numeric)",
+      "columns": [
+        "completedCredits"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_departmentId_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (\"departmentId\") REFERENCES departments(id)",
+      "columns": [
+        "departmentId"
+      ],
+      "referenced_schema": "public",
+      "referenced_table": "departments",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_grade_check",
+      "type": "c",
+      "definition": "CHECK (grade >= 1)",
+      "columns": [
+        "grade"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_graduationCredits_check",
+      "type": "c",
+      "definition": "CHECK (\"graduationCredits\" > 0::numeric)",
+      "columns": [
+        "graduationCredits"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_maxCredits_check",
+      "type": "c",
+      "definition": "CHECK (\"maxCredits\" > 0::numeric)",
+      "columns": [
+        "maxCredits"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (owner)",
+      "columns": [
+        "owner"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_studentId_key",
+      "type": "u",
+      "definition": "UNIQUE (\"studentId\")",
+      "columns": [
+        "studentId"
+      ],
+      "referenced_schema": null,
+      "referenced_table": null,
+      "referenced_columns": []
+    }
+  ],
+  "views": [
+    {
+      "name": "course_seats",
+      "definition": " SELECT o.id AS \"openCourseId\",\n    o.\"courseCode\",\n    o.\"sectionNo\",\n    o.capacity,\n    (count(e.id))::integer AS \"enrolledCount\",\n    (GREATEST((0)::bigint, (o.capacity - count(e.id))))::integer AS \"remainingSeats\"\n   FROM (open_courses o\n     LEFT JOIN enrollments e ON (((e.\"openCourseId\" = o.id) AND (e.status = 'enrolled'::text))))\n  GROUP BY o.id;"
+    }
+  ],
+  "indexes": [
+    {
+      "table_name": "courses",
+      "name": "tt_courses_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_courses_pkey ON public.courses USING btree (\"courseCode\")"
+    },
+    {
+      "table_name": "departments",
+      "name": "tt_departments_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_departments_pkey ON public.departments USING btree (id)"
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_course_status",
+      "definition": "CREATE INDEX tt_enrollments_course_status ON public.enrollments USING btree (\"openCourseId\", status)"
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_enrollments_pkey ON public.enrollments USING btree (id)"
+    },
+    {
+      "table_name": "enrollments",
+      "name": "tt_enrollments_studentOwner_openCourseId_key",
+      "definition": "CREATE UNIQUE INDEX \"tt_enrollments_studentOwner_openCourseId_key\" ON public.enrollments USING btree (\"studentOwner\", \"openCourseId\")"
+    },
+    {
+      "table_name": "notice",
+      "name": "notice_pkey",
+      "definition": "CREATE UNIQUE INDEX notice_pkey ON public.notice USING btree (id)"
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_courseCode_sectionNo_key",
+      "definition": "CREATE UNIQUE INDEX \"tt_open_courses_courseCode_sectionNo_key\" ON public.open_courses USING btree (\"courseCode\", \"sectionNo\")"
+    },
+    {
+      "table_name": "open_courses",
+      "name": "tt_open_courses_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_open_courses_pkey ON public.open_courses USING btree (id)"
+    },
+    {
+      "table_name": "registration_period",
+      "name": "tt_registration_period_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_registration_period_pkey ON public.registration_period USING btree (id)"
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_course",
+      "definition": "CREATE INDEX tt_schedules_course ON public.schedules USING btree (\"openCourseId\")"
+    },
+    {
+      "table_name": "schedules",
+      "name": "tt_schedules_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_schedules_pkey ON public.schedules USING btree (id)"
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_pkey",
+      "definition": "CREATE UNIQUE INDEX tt_students_pkey ON public.students USING btree (owner)"
+    },
+    {
+      "table_name": "students",
+      "name": "tt_students_studentId_key",
+      "definition": "CREATE UNIQUE INDEX \"tt_students_studentId_key\" ON public.students USING btree (\"studentId\")"
+    }
+  ]
+}

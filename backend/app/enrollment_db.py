@@ -27,7 +27,7 @@ def enrollment_query(method, table, body=None, params=None):
                                        (body["p_owner"],))
                     result = cursor.fetchone()[0]
                     # Include attachments before committing so a failed read rolls back writes.
-                    cursor.execute('SELECT id, "syllabusPath", "syllabusName" FROM public.tt_open_courses')
+                    cursor.execute('SELECT id, "syllabusPath", "syllabusName" FROM public.open_courses')
                     attachments = {row[0]: row[1:] for row in cursor.fetchall()}
                     for item in [*result.get("courses", []), *result.get("enrolled", [])]:
                         item["syllabusPath"], item["syllabusName"] = attachments.get(item["id"], (None, None))

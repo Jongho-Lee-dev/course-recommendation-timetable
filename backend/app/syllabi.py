@@ -51,7 +51,7 @@ def install_syllabi(app, db):
     async def get_course(course_id):
         rows = await db(
             "GET",
-            "tt_open_courses",
+            "open_courses",
             params={
                 "id": f"eq.{course_id}",
                 "select": "id,syllabusPath,syllabusName",
@@ -89,7 +89,7 @@ def install_syllabi(app, db):
         try:
             await db(
                 "PATCH",
-                "tt_open_courses",
+                "open_courses",
                 {"syllabusPath": path, "syllabusName": name},
                 params={"id": f"eq.{course_id}"},
             )
@@ -105,7 +105,7 @@ def install_syllabi(app, db):
         course = await get_course(course_id)
         await db(
             "PATCH",
-            "tt_open_courses",
+            "open_courses",
             {"syllabusPath": None, "syllabusName": None},
             params={"id": f"eq.{course_id}"},
         )

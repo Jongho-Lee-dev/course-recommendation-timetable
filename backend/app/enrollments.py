@@ -17,7 +17,7 @@ def install_enrollments(app, db, claims, get_catalog, ensure_open=None):
             return result
         rows = await db(
             "GET",
-            "tt_open_courses",
+            "open_courses",
             params={
                 "select": "id,syllabusPath,syllabusName",
                 "limit": "10000",

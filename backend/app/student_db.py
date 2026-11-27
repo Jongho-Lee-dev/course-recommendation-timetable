@@ -16,7 +16,7 @@ STUDENT_COLUMNS = {
 
 
 def student_query(method, table, body=None, params=None):
-    if table not in {'tt_students', 'tt_departments'}:
+    if table not in {'students', 'departments'}:
         raise ValueError('Unsupported student table')
     params = params or {}
     filters, values = [], []
@@ -31,9 +31,9 @@ def student_query(method, table, body=None, params=None):
     target = sql.Identifier('public', table)
     if method == 'GET':
         query = sql.SQL('SELECT * FROM {}').format(target) + where
-        if table == 'tt_departments':
+        if table == 'departments':
             query += sql.SQL(' ORDER BY id')
-    elif method in {'POST', 'PATCH'} and table == 'tt_students':
+    elif method in {'POST', 'PATCH'} and table == 'students':
         if not body or not set(body) <= STUDENT_COLUMNS:
             raise ValueError('Unsupported student fields')
         fields = list(body)

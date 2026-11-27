@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # 기간은 한 개만 저장합니다(id=1).
 TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS public.tt_registration_period (
+CREATE TABLE IF NOT EXISTS public.registration_period (
     id smallint PRIMARY KEY DEFAULT 1 CHECK (id = 1),
     "startsAt" timestamptz NOT NULL,
     "endsAt" timestamptz NOT NULL,
@@ -26,10 +26,10 @@ CREATE TABLE IF NOT EXISTS public.tt_registration_period (
     "updatedAt" timestamptz NOT NULL DEFAULT now(),
     CHECK ("endsAt" > "startsAt")
 );
-ALTER TABLE public.tt_registration_period ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.registration_period ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-        REVOKE ALL ON public.tt_registration_period FROM anon, authenticated;
+        REVOKE ALL ON public.registration_period FROM anon, authenticated;
     END IF;
 END $$;
 """
@@ -41,7 +41,7 @@ SELECT (extract(epoch FROM now()) * 1000)::bigint AS now,
        (extract(epoch FROM p."endsAt") * 1000)::bigint AS "endsAt",
        p.stopped
 FROM (SELECT 1) AS one
-LEFT JOIN public.tt_registration_period AS p ON p.id = 1
+LEFT JOIN public.registration_period AS p ON p.id = 1
 """
 
 _table_ready = False
@@ -119,7 +119,7 @@ def save_period(body: PeriodInput):
         raise HTTPException(422, "종료 시간은 현재보다 이후여야 합니다.")
     _run([(
         """
-        INSERT INTO public.tt_registration_period (id, "startsAt", "endsAt", stopped, "updatedAt")
+        INSERT INTO public.registration_period (id, "startsAt", "endsAt", stopped, "updatedAt")
         VALUES (1, to_timestamp(%s / 1000.0), to_timestamp(%s / 1000.0), false, now())
         ON CONFLICT (id) DO UPDATE SET "startsAt" = excluded."startsAt",
             "endsAt" = excluded."endsAt", stopped = false, "updatedAt" = now()
@@ -133,12 +133,12 @@ def stop_period():
     """진행 중이면 지금 종료하고, 아직 시작 전이면 예약을 취소합니다."""
     _run([
         ("""
-        UPDATE public.tt_registration_period
+        UPDATE public.registration_period
         SET stopped = true, "endsAt" = least("endsAt", greatest(now(), "startsAt" + interval '1 millisecond')),
             "updatedAt" = now()
         WHERE id = 1 AND "startsAt" <= now()
         """, None),
-        ('DELETE FROM public.tt_registration_period WHERE id = 1 AND "startsAt" > now()', None),
+        ('DELETE FROM public.registration_period WHERE id = 1 AND "startsAt" > now()', None),
     ])
     return state_response(*read_state())
 

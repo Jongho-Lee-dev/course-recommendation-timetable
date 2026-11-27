@@ -1,0 +1,445 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2280" height="1720" viewBox="0 0 2280 1720">
+<rect width="100%" height="100%" fill="white"/>
+<text x="60" y="64" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="34" font-weight="700" text-anchor="start">AI 기반 개인 맞춤형 수강신청 및 시간표 설계 플랫폼</text>
+<text x="60" y="111" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="28" font-weight="700" text-anchor="start">데이터베이스 ERD</text>
+<text x="2220" y="104" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="19" font-weight="400" text-anchor="end">Supabase PostgreSQL · public 스키마 · 실제 DB 메타데이터 검증</text>
+<polyline points="60,135 2220,135" fill="none" stroke="#ccd6e1" stroke-width="2"/>
+<polyline points="345,424 345,550" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="353.0,434.0 337.0,434.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="353.0,441.0 337.0,441.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="337.0,549.0 345.0,533.0 353.0,549.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="345.0" cy="524.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="365" y="477" width="158.5078125" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="371" y="497" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">id → departmentId</text>
+<polyline points="630,250 725,250 725,455 830,455" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="640.0,242.0 640.0,258.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="647.0,242.0 647.0,258.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="829.0,463.0 813.0,455.0 829.0,447.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="804.0" cy="455.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="659" y="211" width="48.0" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="665" y="231" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">id →</text>
+<rect x="678" y="468" width="116.5078125" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="684" y="488" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">departmentId</text>
+<polyline points="1630,290 1430,290" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1620.0,298.0 1620.0,282.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1613.0,298.0 1613.0,282.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1431.0,282.0 1447.0,290.0 1431.0,298.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="1456.0" cy="290.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="1454" y="251" width="102.5" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="1460" y="271" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">courseCode</text>
+<polyline points="1430,640 1630,640" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1440.0,632.0 1440.0,648.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1447.0,632.0 1447.0,648.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1629.0,648.0 1613.0,640.0 1629.0,632.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="1604.0" cy="640.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="1433" y="601" width="144.5" height="24" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="1439" y="619" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">id → openCourseId</text>
+<polyline points="345,954 345,995 830,995" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="353.0,964.0 337.0,964.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="353.0,971.0 337.0,971.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="829.0,1003.0 813.0,995.0 829.0,987.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="804.0" cy="995.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="442" y="962" width="196.5" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="448" y="982" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">owner → studentOwner</text>
+<polyline points="1130,694 1130,910" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1138.0,704.0 1122.0,704.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1138.0,711.0 1122.0,711.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="1122.0,909.0 1130.0,893.0 1138.0,909.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="1130.0" cy="884.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<rect x="1150" y="790" width="161.0" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="1156" y="810" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">id → openCourseId</text>
+<polyline points="1430,680 1505,680 1505,1030 1925,1030 1925,1080" fill="none" stroke="#7756a7" stroke-width="2" stroke-dasharray="7 6"/>
+<polyline points="1917,1068 1925,1080 1933,1068" fill="none" stroke="#7756a7" stroke-width="2"/>
+<rect x="1674" y="994" width="86.0" height="26" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="1680" y="1014" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">개설 강좌</text>
+<polyline points="1430,1160 1630,1160" fill="none" stroke="#7756a7" stroke-width="2" stroke-dasharray="7 6"/>
+<polyline points="1618,1152 1630,1160 1618,1168" fill="none" stroke="#7756a7" stroke-width="2"/>
+<rect x="1450" y="1119" width="119.0" height="25" rx="0" fill="white" stroke="none" stroke-width="2"/>
+<text x="1456" y="1138" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="16" font-weight="400" text-anchor="start">신청 내역 집계</text>
+<rect x="60" y="170" width="570" height="254" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="60" y="170" width="570" height="64" rx="8" fill="#265f99" stroke="none" stroke-width="2"/>
+<rect x="60" y="222" width="570" height="12" rx="0" fill="#265f99" stroke="none" stroke-width="2"/>
+<text x="78" y="199" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">departments</text>
+<text x="78" y="223" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">학과</text>
+<rect x="61" y="234" width="568" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="74" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="139" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="458" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="586" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="74" y="285" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="139" y="285" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="458" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="603" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="294" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="315" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="315" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">majorName</text>
+<text x="458" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="345" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="345" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">facultyName</text>
+<text x="458" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<rect x="61" y="354" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="375" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="375" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">collegeName</text>
+<text x="458" y="375" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="375" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<polyline points="60,384 630,384" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="74" y="409" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">학과 정보: 단과대학 / 학부 / 전공</text>
+<rect x="60" y="550" width="570" height="404" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="60" y="550" width="570" height="64" rx="8" fill="#265f99" stroke="none" stroke-width="2"/>
+<rect x="60" y="602" width="570" height="12" rx="0" fill="#265f99" stroke="none" stroke-width="2"/>
+<text x="78" y="579" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">students</text>
+<text x="78" y="603" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">학생</text>
+<rect x="61" y="614" width="568" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="74" y="635" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="139" y="635" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="458" y="635" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="586" y="635" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="74" y="665" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="139" y="665" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">owner</text>
+<text x="458" y="665" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">uuid</text>
+<text x="603" y="665" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="674" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="695" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">UQ</text>
+<text x="139" y="695" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">studentId</text>
+<text x="458" y="695" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="695" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="725" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="725" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">name</text>
+<text x="458" y="725" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="725" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="734" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="755" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="755" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">grade</text>
+<text x="458" y="755" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="603" y="755" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="785" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="139" y="785" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">departmentId</text>
+<text x="458" y="785" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="603" y="785" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="794" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="815" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="815" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">completedCredits</text>
+<text x="458" y="815" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">numeric</text>
+<text x="603" y="815" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="845" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="845" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">graduationCredits</text>
+<text x="458" y="845" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">numeric</text>
+<text x="603" y="845" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="854" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="875" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="875" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">maxCredits</text>
+<text x="458" y="875" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">numeric</text>
+<text x="603" y="875" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="905" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="905" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">passwordHash</text>
+<text x="458" y="905" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="905" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<polyline points="60,914 630,914" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="74" y="939" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">owner: 기본키  ·  studentId: 고유 학번</text>
+<rect x="1630" y="170" width="590" height="224" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="1630" y="170" width="590" height="64" rx="8" fill="#265f99" stroke="none" stroke-width="2"/>
+<rect x="1630" y="222" width="590" height="12" rx="0" fill="#265f99" stroke="none" stroke-width="2"/>
+<text x="1648" y="199" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">courses</text>
+<text x="1648" y="223" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">교과목 원장</text>
+<rect x="1631" y="234" width="588" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="1644" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="1709" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="2048" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="2176" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="1644" y="285" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="1709" y="285" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">courseCode</text>
+<text x="2048" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="1631" y="294" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="315" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="315" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">title</text>
+<text x="2048" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="1644" y="345" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="345" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">credit</text>
+<text x="2048" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">numeric</text>
+<text x="2193" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<polyline points="1630,354 2220,354" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="1644" y="379" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">동일 과목의 여러 분반이 참조</text>
+<rect x="830" y="170" width="600" height="524" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="830" y="170" width="600" height="64" rx="8" fill="#265f99" stroke="none" stroke-width="2"/>
+<rect x="830" y="222" width="600" height="12" rx="0" fill="#265f99" stroke="none" stroke-width="2"/>
+<text x="848" y="199" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">open_courses</text>
+<text x="848" y="223" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">개설 강좌 · 분반</text>
+<rect x="831" y="234" width="598" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="844" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="909" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="1258" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="1386" y="255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="844" y="285" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="909" y="285" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="1258" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="1403" y="285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="294" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="315" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="909" y="315" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">courseCode</text>
+<text x="1258" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="345" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="345" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">sectionNo</text>
+<text x="1258" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="354" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="375" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="375" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">professorName</text>
+<text x="1258" y="375" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="375" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="405" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="405" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">capacity</text>
+<text x="1258" y="405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="1403" y="405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="414" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="435" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="435" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">targetGrade</text>
+<text x="1258" y="435" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="1403" y="435" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="465" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="909" y="465" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">departmentId</text>
+<text x="1258" y="465" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="1403" y="465" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="474" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="495" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="495" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">isOnline</text>
+<text x="1258" y="495" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">boolean</text>
+<text x="1403" y="495" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="525" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="525" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">classificationPath</text>
+<text x="1258" y="525" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text[]</text>
+<text x="1403" y="525" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="534" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="555" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="555" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">excludedDepartmentIds</text>
+<text x="1258" y="555" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint[]</text>
+<text x="1403" y="555" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="585" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="585" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">active</text>
+<text x="1258" y="585" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">boolean</text>
+<text x="1403" y="585" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="594" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="615" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="615" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">syllabusPath</text>
+<text x="1258" y="615" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="615" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<text x="844" y="645" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="645" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">syllabusName</text>
+<text x="1258" y="645" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="645" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<polyline points="830,654 1430,654" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="844" y="679" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">UQ (courseCode, sectionNo)</text>
+<rect x="830" y="910" width="600" height="314" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="830" y="910" width="600" height="64" rx="8" fill="#257466" stroke="none" stroke-width="2"/>
+<rect x="830" y="962" width="600" height="12" rx="0" fill="#257466" stroke="none" stroke-width="2"/>
+<text x="848" y="939" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">enrollments</text>
+<text x="848" y="963" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">수강신청 내역</text>
+<rect x="831" y="974" width="598" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="844" y="995" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="909" y="995" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="1258" y="995" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="1386" y="995" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="844" y="1025" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="909" y="1025" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="1258" y="1025" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="1403" y="1025" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="1034" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="1055" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="909" y="1055" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">studentOwner</text>
+<text x="1258" y="1055" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">uuid</text>
+<text x="1403" y="1055" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="1085" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="909" y="1085" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">openCourseId</text>
+<text x="1258" y="1085" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="1403" y="1085" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="1094" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="1115" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1115" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">status</text>
+<text x="1258" y="1115" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="1403" y="1115" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="1145" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1145" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">createdAt</text>
+<text x="1258" y="1145" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="1403" y="1145" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="1154" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="1175" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1175" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">updatedAt</text>
+<text x="1258" y="1175" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="1403" y="1175" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<polyline points="830,1184 1430,1184" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="844" y="1209" fill="#257466" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">UQ (studentOwner, openCourseId)</text>
+<rect x="1630" y="570" width="590" height="314" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="1630" y="570" width="590" height="64" rx="8" fill="#265f99" stroke="none" stroke-width="2"/>
+<rect x="1630" y="622" width="590" height="12" rx="0" fill="#265f99" stroke="none" stroke-width="2"/>
+<text x="1648" y="599" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">schedules</text>
+<text x="1648" y="623" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">강의 시간 및 강의실</text>
+<rect x="1631" y="634" width="588" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="1644" y="655" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="1709" y="655" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="2048" y="655" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="2176" y="655" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="1644" y="685" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="1709" y="685" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="2048" y="685" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="2193" y="685" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="1631" y="694" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="715" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">FK</text>
+<text x="1709" y="715" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">openCourseId</text>
+<text x="2048" y="715" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="2193" y="715" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="1644" y="745" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="745" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">dayOfWeek</text>
+<text x="2048" y="745" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="745" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="1631" y="754" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="775" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="775" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">startPeriod</text>
+<text x="2048" y="775" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="2193" y="775" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="1644" y="805" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="805" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">endPeriod</text>
+<text x="2048" y="805" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="2193" y="805" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="1631" y="814" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="835" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="835" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">classroom</text>
+<text x="2048" y="835" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="835" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<polyline points="1630,844 2220,844" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="1644" y="869" fill="#265f99" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">CHECK (endPeriod &gt;= startPeriod)</text>
+<rect x="60" y="1080" width="570" height="314" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="60" y="1080" width="570" height="64" rx="8" fill="#52657b" stroke="none" stroke-width="2"/>
+<rect x="60" y="1132" width="570" height="12" rx="0" fill="#52657b" stroke="none" stroke-width="2"/>
+<text x="78" y="1109" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">notice</text>
+<text x="78" y="1133" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">공지사항 · 독립 테이블</text>
+<rect x="61" y="1144" width="568" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="74" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="139" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="458" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="586" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="74" y="1195" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="139" y="1195" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="458" y="1195" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="603" y="1195" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="1204" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="1225" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="1225" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">title</text>
+<text x="458" y="1225" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="1225" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="74" y="1255" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="1255" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">content</text>
+<text x="458" y="1255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="1255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="61" y="1264" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="1285" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="1285" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">author</text>
+<text x="458" y="1285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="603" y="1285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<text x="74" y="1315" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="1315" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">is_pinned</text>
+<text x="458" y="1315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">boolean</text>
+<text x="603" y="1315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">Y</text>
+<rect x="61" y="1324" width="568" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="74" y="1345" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="139" y="1345" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">created_at</text>
+<text x="458" y="1345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="603" y="1345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<polyline points="60,1354 630,1354" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="74" y="1379" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">다른 테이블을 참조하는 FK 없음</text>
+<rect x="830" y="1320" width="600" height="284" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="830" y="1320" width="600" height="64" rx="8" fill="#52657b" stroke="none" stroke-width="2"/>
+<rect x="830" y="1372" width="600" height="12" rx="0" fill="#52657b" stroke="none" stroke-width="2"/>
+<text x="848" y="1349" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">registration_period</text>
+<text x="848" y="1373" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">수강신청 기간 · 독립 테이블</text>
+<rect x="831" y="1384" width="598" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="844" y="1405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="909" y="1405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="1258" y="1405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="1386" y="1405" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="844" y="1435" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start">PK</text>
+<text x="909" y="1435" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="start">id</text>
+<text x="1258" y="1435" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">smallint</text>
+<text x="1403" y="1435" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="1444" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="1465" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1465" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">startsAt</text>
+<text x="1258" y="1465" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="1403" y="1465" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="1495" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1495" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">endsAt</text>
+<text x="1258" y="1495" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="1403" y="1495" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<rect x="831" y="1504" width="598" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="844" y="1525" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1525" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">stopped</text>
+<text x="1258" y="1525" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">boolean</text>
+<text x="1403" y="1525" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<text x="844" y="1555" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="909" y="1555" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">updatedAt</text>
+<text x="1258" y="1555" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">timestamptz</text>
+<text x="1403" y="1555" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">N</text>
+<polyline points="830,1564 1430,1564" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="844" y="1589" fill="#52657b" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">CHECK (id = 1), CHECK (endsAt &gt; startsAt)</text>
+<rect x="1630" y="1080" width="590" height="314" rx="8" fill="white" stroke="#ccd6e1" stroke-width="2"/>
+<rect x="1630" y="1080" width="590" height="64" rx="8" fill="#7756a7" stroke="none" stroke-width="2"/>
+<rect x="1630" y="1132" width="590" height="12" rx="0" fill="#7756a7" stroke="none" stroke-width="2"/>
+<text x="1648" y="1109" fill="white" font-family="Malgun Gothic, sans-serif" font-size="24" font-weight="700" text-anchor="start">course_seats</text>
+<text x="1648" y="1133" fill="#edf4ff" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">좌석 현황 · 집계 VIEW</text>
+<rect x="1631" y="1144" width="588" height="30" rx="0" fill="#eef3f8" stroke="none" stroke-width="2"/>
+<text x="1644" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEY</text>
+<text x="1709" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">COLUMN</text>
+<text x="2048" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">TYPE</text>
+<text x="2176" y="1165" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="12" font-weight="700" text-anchor="start">NULL</text>
+<text x="1644" y="1195" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1195" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">openCourseId</text>
+<text x="2048" y="1195" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">bigint</text>
+<text x="2193" y="1195" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<rect x="1631" y="1204" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="1225" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1225" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">courseCode</text>
+<text x="2048" y="1225" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="1225" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<text x="1644" y="1255" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1255" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">sectionNo</text>
+<text x="2048" y="1255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">text</text>
+<text x="2193" y="1255" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<rect x="1631" y="1264" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="1285" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1285" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">capacity</text>
+<text x="2048" y="1285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="2193" y="1285" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<text x="1644" y="1315" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1315" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">enrolledCount</text>
+<text x="2048" y="1315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="2193" y="1315" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<rect x="1631" y="1324" width="588" height="30" rx="0" fill="#f8fafc" stroke="none" stroke-width="2"/>
+<text x="1644" y="1345" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="13" font-weight="700" text-anchor="start"></text>
+<text x="1709" y="1345" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">remainingSeats</text>
+<text x="2048" y="1345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">integer</text>
+<text x="2193" y="1345" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="14" font-weight="400" text-anchor="middle">—</text>
+<polyline points="1630,1354 2220,1354" fill="none" stroke="#ccd6e1" stroke-width="1"/>
+<text x="1644" y="1379" fill="#7756a7" font-family="Malgun Gothic, sans-serif" font-size="15" font-weight="400" text-anchor="start">status = &#x27;enrolled&#x27;인 신청만 집계</text>
+<text x="60" y="1460" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="21" font-weight="700" text-anchor="start">표기 안내</text>
+<text x="60" y="1496" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">PK  기본키     FK  외래키     UQ  고유 제약</text>
+<text x="60" y="1529" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">NULL: Y 허용 / N 불가 / — 뷰는 제약 미표시</text>
+<polyline points="65,1567 195,1567" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="75.0,1559.0 75.0,1575.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="82.0,1559.0 82.0,1575.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<polyline points="194.0,1575.0 178.0,1567.0 194.0,1559.0" fill="none" stroke="#265f99" stroke-width="2"/>
+<circle cx="169.0" cy="1567.0" r="5" fill="white" stroke="#265f99" stroke-width="2"/>
+<text x="222" y="1574" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">1 : 0..N   실제 FK 관계</text>
+<polyline points="65,1605 195,1605" fill="none" stroke="#7756a7" stroke-width="2" stroke-dasharray="7 6"/>
+<text x="222" y="1612" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="400" text-anchor="start">집계 뷰의 원본 참조 · FK 아님</text>
+<text x="1630" y="1460" fill="#172b46" font-family="Malgun Gothic, sans-serif" font-size="21" font-weight="700" text-anchor="start">현재 구현에서 구분할 사항</text>
+<text x="1630" y="1496" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">분류 트리: classificationPath 배열에서 생성</text>
+<text x="1630" y="1529" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">excludedDepartmentIds: 배열 · DB FK 아님</text>
+<text x="1630" y="1562" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">강의계획서 PDF: Storage 저장 / DB에는 경로·이름</text>
+<text x="1630" y="1595" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="400" text-anchor="start">예비시간표·즐겨찾기: 브라우저 저장 · DB 테이블 아님</text>
+<polyline points="60,1650 2220,1650" fill="none" stroke="#ccd6e1" stroke-width="2"/>
+<text x="60" y="1686" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="700" text-anchor="start">8 TABLES  /  1 VIEW  /  6 FOREIGN KEYS</text>
+<text x="2220" y="1686" fill="#5c6d82" font-family="Malgun Gothic, sans-serif" font-size="16" font-weight="400" text-anchor="end">검증일: 2026.11.27 (KST)  ·  컬럼·자료형·PK·FK·UQ 확인  ·  업무 데이터 조회 및 변경 없음</text>
+</svg>

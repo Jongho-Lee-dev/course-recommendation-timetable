@@ -1,0 +1,148 @@
+데이터베이스 ERD 검증 내역
+검증일: 2026-11-27 (Asia/Seoul)
+출처: backend/.env에 설정된 PostgreSQL의 pg_catalog 메타데이터.
+읽기 전용 트랜잭션으로 public 스키마의 구조만 조회. 업무 레코드·비밀번호 값·접속 비밀정보는 포함하지 않음.
+
+보고서 그림 제목: 그림 2. 수강신청 및 시간표 설계 플랫폼 데이터베이스 ERD
+
+보고서용 설명:
+데이터베이스는 학과, 학생, 교과목, 개설 강좌, 강의 시간, 수강신청 내역, 공지사항 및 수강신청 기간을 관리하는 8개 테이블과 좌석 현황을 계산하는 1개 뷰로 구성하였다. 학생과 개설 강좌의 다대다 관계는 수강신청 테이블로 연결하며, 외래키와 고유 제약을 통해 참조 관계와 중복 신청 데이터를 관리한다. 강좌의 분류 경로는 배열로 저장하여 계층형 검색 필터 구성에 활용한다.
+
+주요 확인 사항:
+- tt_students의 PK는 owner(uuid), studentId는 UNIQUE(text)이다.
+- tt_enrollments는 studentOwner → students.owner를 참조한다. 학번을 FK로 사용하지 않는다.
+- tt_enrollments는 UNIQUE(studentOwner, openCourseId)를 가진다. status는 enrolled 또는 cancelled이다.
+- 모든 FK 컬럼은 NOT NULL이며 단독 UNIQUE가 아니다. 부모 1개 대 자식 0개 이상의 관계다.
+- PNG/SVG 실선은 FK 관계의 존재를 뜻하며 식별 관계를 뜻하지 않는다. 모든 관계는 비식별 관계이며 Mermaid에는 점선으로 표시하였다.
+- tt_course_seats는 일반 VIEW이며 PK/FK를 가진 물리 테이블이 아니다.
+- VIEW는 tt_open_courses와 status=enrolled인 tt_enrollments를 LEFT JOIN하여 강좌별 집계한다.
+- enrolledCount = count(e.id)::integer, remainingSeats = greatest(0, capacity-count(e.id))::integer.
+- 뷰의 NULL 표기는 생략하였다. pg_attribute의 attnotnull=false가 실제 결과의 NULL 발생을 의미하지 않는다.
+- tt_open_courses의 classificationPath(text[])는 별도의 필터 테이블이 아니다.
+- excludedDepartmentIds(bigint[])에는 DB 외래키가 없다. 애플리케이션에서 학과코드를 확인한다.
+- capacity는 tt_open_courses에 저장하며 뷰에서는 이를 조회한다.
+- tt_registration_period는 id=1 제약으로 최대 1행을 저장한다. notice와 함께 연결된 FK가 없는 독립 테이블이다.
+- timestamptz는 PostgreSQL timestamp with time zone의 별칭이다.
+- Storage 내부 스키마는 이 ERD의 범위가 아니다. PDF 파일은 Storage, 메타데이터는 tt_open_courses에 둔다.
+- 예비시간표와 즐겨찾기, AI 추천 결과를 위한 별도 테이블은 현재 public 스키마에 없다.
+- frontend/src/shared/types/database.ts의 설계 제안용 타입을 실제 테이블로 간주하지 않았다.
+
+전체 컬럼 및 실제 제약:
+
+departments [TABLE]
+  id: bigint; NOT NULL
+  majorName: text; NOT NULL
+  facultyName: text; NULL 허용
+  collegeName: text; NULL 허용
+  tt_departments_pkey: PRIMARY KEY (id)
+
+students [TABLE]
+  owner: uuid; NOT NULL
+  studentId: text; NOT NULL
+  name: text; NOT NULL
+  grade: integer; NOT NULL
+  departmentId: bigint; NOT NULL
+  completedCredits: numeric; NOT NULL
+  graduationCredits: numeric; NOT NULL
+  maxCredits: numeric; NOT NULL
+  passwordHash: text; NULL 허용
+  tt_students_check: CHECK ("completedCredits" <= "graduationCredits")
+  tt_students_completedCredits_check: CHECK ("completedCredits" >= 0::numeric)
+  tt_students_departmentId_fkey: FOREIGN KEY ("departmentId") REFERENCES departments(id)
+  tt_students_grade_check: CHECK (grade >= 1)
+  tt_students_graduationCredits_check: CHECK ("graduationCredits" > 0::numeric)
+  tt_students_maxCredits_check: CHECK ("maxCredits" > 0::numeric)
+  tt_students_pkey: PRIMARY KEY (owner)
+  tt_students_studentId_key: UNIQUE ("studentId")
+
+courses [TABLE]
+  courseCode: text; NOT NULL
+  title: text; NOT NULL
+  credit: numeric; NOT NULL
+  tt_courses_credit_check: CHECK (credit >= 0::numeric)
+  tt_courses_pkey: PRIMARY KEY ("courseCode")
+
+open_courses [TABLE]
+  id: bigint; NOT NULL; identity=ALWAYS
+  courseCode: text; NOT NULL
+  sectionNo: text; NOT NULL
+  professorName: text; NOT NULL
+  capacity: integer; NOT NULL
+  targetGrade: integer; NOT NULL
+  departmentId: bigint; NOT NULL
+  isOnline: boolean; NOT NULL
+  classificationPath: text[]; NOT NULL
+  excludedDepartmentIds: bigint[]; NOT NULL; default='{}'::bigint[]
+  active: boolean; NOT NULL; default=true
+  syllabusPath: text; NULL 허용
+  syllabusName: text; NULL 허용
+  tt_open_courses_capacity_check: CHECK (capacity > 0)
+  tt_open_courses_courseCode_fkey: FOREIGN KEY ("courseCode") REFERENCES courses("courseCode")
+  tt_open_courses_courseCode_sectionNo_key: UNIQUE ("courseCode", "sectionNo")
+  tt_open_courses_departmentId_fkey: FOREIGN KEY ("departmentId") REFERENCES departments(id)
+  tt_open_courses_pkey: PRIMARY KEY (id)
+  tt_open_courses_targetGrade_check: CHECK ("targetGrade" >= 1)
+
+enrollments [TABLE]
+  id: bigint; NOT NULL; identity=ALWAYS
+  studentOwner: uuid; NOT NULL
+  openCourseId: bigint; NOT NULL
+  status: text; NOT NULL; default='enrolled'::text
+  createdAt: timestamp with time zone; NOT NULL; default=now()
+  updatedAt: timestamp with time zone; NOT NULL; default=now()
+  tt_enrollments_openCourseId_fkey: FOREIGN KEY ("openCourseId") REFERENCES open_courses(id)
+  tt_enrollments_pkey: PRIMARY KEY (id)
+  tt_enrollments_status_check: CHECK (status = ANY (ARRAY['enrolled'::text, 'cancelled'::text]))
+  tt_enrollments_studentOwner_fkey: FOREIGN KEY ("studentOwner") REFERENCES students(owner)
+  tt_enrollments_studentOwner_openCourseId_key: UNIQUE ("studentOwner", "openCourseId")
+
+schedules [TABLE]
+  id: bigint; NOT NULL; identity=ALWAYS
+  openCourseId: bigint; NOT NULL
+  dayOfWeek: text; NOT NULL
+  startPeriod: integer; NOT NULL
+  endPeriod: integer; NOT NULL
+  classroom: text; NOT NULL
+  tt_schedules_check: CHECK ("endPeriod" >= "startPeriod")
+  tt_schedules_dayOfWeek_check: CHECK ("dayOfWeek" = ANY (ARRAY['월'::text, '화'::text, '수'::text, '목'::text, '금'::text, '토'::text, '일'::text]))
+  tt_schedules_openCourseId_fkey: FOREIGN KEY ("openCourseId") REFERENCES open_courses(id)
+  tt_schedules_pkey: PRIMARY KEY (id)
+  tt_schedules_startPeriod_check: CHECK ("startPeriod" >= 1)
+
+notice [TABLE]
+  id: bigint; NOT NULL; identity=BY DEFAULT
+  title: text; NOT NULL
+  content: text; NOT NULL
+  author: text; NULL 허용; default='관리자'::text
+  is_pinned: boolean; NULL 허용; default=false
+  created_at: timestamp with time zone; NOT NULL; default=now()
+  notice_pkey: PRIMARY KEY (id)
+
+registration_period [TABLE]
+  id: smallint; NOT NULL; default=1
+  startsAt: timestamp with time zone; NOT NULL
+  endsAt: timestamp with time zone; NOT NULL
+  stopped: boolean; NOT NULL; default=false
+  updatedAt: timestamp with time zone; NOT NULL; default=now()
+  tt_registration_period_check: CHECK ("endsAt" > "startsAt")
+  tt_registration_period_id_check: CHECK (id = 1)
+  tt_registration_period_pkey: PRIMARY KEY (id)
+
+course_seats [VIEW]
+  openCourseId: bigint; 제약 미표시(VIEW)
+  courseCode: text; 제약 미표시(VIEW)
+  sectionNo: text; 제약 미표시(VIEW)
+  capacity: integer; 제약 미표시(VIEW)
+  enrolledCount: integer; 제약 미표시(VIEW)
+  remainingSeats: integer; 제약 미표시(VIEW)
+
+뷰 정의:
+ SELECT o.id AS "openCourseId",
+    o."courseCode",
+    o."sectionNo",
+    o.capacity,
+    (count(e.id))::integer AS "enrolledCount",
+    (GREATEST((0)::bigint, (o.capacity - count(e.id))))::integer AS "remainingSeats"
+   FROM (open_courses o
+     LEFT JOIN enrollments e ON (((e."openCourseId" = o.id) AND (e.status = 'enrolled'::text))))
+  GROUP BY o.id;

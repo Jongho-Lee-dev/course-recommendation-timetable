@@ -10,14 +10,14 @@ from .auth import password_hash
 async def run(student_id, password):
     rows = await db(
         "GET",
-        "tt_students",
+        "students",
         params={"studentId": f"eq.{student_id}", "select": "owner"},
     )
     if not rows:
         raise SystemExit("등록된 학번이 없습니다.")
     await db(
         "PATCH",
-        "tt_students",
+        "students",
         {"passwordHash": await asyncio.to_thread(password_hash, password)},
         {"owner": f'eq.{rows[0]["owner"]}'},
     )

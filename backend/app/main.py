@@ -130,16 +130,16 @@ def get_courses():
            oc."syllabusPath", oc."syllabusName",
            oc."targetGrade", oc."isOnline", ss.capacity,
            ss."enrolledCount", ss."remainingSeats"
-           FROM public.tt_open_courses oc
-           JOIN public.tt_courses c ON c."courseCode"=oc."courseCode"
-           JOIN public.tt_departments d ON d.id=oc."departmentId"
-           JOIN public.tt_course_seats ss ON ss."openCourseId"=oc.id
+           FROM public.open_courses oc
+           JOIN public.courses c ON c."courseCode"=oc."courseCode"
+           JOIN public.departments d ON d.id=oc."departmentId"
+           JOIN public.course_seats ss ON ss."openCourseId"=oc.id
            WHERE oc.active
            ORDER BY oc.id''',
         '''SELECT s.id, s."dayOfWeek", s."startPeriod", s."endPeriod",
            s.classroom, s."openCourseId"
-           FROM public.tt_schedules s
-           JOIN public.tt_open_courses oc ON oc.id=s."openCourseId"
+           FROM public.schedules s
+           JOIN public.open_courses oc ON oc.id=s."openCourseId"
            WHERE oc.active ORDER BY s.id''',
     ])
     schedules_by_course = {}
@@ -165,7 +165,7 @@ def get_notices():
 def get_departments():
     return read_catalog_queries([
         '''SELECT id, "collegeName", "facultyName", "majorName"
-           FROM public.tt_departments ORDER BY id'''
+           FROM public.departments ORDER BY id'''
     ])[0]
 
 
@@ -177,7 +177,7 @@ def save_import(items, *, departments=False, replace_all=True, edit_id=None):
                 with conn.cursor() as cursor:
                     if departments:
                         cursor.executemany(
-                            '''INSERT INTO public.tt_departments
+                            '''INSERT INTO public.departments
                                (id, "collegeName", "facultyName", "majorName")
                                VALUES (%s, %s, %s, %s)
                                ON CONFLICT (id) DO UPDATE SET
@@ -188,7 +188,7 @@ def save_import(items, *, departments=False, replace_all=True, edit_id=None):
                               d.get("facultyName") or None, d["majorName"]) for d in items],
                         )
                     else:
-                        cursor.execute('SELECT id FROM public.tt_departments')
+                        cursor.execute('SELECT id FROM public.departments')
                         known = {row[0] for row in cursor.fetchall()}
                         requested = {d["departmentId"] for d in items}
                         requested.update(i for d in items for i in d["excludedDepartmentIds"])
@@ -267,9 +267,9 @@ def syllabus_query(method, course_id, body=None):
                 with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                     if method == "GET":
                         cursor.execute('''SELECT id, "syllabusPath", "syllabusName"
-                                          FROM public.tt_open_courses WHERE id=%s''', (course_id,))
+                                          FROM public.open_courses WHERE id=%s''', (course_id,))
                     else:
-                        cursor.execute('''UPDATE public.tt_open_courses SET
+                        cursor.execute('''UPDATE public.open_courses SET
                                           "syllabusPath"=%s, "syllabusName"=%s WHERE id=%s
                                           RETURNING id, "syllabusPath", "syllabusName"''',
                                        (body["syllabusPath"], body["syllabusName"], course_id))
@@ -288,7 +288,7 @@ def syllabus_query(method, course_id, body=None):
 
 async def syllabus_db(method, table, body=None, params=None):
     # Adapter for the existing syllabus module's narrow GET/PATCH contract.
-    if table != "tt_open_courses" or method not in {"GET", "PATCH"}:
+    if table != "open_courses" or method not in {"GET", "PATCH"}:
         raise ValueError("Unsupported syllabus query")
     course_id = int(params["id"].removeprefix("eq."))
     return await run_in_threadpool(syllabus_query, method, course_id, body)
@@ -301,7 +301,7 @@ install_syllabi(app, syllabus_db)
 def get_filter_categories():
     # There is no filter table: derive classifications from active courses.
     rows = read_catalog_queries([
-        '''SELECT DISTINCT "classificationPath" FROM public.tt_open_courses
+        '''SELECT DISTINCT "classificationPath" FROM public.open_courses
            WHERE active ORDER BY "classificationPath"'''
     ])[0]
     categories = []
@@ -344,13 +344,13 @@ def get_filter_categories():
 async def save_student(body: StudentIdUpdate, c=Depends(claims)):
     if c["role"] != "student":
         raise HTTPException(403, "학생 세션이 필요합니다.")
-    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
+    rows = await db("GET", "students", params={"owner": f'eq.{c["sub"]}'})
     if not rows:
         raise HTTPException(404, "학생 정보가 없습니다.")
-    existing = await db("GET", "tt_students", params={"studentId": f"eq.{body.studentId}"})
+    existing = await db("GET", "students", params={"studentId": f"eq.{body.studentId}"})
     if any(row["owner"] != c["sub"] for row in existing):
         raise HTTPException(409, "이미 등록된 학번입니다.")
-    updated = await db("PATCH", "tt_students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
+    updated = await db("PATCH", "students", body.model_dump(), {"owner": f'eq.{c["sub"]}'})
     student = Student.model_validate(updated[0]).model_dump()
     return {"token": token("student", c["sub"]), "student": student}
 
@@ -359,7 +359,7 @@ async def save_student(body: StudentIdUpdate, c=Depends(claims)):
 async def me(c=Depends(claims)):
     if c["role"] != "student":
         raise HTTPException(403, "학생 세션이 필요합니다.")
-    rows = await db("GET", "tt_students", params={"owner": f'eq.{c["sub"]}'})
+    rows = await db("GET", "students", params={"owner": f'eq.{c["sub"]}'})
     if not rows:
         raise HTTPException(404, "학생 정보가 없습니다.")
     return Student.model_validate(rows[0]).model_dump()
@@ -381,7 +381,7 @@ async def auth_db(*args, **kwargs):
 
 
 async def departments():
-    return await db("GET", "tt_departments", params={"order": "id"})
+    return await db("GET", "departments", params={"order": "id"})
 
 
 install_auth(app, auth_db, token, departments)
